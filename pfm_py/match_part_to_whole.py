@@ -30,7 +30,7 @@ def match_part_to_whole(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C_in
     C = C_init
 
     for i in range(opts.max_outer_iter):
-        print(f"------------------------- Iteration %{i + 1} -------------------------")
+        print(f"------------------------- Iteration {i + 1} -------------------------")
 
         # Step 1: Optimize C
         print("Optimizing C ...")
