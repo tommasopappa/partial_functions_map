@@ -11,7 +11,7 @@ def compute_geodesic_descriptors(M : ManifoldMesh, N : ManifoldMesh, matches, op
     v_N, f_N = N.vert.numpy(force=True), N.triv.numpy(force=True)
     v_M, f_M = M.vert.numpy(force=True), M.triv.numpy(force=True)
     fps_indices = _fps_euclidean(v_N, opts.refine_fps)
-    func_M, func_N = _compute_indicator_functions(v_M, v_N, f_M, f_N, fps_indices, matches, opts.fps_variance)
+    func_M, func_N = _compute_indicator_functions(v_M, v_N, f_M, f_N, fps_indices, matches.numpy(force=True), opts.fps_variance)
     func_M = torch.tensor(func_M, dtype=torch.float32, device=opts.device)
     func_N = torch.tensor(func_N, dtype=torch.float32, device=opts.device)
     return func_M, func_N
@@ -60,7 +60,6 @@ def _compute_geodesic_distances_mesh(vert : np.ndarray, triv : np.ndarray, sourc
 
 def _compute_indicator_functions(v_M, v_N, f_M, f_N, fps_indices, matches, variance):
     """Compute indicator functions using geodesic distances"""
-    n_fps = len(fps_indices)
 
     # Get corresponding points on M
     fps_matches_M = [matches[idx] for idx in fps_indices]
@@ -75,4 +74,4 @@ def _compute_indicator_functions(v_M, v_N, f_M, f_N, fps_indices, matches, varia
     F = np.exp(-0.5 * variance * geo_dists_N.T**2)
     G = np.exp(-0.5 * variance * geo_dists_M.T**2)
 
-    return F, G
+    return G, F

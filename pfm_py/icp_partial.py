@@ -25,7 +25,7 @@ def run_icp_partial_torch_batched(M : ManifoldMesh, N : ManifoldMesh, C_init, es
         U, _, Vt = torch.linalg.svd(X @ YM.T, full_matrices=False)
         C = (U @ Vt[:est_rank, :]).T
 
-        if (i + 1) % 10 == 0:
+        if i == 0 or (i + 1) % 10 == 0:
             with torch.no_grad():
                 err = torch.mean(torch.norm(C @ X - YM, dim=0)).item()
                 print(f"  ICP iter {i+1}, MSE: {err:.4e}")

@@ -26,12 +26,7 @@ class ManifoldMesh:
         self.triv = torch.tensor(triangles, dtype=torch.long, device=opts.device)
         self.n_vert = vertices.shape[0]
 
-        self._compute_data(opts)
-        if compute_geo:
-            self._compute_geometry()
-
-    def _compute_data(self, opts: Options):
-        L, S = robust_laplacian.mesh_laplacian(self.vert, self.triv, mollify_factor=1e-5)
+        L, S = robust_laplacian.mesh_laplacian(vertices, triangles, mollify_factor=1e-5)
         L, S = L.tocsr(), S.tocsr() # CSR for efficiency
         evals, evecs = sla.eigsh(L, k=opts.n_eigen, M=S, sigma=0.0, which='LM', maxiter=1e9, tol=1.e-15) # type: ignore
         for i in range(opts.n_eigen): # Normalize eigenvectors w.r.t mass matrix
@@ -41,10 +36,13 @@ class ManifoldMesh:
         self.S = torch.tensor(S.diagonal(), dtype=torch.float32, device=opts.device)
         self.area = torch.sum(self.S)
 
+        if compute_geo:
+            self._compute_geometry()
+
     def compute_fpfh_features(self, opts: Options):
         radius = 0.04 * self.area
         pcd = o3d.geometry.PointCloud()
-        pcd.points = o3d.utility.Vector3dVector()
+        pcd.points = o3d.utility.Vector3dVector(self.vert.numpy(force=True))
         pcd.estimate_normals(o3d.geometry.KDTreeSearchParamRadius(radius=radius*2))
         fpfh = o3d.pipelines.registration.compute_fpfh_feature(pcd, o3d.geometry.KDTreeSearchParamRadius(radius=radius))
         return torch.tensor(fpfh.data.T, dtype=torch.float32, device=opts.device)
@@ -59,6 +57,7 @@ class ManifoldMesh:
         self.G = torch.sum(e2 * e2, dim=1)
         self.det = torch.sqrt(torch.abs(self.E * self.G - self.F * self.F) + ALMOST_ZERO)
 
+        """"
         e3 = x3 - x2
         edges = torch.cat([e1, e2, e3])
         edges = torch.sort(edges, dim=1).values
@@ -66,6 +65,7 @@ class ManifoldMesh:
         v1, v2 = self.vert[edges[:, 0]], self.vert[edges[:, 1]]
         edge_lengths = torch.sqrt(torch.sum((v2 - v1)**2, dim=1) + ALMOST_ZERO)
         self.avg_edge_length = edge_lengths.mean()
+        """
 
     def partial_area(self, v):
         return torch.sum(v * self.S)
