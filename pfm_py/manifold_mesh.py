@@ -3,6 +3,7 @@ import robust_laplacian
 import scipy.sparse.linalg as sla
 import numpy as np
 import open3d as o3d
+from scipy.sparse.csgraph import dijkstra
 
 from pfm_py.options import Options
 
@@ -34,7 +35,7 @@ class ManifoldMesh:
         self.evals = torch.tensor(evals, dtype=torch.float32, device=opts.device)
         self.evecs = torch.tensor(evecs, dtype=torch.float32, device=opts.device)
         self.S = torch.tensor(S.diagonal(), dtype=torch.float32, device=opts.device)
-        self.area = torch.sum(self.S)
+        self.area = torch.sum(self.S).item()
 
         if compute_geo:
             self._compute_geometry()
@@ -69,3 +70,20 @@ class ManifoldMesh:
 
     def partial_area(self, v):
         return torch.sum(v * self.S)
+    
+    def compute_geodesic_matrix(self):
+        vertices, faces = self.vert.numpy(force=True), self.triv.numpy(force=True)
+        n = self.n_vert
+        edges = set()
+        for face in faces:
+            edges.add(tuple(sorted([face[0], face[1]])))
+            edges.add(tuple(sorted([face[1], face[2]])))
+            edges.add(tuple(sorted([face[2], face[0]])))
+
+        graph = np.full((n, n), np.inf)
+        for i, j in edges:
+            dist = np.linalg.norm(vertices[i] - vertices[j])
+            graph[i, j] = dist
+            graph[j, i] = dist
+
+        return dijkstra(graph, directed=False)
