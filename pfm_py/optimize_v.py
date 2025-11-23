@@ -9,7 +9,9 @@ ALMOST_ZERO = 1e-12
 def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Options):
     A = C @ N.evecs.T @ (N.S.unsqueeze(1) * func_N)
     B = M.evecs.T * M.S.unsqueeze(0)
-    v0 = M.evecs @ C @ np.transpose(N.evecs) @ (N.S.unsqueeze(1) * np.ones((N.n_vert, 1)))
+
+    constant_one = torch.ones(N.n_vert, dtype=torch.float32, device=opts.device)
+    v0 = M.evecs @ C @ N.evecs.T @ (N.S * constant_one)
     perturb = torch.ones_like(v0)
 
     v = torch.nn.Parameter(v0)
@@ -35,7 +37,7 @@ def v_loss(M : ManifoldMesh, N : ManifoldMesh, CA, PtS, func_M, v, perturb, opts
     area_term = (N.area - M.partial_area(tv))**2
 
     tv_mean = N.area / M.area
-    tv_sigma = M.avg_edge_length
+    tv_sigma = opts.tv_sigma
     reg_term = mumford_shah_cost(M, v, perturb, opts, tv_mean, tv_sigma)
 
     return data_term + opts.mu1 * area_term + opts.mu2 * reg_term

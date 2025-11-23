@@ -11,6 +11,7 @@ class Options:
     mu3 : float = 1.0
     mu4 : float = 1e3
     mu5 : float = 1e3
+    tv_sigma = 0.2 * 4e-4
     C_lr : float = 1e-2
     C_max_iter : int = 2000
     max_outer_iter : int = 7
@@ -20,4 +21,4 @@ class Options:
     icp_batch_size : int = 1000
     refine_fps : int = 50
     refine_iters = 3
-    fps_variance = 0.7
+    fps_variance = 0.7 * 4e-4

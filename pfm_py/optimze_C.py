@@ -7,10 +7,10 @@ ALMOST_ZERO = 1e-10
 
 def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v, est_rank, opts : Options):
     A = N.evecs.T @ (N.S.unsqueeze(1) * func_N)
-    B = M.evecs.T @ ((N.S * v).unsqueeze(1) * func_M)
+    B = M.evecs.T @ ((M.S * v).unsqueeze(1) * func_M)
 
     # Create vector d for orthogonality constraint
-    d = torch.zeros(opts.n_eigen)
+    d = torch.zeros(opts.n_eigen, dtype=torch.float32, device=opts.device)
     d[:est_rank] = 1
 
     if C_init is None:
@@ -48,12 +48,12 @@ def l21_norm(matrix):
     return torch.sum(torch.sqrt(torch.sum(matrix**2, dim=0) + ALMOST_ZERO))
 
 def estimate_rank(M : ManifoldMesh, N : ManifoldMesh):
-    return torch.sum(N.evals - torch.max(M.evals) <= 0)
+    return torch.sum((N.evals - torch.max(M.evals)) < 0)
 
 def create_slanted_diagonal_mask(est_rank, opts: Options):
     k = opts.n_eigen
     W = torch.zeros((k, k), dtype=torch.float32)
-    slope = est_rank / k if est_rank > 0 else 1.0
+    slope = est_rank.item() / k if est_rank > 0 else 1.0
     direction = np.array([1, slope])
     direction = direction / np.linalg.norm(direction)
 
