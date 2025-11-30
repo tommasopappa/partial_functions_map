@@ -6,6 +6,7 @@ import torch
 import open3d as o3d
 import numpy as np
 import os
+import argparse
 
 from dataclasses import dataclass
 
@@ -65,6 +66,39 @@ experiments = [victoria_cut, michael_cut, horse_cut, centaur_cut, cat_cut, dog_c
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"Device: {device}")
 
+# 命令行参数解析
+parser = argparse.ArgumentParser(
+    description='Partial Functions Map - 3D shape matching',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    epilog="""
+Examples:
+  python main.py --fpfh          # Use FPFH descriptors (default)
+  python main.py --shot          # Use SHOT descriptors
+    """
+)
+parser.add_argument(
+    '--fpfh',
+    action='store_true',
+    help='Use FPFH descriptors (default)'
+)
+parser.add_argument(
+    '--shot',
+    action='store_true',
+    help='Use SHOT descriptors'
+)
+
+args = parser.parse_args()
+
+# 确定使用的 descriptor 类型
+descriptor_type = "fpfh"  # 默认值
+if args.shot:
+    descriptor_type = "shot"
+elif args.fpfh:
+    descriptor_type = "fpfh"
+
+print(f"Using descriptor: {descriptor_type.upper()}")
+print()
+
 for test in experiments:
     output_folder = target_path + '/' + test.name
     os.makedirs(output_folder, exist_ok=True)
@@ -72,7 +106,7 @@ for test in experiments:
     print('#'*60)
     print(f"Running `{test.name}` ...")
     print('#'*60)
-    opts = Options(device)
+    opts = Options(device, descriptor_type=descriptor_type)
 
     mesh_M = o3d.io.read_triangle_mesh(data_path + '/' + test.full_mesh)
     mesh_N = o3d.io.read_triangle_mesh(data_path + '/' + test.partial_mesh)

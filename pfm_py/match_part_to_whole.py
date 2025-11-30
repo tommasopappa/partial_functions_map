@@ -14,7 +14,7 @@ def match_and_refine(M : ManifoldMesh, N : ManifoldMesh, opts: Options):
     print(f"Estimate rank of functional map: {est_rank} / {opts.n_eigen}")
 
     W = create_slanted_diagonal_mask(est_rank, opts)
-    M_descriptors, N_descriptors = M.compute_fpfh_features(opts), N.compute_fpfh_features(opts)
+    M_descriptors, N_descriptors = M.compute_descriptors(opts), N.compute_descriptors(opts)
     C, v, matches = match_part_to_whole(M, N, M_descriptors, N_descriptors, None, W, est_rank, opts)
     
     print("="*60)
