@@ -17,6 +17,7 @@ class TestMeshData:
     partial_mesh: str
     ground_truth: str
 
+data_path = '/usr/prakt/w0012/SAVHA/shape_data'
 target_path = 'results'
 cat_holes = TestMeshData(
     name='cat_holes_10',
@@ -65,62 +66,17 @@ experiments = [victoria_cut, michael_cut, horse_cut, centaur_cut, cat_cut, dog_c
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"Device: {device}")
 
-# Command-line argument parsing
-parser = argparse.ArgumentParser(
-    description='Partial Functions Map - 3D shape matching',
-    formatter_class=argparse.RawDescriptionHelpFormatter,
-    epilog="""
-Examples:
-  python main.py --fpfh                                    # Use FPFH descriptors (default)
-  python main.py --shot                                    # Use SHOT descriptors
-  python main.py --data-path /path/to/data --shot         # Specify custom data path
-  python main.py --fpfh --data-path ~/data/shapes         # FPFH with custom path
-    """
-)
-parser.add_argument(
-    '--fpfh',
-    action='store_true',
-    help='Use FPFH descriptors (default)'
-)
-parser.add_argument(
-    '--shot',
-    action='store_true',
-    help='Use SHOT descriptors'
-)
-parser.add_argument(
-    '--data-path',
-    type=str,
-    default='/usr/prakt/w0010/SAVHA/shape_data',
-    help='Path to the shape data directory (default: /usr/prakt/w0010/SAVHA/shape_data)'
-)
-
-args = parser.parse_args()
-
-# Determine the descriptor type to use
-descriptor_type = "fpfh"  # Default value
-if args.shot:
-    descriptor_type = "shot"
-elif args.fpfh:
-    descriptor_type = "fpfh"
-
-# Data path
-data_path = args.data_path
-
-print(f"Using descriptor: {descriptor_type.upper()}")
-print(f"Data path: {data_path}")
-print()
-
 for test in experiments:
     output_folder = target_path + '/' + test.name
     os.makedirs(output_folder, exist_ok=True)
 
     print('#'*60)
-    print(f"Running `{test.name}` ...")
+    print(f"Running `{mesh_data.name}` ...")
     print('#'*60)
-    opts = Options(device, descriptor_type=descriptor_type)
+    opts = Options(device)
 
-    mesh_M = o3d.io.read_triangle_mesh(data_path + '/' + test.full_mesh)
-    mesh_N = o3d.io.read_triangle_mesh(data_path + '/' + test.partial_mesh)
+    mesh_M = o3d.io.read_triangle_mesh(mesh_data.full_mesh)
+    mesh_N = o3d.io.read_triangle_mesh(mesh_data.partial_mesh)
 
     vert_M, triv_M = np.asarray(mesh_M.vertices), np.asarray(mesh_M.triangles)
     vert_N, triv_N = np.asarray(mesh_N.vertices), np.asarray(mesh_N.triangles)
@@ -130,7 +86,7 @@ for test in experiments:
     C, v, matches = match_and_refine(M, N, opts)
     C, v, matches = C.numpy(force=True), v.numpy(force=True), matches.numpy(force=True)
 
-    gt_matches = np.loadtxt(data_path + '/' + test.ground_truth, dtype=float).astype(int) - 1
+    gt_matches = np.loadtxt(mesh_data.ground_truth, dtype=float).astype(int) - 1
 
     geodesics_M = M.compute_geodesic_matrix()
     dist_method_geo = np.array([geodesics_M[gt_matches[i], matches[i]] for i in range(len(matches))])
@@ -301,3 +257,97 @@ for test in experiments:
     print(f"Saved: {output_folder}/indexed_color_transfer.png")
     print()
     print()
+
+    # record summary entry (store relative paths from `target_path`)
+    try:
+        pfm_rel = os.path.relpath(os.path.join(output_folder, 'pfm_visualization.png'), start=target_path)
+        idx_rel = os.path.relpath(os.path.join(output_folder, 'indexed_color_transfer.png'), start=target_path)
+    except Exception:
+        pfm_rel = os.path.join(output_folder, 'pfm_visualization.png')
+        idx_rel = os.path.join(output_folder, 'indexed_color_transfer.png')
+
+    global summary_results
+    summary_results.append({
+        'name': mesh_data.name,
+        'mean_geodesic_error': float(mean_geodesic_error),
+        'pfm_visualization': pfm_rel,
+        'indexed_color_transfer': idx_rel,
+        'output_folder': output_folder,
+    })
+
+    return mean_geodesic_error
+
+data_path = '/usr/prakt/w0012/SAVHA/shape_data'
+target_path = 'results'
+
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+print(f"Device: {device}")
+opts = Options(device)
+ 
+# collect summary entries for all processed meshes
+summary_results = []
+
+partial_folders = ["cuts", "holes"]
+for folder in partial_folders:
+    partial_files = os.listdir(data_path + "/SHREC16/" + folder + "/off")
+    for partial_file in partial_files:
+        # remove extension safely
+        partial_mesh_name = os.path.splitext(partial_file)[0]
+
+        # safe extraction of the full mesh name from the partial's filename
+        parts = partial_mesh_name.split('_')
+        if len(parts) >= 2:
+            full_mesh_name = parts[1]
+        else:
+            full_mesh_name = partial_mesh_name
+        mesh_data = TestMeshData(
+            name=partial_mesh_name,
+            full_mesh=data_path + f"/SHREC16/null/off/{full_mesh_name}.off",
+            partial_mesh=data_path + f"/SHREC16/{folder}/off/{partial_file}",
+            ground_truth=data_path + f"/SHREC16/{folder}/corres/{partial_mesh_name}.vts"
+        )
+        result_path = f"{target_path}/{folder}/{partial_mesh_name}"
+        mean_geodesic_error = run(mesh_data, result_path, opts)
+        break
+
+# --- Generate HTML summary sorted by mesh name ---
+os.makedirs(target_path, exist_ok=True)
+html_path = os.path.join(target_path, 'meshes_summary.html')
+rows = sorted(summary_results, key=lambda x: x['name'])
+
+html_lines = [
+    '<!doctype html>',
+    '<html>',
+    '<head>',
+    '<meta charset="utf-8" />',
+    '<title>Meshes Summary</title>',
+    '<style>',
+    'body { font-family: Arial, sans-serif; padding: 20px; }',
+    'table { border-collapse: collapse; width: 100%; }',
+    'th, td { border: 1px solid #ddd; padding: 8px; }',
+    'th { background: #f4f4f4; text-align: left; }',
+    'tr:nth-child(even) { background: #fbfbfb; }',
+    '</style>',
+    '</head>',
+    '<body>',
+    '<h1>Meshes Summary</h1>',
+    '<table>',
+    '<tr><th>Name</th><th>Mean Geodesic Error</th><th>Visualizations</th></tr>'
+]
+
+for r in rows:
+    mv_links = []
+    if r.get('pfm_visualization'):
+        mv_links.append(f'<a href="{r["pfm_visualization"]}" target="_blank">pfm_visualization</a>')
+    if r.get('indexed_color_transfer'):
+        mv_links.append(f'<a href="{r["indexed_color_transfer"]}" target="_blank">indexed_color_transfer</a>')
+    links_html = ' | '.join(mv_links) if mv_links else ''
+    html_lines.append(f'<tr><td>{r["name"]}</td><td>{r["mean_geodesic_error"]:.6f}</td><td>{links_html}</td></tr>')
+
+html_lines.extend(['</table>', '</body>', '</html>'])
+
+with open(html_path, 'w', encoding='utf-8') as f:
+    f.write('\n'.join(html_lines))
+
+print(f"Wrote HTML summary to {html_path}")
+
