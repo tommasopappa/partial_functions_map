@@ -17,7 +17,6 @@ class TestMeshData:
     partial_mesh: str
     ground_truth: str
 
-data_path = '/usr/prakt/w0010/SAVHA/shape_data'
 target_path = 'results'
 cat_holes = TestMeshData(
     name='cat_holes_10',
@@ -72,8 +71,10 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     epilog="""
 Examples:
-  python main.py --fpfh          # Use FPFH descriptors (default)
-  python main.py --shot          # Use SHOT descriptors
+  python main.py --fpfh                                    # Use FPFH descriptors (default)
+  python main.py --shot                                    # Use SHOT descriptors
+  python main.py --data-path /path/to/data --shot         # Specify custom data path
+  python main.py --fpfh --data-path ~/data/shapes         # FPFH with custom path
     """
 )
 parser.add_argument(
@@ -86,6 +87,12 @@ parser.add_argument(
     action='store_true',
     help='Use SHOT descriptors'
 )
+parser.add_argument(
+    '--data-path',
+    type=str,
+    default='/usr/prakt/w0010/SAVHA/shape_data',
+    help='Path to the shape data directory (default: /usr/prakt/w0010/SAVHA/shape_data)'
+)
 
 args = parser.parse_args()
 
@@ -96,7 +103,11 @@ if args.shot:
 elif args.fpfh:
     descriptor_type = "fpfh"
 
+# 数据路径
+data_path = args.data_path
+
 print(f"Using descriptor: {descriptor_type.upper()}")
+print(f"Data path: {data_path}")
 print()
 
 for test in experiments:
