@@ -4,7 +4,7 @@ from numpy.linalg import norm
 from scipy.spatial import cKDTree
 import math
 
-# 角度常量（和 C++ 代码一致）
+# Angle constants (consistent with C++ implementation)
 DEG_45_TO_RAD  = 0.7853981633974483
 DEG_90_TO_RAD  = 1.5707963267948966
 DEG_135_TO_RAD = 2.356194490192345
@@ -13,9 +13,9 @@ DEG_168_TO_RAD = 2.748893571891069
 
 @dataclass
 class SHOTParams:
-    radius: float = 15.0          # 邻域半径
-    localRFradius: float = None   # LRF 半径，不设的话 = radius
-    bins: int = 10                # cosine 量化 bins
+    radius: float = 15.0          # Neighborhood radius
+    localRFradius: float = None   # LRF radius, defaults to radius if not set
+    bins: int = 10                # Cosine quantization bins
     doubleVolumes: bool = True
     useInterpolation: bool = True
     useNormalization: bool = True
@@ -38,17 +38,17 @@ class SHOTDescriptor:
         self.vertices = None
         self.normals = None
         self.tree = None
-        self.adj = None       # ★ mesh adjacency
+        self.adj = None       # Mesh adjacency
 
     def get_descriptor_length(self):
         return self.desc_length
 
-    # ---------- 绑定点云 + 法向 & 建 KDTree ----------
+    # ---------- Bind point cloud + normals & build KDTree ----------
     def set_data(self, vertices, normals, faces=None):
         """
         vertices: (N,3)
         normals:  (N,3)
-        faces:    (F,3) int, 如果给了就用 mesh 邻接；否则退回 KDTree
+        faces:    (F,3) int, if provided use mesh adjacency; otherwise fall back to KDTree
         """
         self.vertices = np.asarray(vertices, dtype=float)
         self.normals = np.asarray(normals, dtype=float)
@@ -63,25 +63,25 @@ class SHOTDescriptor:
             self.tree = cKDTree(self.vertices)
 
     def _build_adjacency(self, faces, n_vertices):
-        """根据三角形列表构建顶点邻接表"""
+        """Build vertex adjacency list from triangle list"""
         adj = [set() for _ in range(n_vertices)]
         for tri in faces:
             i, j, k = int(tri[0]), int(tri[1]), int(tri[2])
             adj[i].update((j, k))
             adj[j].update((i, k))
             adj[k].update((i, j))
-        # 转成 numpy 数组，后面遍历更快一点
+        # Convert to numpy array for faster iteration
         return [np.fromiter(neigh, dtype=int) for neigh in adj]
 
-    # ---------- 邻域搜索 ----------
+    # ---------- Neighborhood search ----------
     def nearest_neighbors_with_dist(self, center_idx, radius):
-        """如果有 mesh 邻接，就用 BFS；否则退回 KDTree 半径搜索"""
+        """If mesh adjacency available, use BFS; otherwise fall back to KDTree radius search"""
         if self.adj is not None:
             return self._nearest_neighbors_mesh(center_idx, radius)
         else:
             return self._nearest_neighbors_kdtree(center_idx, radius)
 
-    # ---------- KDTree 版本（原来的实现，留作 fallback） ----------
+    # ---------- KDTree version (original implementation, fallback) ----------
     def _nearest_neighbors_kdtree(self, center_idx, radius):
         pts = self.vertices
         center = pts[center_idx]
@@ -93,12 +93,12 @@ class SHOTDescriptor:
         dists = norm(pts[idx] - center, axis=1)
         return idx, dists
 
-    # ---------- mesh-based BFS 版本 ----------
+    # ---------- Mesh-based BFS version ----------
     def _nearest_neighbors_mesh(self, center_idx, radius):
         """
-        基于 mesh 邻接的 BFS：
-        - 从 center_idx 出发，在邻接图上做 BFS
-        - 按欧氏距离 r 进行截断
+        Mesh-based BFS neighborhood search:
+        - Start from center_idx, perform BFS on adjacency graph
+        - Truncate by Euclidean distance r
         """
         verts = self.vertices
         adj = self.adj
@@ -120,7 +120,7 @@ class SHOTDescriptor:
                     continue
                 visited[j] = True
                 d2 = float(np.dot(verts[j] - c, verts[j] - c))
-                # 只要在半径内，就记为邻居并继续往外扩
+                # If within radius, add as neighbor and continue expanding
                 if d2 <= r2:
                     neighbors.append(j)
                     dists.append(math.sqrt(d2))
@@ -131,7 +131,7 @@ class SHOTDescriptor:
 
         return np.asarray(neighbors, dtype=int), np.asarray(dists, dtype=float)
 
-    # ---------- LRF 计算（对应 getSHOTLocalRF） ----------
+    # ---------- LRF computation (corresponds to getSHOTLocalRF) ----------
     def get_local_rf(self, center_idx, neigh_idx, neigh_dists, radius):
         pts = self.vertices
         pt = pts[center_idx]
@@ -142,13 +142,13 @@ class SHOTDescriptor:
             raise ValueError("Not enough points for computing SHOT local RF")
 
         q = pts[neigh_idx] - pt           # (k,3)
-        w = radius - neigh_dists          # 线性权重
+        w = radius - neigh_dists          # Linear weight
         w = np.clip(w, 1e-8, None)
 
         M = (q.T * w) @ q / np.sum(w)     # 3x3
-        evals, evecs = np.linalg.eigh(M)  # evals 升序, evecs 列为特征向量
+        evals, evecs = np.linalg.eigh(M)  # evals in ascending order, evecs as columns
 
-        x, y, z = 2, 1, 0   # 最大特征值 → X, 最小 → Z
+        x, y, z = 2, 1, 0   # Largest eigenvalue → X, smallest → Z
         if not (evals[x] >= evals[y] >= evals[z]):
             raise ValueError("Eigenvalues are not in decreasing order")
 
@@ -171,9 +171,9 @@ class SHOTDescriptor:
         Z /= norm(Z) + 1e-12
         return X, Y, Z
 
-    # ---------- 单点 SHOT 描述 ----------
+    # ---------- Single point SHOT descriptor ----------
     def describe_point(self, center_idx: int):
-        # 既没有 vertices/normals，或者既没有 KDTree 也没有 mesh 邻接，才报错
+        # Check if data is set (vertices/normals and either KDTree or mesh adjacency)
         if (
           self.vertices is None
           or self.normals is None
@@ -184,7 +184,7 @@ class SHOTDescriptor:
         radius = params.radius
         desc = np.zeros(self.desc_length, dtype=float)
 
-        # ---------- 选邻域 & LRF ----------
+        # ---------- Select neighborhood & compute LRF ----------
         if abs(params.localRFradius - params.radius) < 1e-6:
             neigh_idx, dists = self.nearest_neighbors_with_dist(center_idx, radius)
             if len(neigh_idx) < params.minNeighbors:
@@ -215,7 +215,7 @@ class SHOTDescriptor:
 
         maxAngularSectors = 28 if params.doubleVolumes else 12
 
-        # ---------- 遍历邻居 ----------
+        # ---------- Iterate over neighbors ----------
         for ni in neigh_idx:
             q = vertices[ni] - centralPoint
             distance = np.dot(q, q)
@@ -236,7 +236,7 @@ class SHOTDescriptor:
             if abs(yInFeatRef) < 1e-30: yInFeatRef = 0.0
             if abs(zInFeatRef) < 1e-30: zInFeatRef = 0.0
 
-            # ---- desc_index: 空间 volume 编号 ----
+            # ---- desc_index: spatial volume index ----
             bit4 = 1 if ((yInFeatRef > 0) or ((yInFeatRef == 0.0) and (xInFeatRef < 0.0))) else 0
             if (xInFeatRef > 0) or ((xInFeatRef == 0.0) and (yInFeatRef > 0.0)):
                 bit3 = 0 if bit4 == 1 else 1  # !bit4
@@ -268,11 +268,11 @@ class SHOTDescriptor:
             volume_index = desc_index * (params.bins + 1)
             weight = 1.0
 
-            # ---- 插值 ----
+            # ---- Interpolation ----
             if params.useInterpolation:
                 intWeight = 0.0
 
-                # 1) normal 插值
+                # 1) Normal interpolation
                 binDistance -= step_index
                 intWeight += (1 - abs(binDistance))
 
@@ -285,7 +285,7 @@ class SHOTDescriptor:
                     if 0 <= idx < self.desc_length:
                         desc[idx] += -binDistance * weight
 
-                # 2) radius 插值
+                # 2) Radius interpolation
                 if sqrtSqDistance > radius1_2:
                     radiusDistance = (sqrtSqDistance - radius3_4) / radius1_2
                     if sqrtSqDistance > radius3_4:
@@ -305,7 +305,7 @@ class SHOTDescriptor:
                         if 0 <= idx < self.desc_length:
                             desc[idx] += weight * radiusDistance
 
-                # 3) inclination 仰角插值
+                # 3) Inclination (elevation angle) interpolation
                 inclinationCos = zInFeatRef / sqrtSqDistance
                 inclinationCos = max(-1.0, min(1.0, float(inclinationCos)))
                 inclination = math.acos(inclinationCos)
@@ -329,7 +329,7 @@ class SHOTDescriptor:
                         if 0 <= idx < self.desc_length:
                             desc[idx] += weight * inclinationDistance
 
-                # 4) azimuth 方位角插值
+                # 4) Azimuth (azimuth angle) interpolation
                 if not (yInFeatRef == 0.0 and xInFeatRef == 0.0):
                     azimuth = math.atan2(yInFeatRef, xInFeatRef)
 
@@ -353,7 +353,7 @@ class SHOTDescriptor:
                         if 0 <= idx < self.desc_length:
                             desc[idx] += weight * (-azimuthDistance)
 
-                # 当前 volume 主 bin
+                # Current volume main bin
                 idx = volume_index + step_index
                 if 0 <= idx < self.desc_length:
                     desc[idx] += weight * intWeight
@@ -363,7 +363,7 @@ class SHOTDescriptor:
                 if 0 <= idx < self.desc_length:
                     desc[idx] += weight
 
-        # ---------- L2 归一化 ----------
+        # ---------- L2 normalization ----------
         if params.useNormalization:
             accNorm = math.sqrt(float(np.dot(desc, desc)))
             if accNorm > 1e-12:
