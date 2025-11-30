@@ -66,15 +66,15 @@ class ManifoldMesh:
         faces = self.triv.numpy(force=True)
         normals = None
         
-        # ------- 1. 法向量（含方向一致性） -------
+        # ------- 1. Normal vectors (with direction consistency) -------
         if faces is not None:
             mesh = o3d.geometry.TriangleMesh()
             mesh.vertices = o3d.utility.Vector3dVector(vertices)
             mesh.triangles = o3d.utility.Vector3iVector(faces.astype(np.int32))
 
-            # 关键：先统一三角形法向方向，再重新算顶点法向
-            mesh.orient_triangles()                # ★ 让三角形法向一致
-            mesh.compute_vertex_normals()          # ★ 顶点法向跟着更新
+            # Key: First unify triangle normal directions, then recompute vertex normals
+            mesh.orient_triangles()                # Make triangle normals consistent
+            mesh.compute_vertex_normals()          # Update vertex normals accordingly
 
             normals = np.asarray(mesh.vertex_normals, dtype=float)
         else:
@@ -82,12 +82,12 @@ class ManifoldMesh:
             pcd.points = o3d.utility.Vector3dVector(vertices)
 
             pcd.estimate_normals()
-            # 关键：让局部法向方向一致（k 可以调，比如 20–30）
+            # Key: Make local normal directions consistent (k can be adjusted, e.g., 20–30)
             pcd.orient_normals_consistent_tangent_plane(k=20)
 
             normals = np.asarray(pcd.normals, dtype=float)
 
-        # ------- 2. SHOT 参数（使用论文版的参数结构） -------
+        # ------- 2. SHOT parameters (using paper-based parameter structure) -------
         if local_rf_radius is None:
             local_rf_radius = radius * 1.5
 
@@ -101,17 +101,17 @@ class ManifoldMesh:
             minNeighbors=min_neighbors
         )
 
-        # ------- 3. 创建 SHOT 描述子实例 ------
+        # ------- 3. Create SHOT descriptor instance -------
         shot = SHOTDescriptor(params)
         shot.set_data(vertices, normals, faces=faces)
 
         # ---- DEBUG: print neighbor count at some sample point ----
-        # 选取一个点，比如第 5 个顶点
+        # Select a test point, e.g., vertex 5
         idx_test = min(5, len(vertices) - 1)
         ni, dists = shot.nearest_neighbors_with_dist(idx_test, radius)
         print(f"[DEBUG SHOT] radius={radius:.4f}, neighbors for point {idx_test} = {len(ni)}")
 
-        # ------- 4. 计算所有 descriptor -------
+        # ------- 4. Compute all descriptors -------
         if query_idx is None:
             desc_all = shot.describe_all()
         else:
