@@ -3,6 +3,7 @@ from dataclasses import dataclass
 @dataclass
 class Options:
     device : str
+    descriptor_type: str = "fpfh"  # "fpfh" or "shot"
     mumford_shah_area_weighted: bool = False
     v_lr : float = 1e-2
     v_max_iter : int = 200

@@ -47,7 +47,81 @@ class ManifoldMesh:
         pcd.estimate_normals(o3d.geometry.KDTreeSearchParamRadius(radius=radius*2))
         fpfh = o3d.pipelines.registration.compute_fpfh_feature(pcd, o3d.geometry.KDTreeSearchParamRadius(radius=radius))
         return torch.tensor(fpfh.data.T, dtype=torch.float32, device=opts.device)
+
+    def compute_descriptors(self, opts: Options):
+        """Compute descriptors based on the descriptor_type in options."""
+        if opts.descriptor_type.lower() == "shot":
+            return self.compute_shot_descriptors(opts)
+        elif opts.descriptor_type.lower() == "fpfh":
+            return self.compute_fpfh_features(opts)
+        else:
+            raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot' or 'fpfh'.")
         
+    def compute_shot_descriptors(self, opts: Options, radius=0.05, n_bins=10,
+                                 min_neighbors=10, local_rf_radius=None, query_idx=None):
+        """Compute SHOT descriptors for vertices."""
+        from pfm_py.shot import SHOTParams, SHOTDescriptor
+        
+        vertices = self.vert.numpy(force=True)
+        faces = self.triv.numpy(force=True)
+        normals = None
+        
+        # ------- 1. 法向量（含方向一致性） -------
+        if faces is not None:
+            mesh = o3d.geometry.TriangleMesh()
+            mesh.vertices = o3d.utility.Vector3dVector(vertices)
+            mesh.triangles = o3d.utility.Vector3iVector(faces.astype(np.int32))
+
+            # 关键：先统一三角形法向方向，再重新算顶点法向
+            mesh.orient_triangles()                # ★ 让三角形法向一致
+            mesh.compute_vertex_normals()          # ★ 顶点法向跟着更新
+
+            normals = np.asarray(mesh.vertex_normals, dtype=float)
+        else:
+            pcd = o3d.geometry.PointCloud()
+            pcd.points = o3d.utility.Vector3dVector(vertices)
+
+            pcd.estimate_normals()
+            # 关键：让局部法向方向一致（k 可以调，比如 20–30）
+            pcd.orient_normals_consistent_tangent_plane(k=20)
+
+            normals = np.asarray(pcd.normals, dtype=float)
+
+        # ------- 2. SHOT 参数（使用论文版的参数结构） -------
+        if local_rf_radius is None:
+            local_rf_radius = radius * 1.5
+
+        params = SHOTParams(
+            radius=radius,
+            localRFradius=local_rf_radius,
+            bins=n_bins,
+            doubleVolumes=True,
+            useInterpolation=True,
+            useNormalization=True,
+            minNeighbors=min_neighbors
+        )
+
+        # ------- 3. 创建 SHOT 描述子实例 ------
+        shot = SHOTDescriptor(params)
+        shot.set_data(vertices, normals, faces=faces)
+
+        # ---- DEBUG: print neighbor count at some sample point ----
+        # 选取一个点，比如第 5 个顶点
+        idx_test = min(5, len(vertices) - 1)
+        ni, dists = shot.nearest_neighbors_with_dist(idx_test, radius)
+        print(f"[DEBUG SHOT] radius={radius:.4f}, neighbors for point {idx_test} = {len(ni)}")
+
+        # ------- 4. 计算所有 descriptor -------
+        if query_idx is None:
+            desc_all = shot.describe_all()
+        else:
+            query_idx = np.asarray(query_idx, dtype=int)
+            desc_all = shot.describe_all(query_idx=query_idx)
+
+        return torch.tensor(desc_all, dtype=torch.float32, device=opts.device)
+
+   
+
     def _compute_geometry(self):
         i, j, k = self.triv[:, 0], self.triv[:, 1], self.triv[:, 2]
         x1, x2, x3 = self.vert[i], self.vert[j], self.vert[k]
