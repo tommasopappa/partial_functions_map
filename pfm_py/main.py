@@ -16,7 +16,7 @@ class TestMeshData:
     partial_mesh: str
     ground_truth: str
 
-data_path = '/usr/prakt/w0012/SAVHA/shape_data'
+data_path = '/usr/prakt/w0010/SAVHA/shape_data'
 target_path = 'results'
 cat_holes = TestMeshData(
     name='cat_holes_10',
