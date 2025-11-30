@@ -139,8 +139,10 @@ def run(mesh_data, output_folder, opts: Options):
     ax5.view_init(elev=20, azim=45)
 
     plt.tight_layout()
-    plt.savefig(f"{output_folder}/pfm_visualization.png", dpi=300)
-    print(f"Saved visualization to {output_folder}/pfm_visualization.png")
+    pfm_fname = f"pfm_visualization_{opts.descriptor_type}.png"
+    pfm_path = os.path.join(output_folder, pfm_fname)
+    plt.savefig(pfm_path, dpi=300)
+    print(f"Saved visualization to {pfm_path}")
 
 
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -202,29 +204,29 @@ def run(mesh_data, output_folder, opts: Options):
     ax2.grid(False)
 
     plt.tight_layout()
-    plt.savefig(f"{output_folder}/indexed_color_transfer.png", dpi=300)
-    print(f"Saved: {output_folder}/indexed_color_transfer.png")
+    idx_fname = f"indexed_color_transfer_{opts.descriptor_type}.png"
+    idx_path = os.path.join(output_folder, idx_fname)
+    plt.savefig(idx_path, dpi=300)
+    print(f"Saved: {idx_path}")
     print()
     print()
 
-    # record summary entry (store relative paths from `target_path`)
+    # prepare relative paths for returned result
     try:
-        pfm_rel = os.path.relpath(os.path.join(output_folder, 'pfm_visualization.png'), start=target_path)
-        idx_rel = os.path.relpath(os.path.join(output_folder, 'indexed_color_transfer.png'), start=target_path)
+        pfm_rel = os.path.relpath(pfm_path, start=target_path)
+        idx_rel = os.path.relpath(idx_path, start=target_path)
     except Exception:
-        pfm_rel = os.path.join(output_folder, 'pfm_visualization.png')
-        idx_rel = os.path.join(output_folder, 'indexed_color_transfer.png')
+        pfm_rel = pfm_path
+        idx_rel = idx_path
 
-    global summary_results
-    summary_results.append({
-        'name': mesh_data.name,
-        'mean_geodesic_error': float(mean_geodesic_error),
-        'pfm_visualization': pfm_rel,
-        'indexed_color_transfer': idx_rel,
+    # return result dict (do not append to global here)
+    return {
+        'mean': float(mean_geodesic_error),
+        'pfm': pfm_rel,
+        'idx': idx_rel,
         'output_folder': output_folder,
-    })
-
-    return mean_geodesic_error
+        'descriptor': opts.descriptor_type,
+    }
 
 # Command-line argument parsing
 parser = argparse.ArgumentParser(
@@ -298,8 +300,28 @@ for folder in partial_folders:
             ground_truth=data_path + f"/SHREC16/{folder}/corres/{partial_mesh_name}.vts"
         )
         result_path = f"{target_path}/{folder}/{partial_mesh_name}"
-        mean_geodesic_error = run(mesh_data, result_path, opts)
+
+        # run once with SHOT and once with FPFH
+        opts.descriptor_type = 'shot'
+        res_shot = run(mesh_data, result_path, opts)
+
+        opts.descriptor_type = 'fpfh'
+        res_fpfh = run(mesh_data, result_path, opts)
+
+        # aggregate into one summary entry
+        summary_results.append({
+            'name': partial_mesh_name,
+            'mean_shot': res_shot.get('mean'),
+            'mean_fpfh': res_fpfh.get('mean'),
+            'pfm_shot': res_shot.get('pfm'),
+            'idx_shot': res_shot.get('idx'),
+            'pfm_fpfh': res_fpfh.get('pfm'),
+            'idx_fpfh': res_fpfh.get('idx'),
+            'output_folder': result_path,
+        })
         break
+    break
+
 
 # --- Generate HTML summary sorted by mesh name ---
 os.makedirs(target_path, exist_ok=True)
@@ -323,17 +345,28 @@ html_lines = [
     '<body>',
     '<h1>Meshes Summary</h1>',
     '<table>',
-    '<tr><th>Name</th><th>Mean Geodesic Error</th><th>Visualizations</th></tr>'
+    '<tr><th>Name</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
 ]
 
 for r in rows:
-    mv_links = []
-    if r.get('pfm_visualization'):
-        mv_links.append(f'<a href="{r["pfm_visualization"]}" target="_blank">pfm_visualization</a>')
-    if r.get('indexed_color_transfer'):
-        mv_links.append(f'<a href="{r["indexed_color_transfer"]}" target="_blank">indexed_color_transfer</a>')
-    links_html = ' | '.join(mv_links) if mv_links else ''
-    html_lines.append(f'<tr><td>{r["name"]}</td><td>{r["mean_geodesic_error"]:.6f}</td><td>{links_html}</td></tr>')
+    shot_links = []
+    fpfh_links = []
+    if r.get('pfm_shot'):
+        shot_links.append(f'<a href="{r["pfm_shot"]}" target="_blank">pfm_visualization_shot</a>')
+    if r.get('idx_shot'):
+        shot_links.append(f'<a href="{r["idx_shot"]}" target="_blank">indexed_color_transfer_shot</a>')
+    if r.get('pfm_fpfh'):
+        fpfh_links.append(f'<a href="{r["pfm_fpfh"]}" target="_blank">pfm_visualization_fpfh</a>')
+    if r.get('idx_fpfh'):
+        fpfh_links.append(f'<a href="{r["idx_fpfh"]}" target="_blank">indexed_color_transfer_fpfh</a>')
+
+    shot_html = ' | '.join(shot_links) if shot_links else ''
+    fpfh_html = ' | '.join(fpfh_links) if fpfh_links else ''
+
+    mean_shot = r.get('mean_shot') if r.get('mean_shot') is not None else float('nan')
+    mean_fpfh = r.get('mean_fpfh') if r.get('mean_fpfh') is not None else float('nan')
+
+    html_lines.append(f'<tr><td>{r["name"]}</td><td>{mean_shot:.6f}</td><td>{mean_fpfh:.6f}</td><td>{shot_html}</td><td>{fpfh_html}</td></tr>')
 
 html_lines.extend(['</table>', '</body>', '</html>'])
 
