@@ -319,8 +319,6 @@ for folder in partial_folders:
             'idx_fpfh': res_fpfh.get('idx'),
             'output_folder': result_path,
         })
-        break
-    break
 
 
 # --- Generate HTML summary sorted by mesh name ---

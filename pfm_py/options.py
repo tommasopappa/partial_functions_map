@@ -14,7 +14,7 @@ class Options:
     mu5 : float = 1e3
     tv_sigma = 0.2 * 4e-4
     C_lr : float = 1e-2
-    C_max_iter : int = 8000
+    C_max_iter : int = 10000
     max_outer_iter : int = 7
     n_eigen : int = 100
     mask_sigma : float = 0.03
