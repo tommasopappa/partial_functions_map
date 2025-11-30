@@ -17,63 +17,12 @@ class TestMeshData:
     partial_mesh: str
     ground_truth: str
 
-data_path = '/usr/prakt/w0012/SAVHA/shape_data'
-target_path = 'results'
-cat_holes = TestMeshData(
-    name='cat_holes_10',
-    full_mesh='SHREC16/null/off/cat.off',
-    partial_mesh='SHREC16/holes/off/holes_cat_shape_10.off',
-    ground_truth='SHREC16/holes/corres/holes_cat_shape_10.vts'
-)
-victoria_cut = TestMeshData(
-    name='victoria_cuts_1',
-    full_mesh='SHREC16/null/off/victoria.off',
-    partial_mesh='SHREC16/cuts/off/cuts_victoria_shape_1.off',
-    ground_truth='SHREC16/cuts/corres/cuts_victoria_shape_1.vts'
-)
-michael_cut = TestMeshData(
-    name='michael_cuts_1',
-    full_mesh='SHREC16/null/off/michael.off',
-    partial_mesh='SHREC16/cuts/off/cuts_michael_shape_1.off',
-    ground_truth='SHREC16/cuts/corres/cuts_michael_shape_1.vts'
-)
-horse_cut = TestMeshData(
-    name='horse_cuts_1',
-    full_mesh='SHREC16/null/off/horse.off',
-    partial_mesh='SHREC16/cuts/off/cuts_horse_shape_1.off',
-    ground_truth='SHREC16/cuts/corres/cuts_horse_shape_1.vts'
-)
-centaur_cut = TestMeshData(
-    name='centaur_cuts_1',
-    full_mesh='SHREC16/null/off/centaur.off',
-    partial_mesh='SHREC16/cuts/off/cuts_centaur_shape_1.off',
-    ground_truth='SHREC16/cuts/corres/cuts_centaur_shape_1.vts'
-)
-cat_cut = TestMeshData(
-    name='cat_cuts_1',
-    full_mesh='SHREC16/null/off/cat.off',
-    partial_mesh='SHREC16/cuts/off/cuts_cat_shape_1.off',
-    ground_truth='SHREC16/cuts/corres/cuts_cat_shape_1.vts'
-)
-dog_cut = TestMeshData(
-    name='dog_cuts_1',
-    full_mesh='SHREC16/null/off/dog.off',
-    partial_mesh='SHREC16/cuts/off/cuts_dog_shape_1.off',
-    ground_truth='SHREC16/cuts/corres/cuts_dog_shape_1.vts'
-)
-experiments = [victoria_cut, michael_cut, horse_cut, centaur_cut, cat_cut, dog_cut, cat_holes]
-
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-print(f"Device: {device}")
-
-for test in experiments:
-    output_folder = target_path + '/' + test.name
+def run(mesh_data, output_folder, opts: Options):
     os.makedirs(output_folder, exist_ok=True)
 
     print('#'*60)
     print(f"Running `{mesh_data.name}` ...")
     print('#'*60)
-    opts = Options(device)
 
     mesh_M = o3d.io.read_triangle_mesh(mesh_data.full_mesh)
     mesh_N = o3d.io.read_triangle_mesh(mesh_data.partial_mesh)
@@ -277,8 +226,50 @@ for test in experiments:
 
     return mean_geodesic_error
 
-data_path = '/usr/prakt/w0012/SAVHA/shape_data'
+# Command-line argument parsing
+parser = argparse.ArgumentParser(
+    description='Partial Functions Map - 3D shape matching',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    epilog="""
+Examples:
+  python main.py --fpfh                                    # Use FPFH descriptors (default)
+  python main.py --shot                                    # Use SHOT descriptors
+  python main.py --data-path /path/to/data --shot         # Specify custom data path
+  python main.py --fpfh --data-path ~/data/shapes         # FPFH with custom path
+    """
+)
+parser.add_argument(
+    '--fpfh',
+    action='store_true',
+    help='Use FPFH descriptors (default)'
+)
+parser.add_argument(
+    '--shot',
+    action='store_true',
+    help='Use SHOT descriptors'
+)
+parser.add_argument(
+    '--data-path',
+    type=str,
+    default='/usr/prakt/w0010/SAVHA/shape_data',
+    help='Path to the shape data directory (default: /usr/prakt/w0010/SAVHA/shape_data)'
+)
+
+args = parser.parse_args()
+
+# Determine the descriptor type to use
+descriptor_type = "fpfh"  # Default value
+if args.shot:
+    descriptor_type = "shot"
+elif args.fpfh:
+    descriptor_type = "fpfh"
+
+# Data path
+data_path = args.data_path
 target_path = 'results'
+
+print(f"Using descriptor: {descriptor_type.upper()}")
+print(f"Data path: {data_path}")
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"Device: {device}")
