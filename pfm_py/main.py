@@ -65,7 +65,7 @@ experiments = [victoria_cut, michael_cut, horse_cut, centaur_cut, cat_cut, dog_c
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"Device: {device}")
 
-# 命令行参数解析
+# Command-line argument parsing
 parser = argparse.ArgumentParser(
     description='Partial Functions Map - 3D shape matching',
     formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -96,14 +96,14 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-# 确定使用的 descriptor 类型
-descriptor_type = "fpfh"  # 默认值
+# Determine the descriptor type to use
+descriptor_type = "fpfh"  # Default value
 if args.shot:
     descriptor_type = "shot"
 elif args.fpfh:
     descriptor_type = "fpfh"
 
-# 数据路径
+# Data path
 data_path = args.data_path
 
 print(f"Using descriptor: {descriptor_type.upper()}")
