@@ -16,7 +16,8 @@ def run_icp_partial_torch_batched(M : ManifoldMesh, N : ManifoldMesh, C_init, es
             end_idx = min(start_idx + opts.icp_batch_size, N.n_vert)
             batch_CX = CX[:, start_idx:end_idx]
 
-            batch_dists = torch.sum((batch_CX.unsqueeze(2) - Y.unsqueeze(1))**2, dim=0)
+            # batch_dists = torch.sum((batch_CX.unsqueeze(2) - Y.unsqueeze(1))**2, dim=0)
+            batch_dists = distance_matrix(batch_CX.T, Y.T)
             batch_matches = torch.argmin(batch_dists, dim=1)
             matches[start_idx:end_idx] = batch_matches
 
@@ -33,3 +34,10 @@ def run_icp_partial_torch_batched(M : ManifoldMesh, N : ManifoldMesh, C_init, es
     C_full_shape = torch.zeros((opts.n_eigen, opts.n_eigen), dtype=torch.float32, device=opts.device)
     C_full_shape[:, :est_rank] = C
     return C_full_shape, matches
+
+def distance_matrix(X, Y):
+    """Compute squared Euclidean distance matrix between two sets of points."""
+    X_norm = (X**2).sum(dim=1).unsqueeze(1)
+    Y_norm = (Y**2).sum(dim=1).unsqueeze(0)
+    dist = X_norm + Y_norm - 2.0 * (X @ Y.T)
+    return dist
