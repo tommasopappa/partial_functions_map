@@ -228,6 +228,61 @@ def run(mesh_data, output_folder, opts: Options):
         'descriptor': opts.descriptor_type,
     }
 
+def write_summary_html(summary_results, target_path):
+    """Write/overwrite the HTML meshes summary from `summary_results` into `target_path/meshes_summary.html`.
+    This function is safe to call repeatedly (it overwrites the previous file).
+    """
+    os.makedirs(target_path, exist_ok=True)
+    html_path = os.path.join(target_path, 'meshes_summary.html')
+    rows = sorted(summary_results, key=lambda x: x['name'])
+
+    html_lines = [
+        '<!doctype html>',
+        '<html>',
+        '<head>',
+        '<meta charset="utf-8" />',
+        '<title>Meshes Summary</title>',
+        '<style>',
+        'body { font-family: Arial, sans-serif; padding: 20px; }',
+        'table { border-collapse: collapse; width: 100%; }',
+        'th, td { border: 1px solid #ddd; padding: 8px; }',
+        'th { background: #f4f4f4; text-align: left; }',
+        'tr:nth-child(even) { background: #fbfbfb; }',
+        '</style>',
+        '</head>',
+        '<body>',
+        '<h1>Meshes Summary</h1>',
+        '<table>',
+        '<tr><th>Name</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
+    ]
+
+    for r in rows:
+        shot_links = []
+        fpfh_links = []
+        if r.get('pfm_shot'):
+            shot_links.append(f'<a href="{r["pfm_shot"]}" target="_blank">pfm_visualization_shot</a>')
+        if r.get('idx_shot'):
+            shot_links.append(f'<a href="{r["idx_shot"]}" target="_blank">indexed_color_transfer_shot</a>')
+        if r.get('pfm_fpfh'):
+            fpfh_links.append(f'<a href="{r["pfm_fpfh"]}" target="_blank">pfm_visualization_fpfh</a>')
+        if r.get('idx_fpfh'):
+            fpfh_links.append(f'<a href="{r["idx_fpfh"]}" target="_blank">indexed_color_transfer_fpfh</a>')
+
+        shot_html = ' | '.join(shot_links) if shot_links else ''
+        fpfh_html = ' | '.join(fpfh_links) if fpfh_links else ''
+
+        mean_shot = r.get('mean_shot') if r.get('mean_shot') is not None else float('nan')
+        mean_fpfh = r.get('mean_fpfh') if r.get('mean_fpfh') is not None else float('nan')
+
+        html_lines.append(f'<tr><td>{r["name"]}</td><td>{mean_shot:.6f}</td><td>{mean_fpfh:.6f}</td><td>{shot_html}</td><td>{fpfh_html}</td></tr>')
+
+    html_lines.extend(['</table>', '</body>', '</html>'])
+
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(html_lines))
+
+    print(f"Wrote HTML summary to {html_path}")
+
 # Command-line argument parsing
 parser = argparse.ArgumentParser(
     description='Partial Functions Map - 3D shape matching',
@@ -283,6 +338,7 @@ summary_results = []
 partial_folders = ["cuts", "holes"]
 for folder in partial_folders:
     partial_files = os.listdir(data_path + "/SHREC16/" + folder + "/off")
+    i = 0
     for partial_file in partial_files:
         # remove extension safely
         partial_mesh_name = os.path.splitext(partial_file)[0]
@@ -319,57 +375,10 @@ for folder in partial_folders:
             'idx_fpfh': res_fpfh.get('idx'),
             'output_folder': result_path,
         })
+        # write incremental HTML summary after each processed mesh
+        write_summary_html(summary_results, target_path)
+        i += 1
+        if i >= 45:
+            break
 
-
-# --- Generate HTML summary sorted by mesh name ---
-os.makedirs(target_path, exist_ok=True)
-html_path = os.path.join(target_path, 'meshes_summary.html')
-rows = sorted(summary_results, key=lambda x: x['name'])
-
-html_lines = [
-    '<!doctype html>',
-    '<html>',
-    '<head>',
-    '<meta charset="utf-8" />',
-    '<title>Meshes Summary</title>',
-    '<style>',
-    'body { font-family: Arial, sans-serif; padding: 20px; }',
-    'table { border-collapse: collapse; width: 100%; }',
-    'th, td { border: 1px solid #ddd; padding: 8px; }',
-    'th { background: #f4f4f4; text-align: left; }',
-    'tr:nth-child(even) { background: #fbfbfb; }',
-    '</style>',
-    '</head>',
-    '<body>',
-    '<h1>Meshes Summary</h1>',
-    '<table>',
-    '<tr><th>Name</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
-]
-
-for r in rows:
-    shot_links = []
-    fpfh_links = []
-    if r.get('pfm_shot'):
-        shot_links.append(f'<a href="{r["pfm_shot"]}" target="_blank">pfm_visualization_shot</a>')
-    if r.get('idx_shot'):
-        shot_links.append(f'<a href="{r["idx_shot"]}" target="_blank">indexed_color_transfer_shot</a>')
-    if r.get('pfm_fpfh'):
-        fpfh_links.append(f'<a href="{r["pfm_fpfh"]}" target="_blank">pfm_visualization_fpfh</a>')
-    if r.get('idx_fpfh'):
-        fpfh_links.append(f'<a href="{r["idx_fpfh"]}" target="_blank">indexed_color_transfer_fpfh</a>')
-
-    shot_html = ' | '.join(shot_links) if shot_links else ''
-    fpfh_html = ' | '.join(fpfh_links) if fpfh_links else ''
-
-    mean_shot = r.get('mean_shot') if r.get('mean_shot') is not None else float('nan')
-    mean_fpfh = r.get('mean_fpfh') if r.get('mean_fpfh') is not None else float('nan')
-
-    html_lines.append(f'<tr><td>{r["name"]}</td><td>{mean_shot:.6f}</td><td>{mean_fpfh:.6f}</td><td>{shot_html}</td><td>{fpfh_html}</td></tr>')
-
-html_lines.extend(['</table>', '</body>', '</html>'])
-
-with open(html_path, 'w', encoding='utf-8') as f:
-    f.write('\n'.join(html_lines))
-
-print(f"Wrote HTML summary to {html_path}")
 
