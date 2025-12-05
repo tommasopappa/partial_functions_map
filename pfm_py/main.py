@@ -236,6 +236,30 @@ def write_summary_html(summary_results, target_path):
     html_path = os.path.join(target_path, 'meshes_summary.html')
     rows = sorted(summary_results, key=lambda x: x['name'])
 
+    # compute summary statistics for top summary table
+    shot_vals = np.array([r.get('mean_shot') for r in rows], dtype=float) if rows else np.array([], dtype=float)
+    fpfh_vals = np.array([r.get('mean_fpfh') for r in rows], dtype=float) if rows else np.array([], dtype=float)
+
+    def safe_mean(arr):
+        if arr.size == 0:
+            return float('nan')
+        return float(np.mean(arr))
+
+    overall_shot = safe_mean(shot_vals)
+    overall_fpfh = safe_mean(fpfh_vals)
+
+    cuts_rows = [r for r in rows if r.get('folder') == 'cuts']
+    holes_rows = [r for r in rows if r.get('folder') == 'holes']
+
+    cuts_count = len(cuts_rows)
+    holes_count = len(holes_rows)
+    total_count = len(rows)
+
+    cuts_shot = safe_mean(np.array([r.get('mean_shot') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
+    cuts_fpfh = safe_mean(np.array([r.get('mean_fpfh') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
+    holes_shot = safe_mean(np.array([r.get('mean_shot') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
+    holes_fpfh = safe_mean(np.array([r.get('mean_fpfh') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
+
     html_lines = [
         '<!doctype html>',
         '<html>',
@@ -244,7 +268,7 @@ def write_summary_html(summary_results, target_path):
         '<title>Meshes Summary</title>',
         '<style>',
         'body { font-family: Arial, sans-serif; padding: 20px; }',
-        'table { border-collapse: collapse; width: 100%; }',
+        'table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }',
         'th, td { border: 1px solid #ddd; padding: 8px; }',
         'th { background: #f4f4f4; text-align: left; }',
         'tr:nth-child(even) { background: #fbfbfb; }',
@@ -252,6 +276,15 @@ def write_summary_html(summary_results, target_path):
         '</head>',
         '<body>',
         '<h1>Meshes Summary</h1>',
+        '<h2>Dataset Statistics</h2>',
+        '<table>',
+        '<tr><th>Category</th><th>Count</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th></tr>',
+        f'<tr><td>Cuts</td><td>{cuts_count}</td><td>{cuts_shot:.6f}</td><td>{cuts_fpfh:.6f}</td></tr>',
+        f'<tr><td>Holes</td><td>{holes_count}</td><td>{holes_shot:.6f}</td><td>{holes_fpfh:.6f}</td></tr>',
+        f'<tr><td>Entire dataset</td><td>{total_count}</td><td>{overall_shot:.6f}</td><td>{overall_fpfh:.6f}</td></tr>',
+        '</table>',
+        '<hr/>',
+        '<h2>Individual Mesh Results</h2>',
         '<table>',
         '<tr><th>Name</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
     ]
@@ -338,7 +371,6 @@ summary_results = []
 partial_folders = ["cuts", "holes"]
 for folder in partial_folders:
     partial_files = os.listdir(data_path + "/SHREC16/" + folder + "/off")
-    i = 0
     for partial_file in partial_files:
         # remove extension safely
         partial_mesh_name = os.path.splitext(partial_file)[0]
@@ -374,11 +406,7 @@ for folder in partial_folders:
             'pfm_fpfh': res_fpfh.get('pfm'),
             'idx_fpfh': res_fpfh.get('idx'),
             'output_folder': result_path,
+            'folder': folder,
         })
         # write incremental HTML summary after each processed mesh
         write_summary_html(summary_results, target_path)
-        i += 1
-        if i >= 45:
-            break
-
-
