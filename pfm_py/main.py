@@ -408,6 +408,11 @@ parser.add_argument(
     help='Use SHOT descriptors'
 )
 parser.add_argument(
+    '--dino',
+    action='store_true',
+    help='Use DINO descriptors (requires pytorch3d and internet to download model)'
+)
+parser.add_argument(
     '--data-path',
     type=str,
     default='/usr/prakt/w0010/SAVHA/shape_data',
@@ -428,6 +433,8 @@ if args.shot:
     descriptor_type = "shot"
 elif args.fpfh:
     descriptor_type = "fpfh"
+elif args.dino:
+    descriptor_type = "dino"
 
 # Data path
 data_path = args.data_path
@@ -472,7 +479,7 @@ for folder in partial_folders:
             continue
 
         # run once with SHOT and once with FPFH
-        opts.descriptor_type = 'shot'
+        opts.descriptor_type = 'dino'
         res_shot = run(mesh_data, result_path, opts)
 
         opts.descriptor_type = 'fpfh'
