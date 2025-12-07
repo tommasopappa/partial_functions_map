@@ -7,6 +7,7 @@ import open3d as o3d
 import numpy as np
 import os
 import argparse
+import json
 
 from dataclasses import dataclass
 
@@ -316,6 +317,29 @@ def write_summary_html(summary_results, target_path):
 
     print(f"Wrote HTML summary to {html_path}")
 
+
+def load_state(state_path):
+    """Load persisted state.json if it exists, else return empty structure."""
+    if os.path.exists(state_path):
+        try:
+            with open(state_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if isinstance(data, dict) and 'processed_samples' in data:
+                return data
+        except Exception as e:
+            print(f"Warning: could not read state file {state_path}: {e}")
+    return {'processed_samples': {}}
+
+
+def save_state(state, state_path):
+    """Persist state to disk as JSON."""
+    os.makedirs(os.path.dirname(state_path), exist_ok=True)
+    try:
+        with open(state_path, 'w', encoding='utf-8') as f:
+            json.dump(state, f, indent=2)
+    except Exception as e:
+        print(f"Warning: could not write state file {state_path}: {e}")
+
 # Command-line argument parsing
 parser = argparse.ArgumentParser(
     description='Partial Functions Map - 3D shape matching',
@@ -344,6 +368,12 @@ parser.add_argument(
     default='/usr/prakt/w0010/SAVHA/shape_data',
     help='Path to the shape data directory (default: /usr/prakt/w0010/SAVHA/shape_data)'
 )
+parser.add_argument(
+    '--target-path',
+    type=str,
+    default='results',
+    help='Path to the output results directory (default: results)'
+)
 
 args = parser.parse_args()
 
@@ -356,7 +386,8 @@ elif args.fpfh:
 
 # Data path
 data_path = args.data_path
-target_path = 'results'
+target_path = args.target_path
+state_path = os.path.join(target_path, 'state.txt')
 
 print(f"Using descriptor: {descriptor_type.upper()}")
 print(f"Data path: {data_path}")
@@ -365,8 +396,10 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"Device: {device}")
 opts = Options(device)
  
-# collect summary entries for all processed meshes
-summary_results = []
+# load persisted state (processed samples) and initialize summary_results from it
+state = load_state(state_path)
+processed_samples = state.get('processed_samples', {})
+summary_results = list(processed_samples.values())
 
 partial_folders = ["cuts", "holes"]
 for folder in partial_folders:
@@ -389,6 +422,10 @@ for folder in partial_folders:
         )
         result_path = f"{target_path}/{folder}/{partial_mesh_name}"
 
+        # skip if already processed (from persisted state)
+        if partial_mesh_name in processed_samples:
+            continue
+
         # run once with SHOT and once with FPFH
         opts.descriptor_type = 'shot'
         res_shot = run(mesh_data, result_path, opts)
@@ -397,7 +434,7 @@ for folder in partial_folders:
         res_fpfh = run(mesh_data, result_path, opts)
 
         # aggregate into one summary entry
-        summary_results.append({
+        entry = {
             'name': partial_mesh_name,
             'mean_shot': res_shot.get('mean'),
             'mean_fpfh': res_fpfh.get('mean'),
@@ -407,6 +444,10 @@ for folder in partial_folders:
             'idx_fpfh': res_fpfh.get('idx'),
             'output_folder': result_path,
             'folder': folder,
-        })
+        }
+        summary_results.append(entry)
+        processed_samples[partial_mesh_name] = entry
+        state['processed_samples'] = processed_samples
         # write incremental HTML summary after each processed mesh
+        save_state(state, state_path)
         write_summary_html(summary_results, target_path)
