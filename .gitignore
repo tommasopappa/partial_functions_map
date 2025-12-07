@@ -2,3 +2,6 @@ pfm_py/__pycache__/*
 /.venv/
 results/*
 pfm_py/results/*
+micromamba
+miniforge/
+miniforge.sh
