@@ -23,3 +23,6 @@ class Options:
     refine_fps : int = 50
     refine_iters = 3
     fps_variance = 0.7 * 4e-4
+    # SHOT descriptor configuration
+    shot_radius_scale: float = 0.15       # scale factor for auto-computed SHOT radius (radius = scale * sqrt(total_area))
+    shot_local_rf_factor: float = 1.5     # multiplier to compute local RF radius from main radius (local_rf = factor * radius)

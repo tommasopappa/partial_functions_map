@@ -29,12 +29,16 @@ def match_part_to_whole(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C_in
     v = torch.ones(M.n_vert, dtype=torch.float32, device=opts.device)
     C = C_init
 
+    # Mass normalization: normalize descriptors by square root of mass matrix
+    func_M_normalized = func_M / torch.sqrt(M.S.unsqueeze(1) + 1e-10)
+    func_N_normalized = func_N / torch.sqrt(N.S.unsqueeze(1) + 1e-10)
+
     for i in range(opts.max_outer_iter):
         print(f"------------------------- Iteration {i + 1} -------------------------")
 
         # Step 1: Optimize C
         print("Optimizing C ...")
-        C = optimize_C(M, N, W, func_M, func_N, C, v, est_rank, opts)
+        C = optimize_C(M, N, W, func_M_normalized, func_N_normalized, C, v, est_rank, opts)
 
         # Step 2: Run ICP in spectral domain to refine C and get correspondences
         print("Running spectral ICP refinement ...")
@@ -42,7 +46,7 @@ def match_part_to_whole(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C_in
 
         # Step 3: Optimize v using the ICP-refined C
         print("Optimizing v ...")
-        v = optimize_v(M, N, func_M, func_N, C, opts)
+        v = optimize_v(M, N, func_M_normalized, func_N_normalized, C, opts)
         area_diff = M.partial_area(v) - N.area
         print(f"area(N softly embedded into M) - area(N): {area_diff:.6e}")
         print(f"Number of unique M vertices onto which N is mapped: {len(torch.unique(matches))}")

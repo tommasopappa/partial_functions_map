@@ -57,13 +57,27 @@ class ManifoldMesh:
         else:
             raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot' or 'fpfh'.")
         
-    def compute_shot_descriptors(self, opts: Options, radius=0.05, n_bins=10,
+    def compute_shot_descriptors(self, opts: Options, radius=None, n_bins=10,
                                  min_neighbors=10, local_rf_radius=None, query_idx=None):
         """Compute SHOT descriptors for vertices."""
         from pfm_py.shot import SHOTParams, SHOTDescriptor
         
         vertices = self.vert.numpy(force=True)
         faces = self.triv.numpy(force=True)
+        # ------- 0. Compute scale-aware radius (if not provided) -------
+        triangle_areas = 0.5 * np.linalg.norm(
+            np.cross(vertices[faces[:, 1]] - vertices[faces[:, 0]],
+                     vertices[faces[:, 2]] - vertices[faces[:, 0]]), axis=1)
+        total_area = np.sum(triangle_areas)
+
+        # If radius not provided, compute automatically from total mesh area
+        if radius is None:
+            radius = opts.shot_radius_scale * np.sqrt(total_area)
+            print(f"[SHOT] Using auto-scaled radius = {radius:.6f} (scale={opts.shot_radius_scale})")
+
+        # Local RF radius default (scale factor comes from options)
+        if local_rf_radius is None:
+            local_rf_radius = radius * opts.shot_local_rf_factor
         normals = None
         
         # ------- 1. Normal vectors (with direction consistency) -------
@@ -88,9 +102,6 @@ class ManifoldMesh:
             normals = np.asarray(pcd.normals, dtype=float)
 
         # ------- 2. SHOT parameters (using paper-based parameter structure) -------
-        if local_rf_radius is None:
-            local_rf_radius = radius * 1.5
-
         params = SHOTParams(
             radius=radius,
             localRFradius=local_rf_radius,
