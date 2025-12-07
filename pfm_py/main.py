@@ -18,36 +18,10 @@ class TestMeshData:
     partial_mesh: str
     ground_truth: str
 
-def run(mesh_data, output_folder, opts: Options):
-    os.makedirs(output_folder, exist_ok=True)
-
-    print('#'*60)
-    print(f"Running `{mesh_data.name}` ...")
-    print('#'*60)
-
-    mesh_M = o3d.io.read_triangle_mesh(mesh_data.full_mesh)
-    mesh_N = o3d.io.read_triangle_mesh(mesh_data.partial_mesh)
-
-    vert_M, triv_M = np.asarray(mesh_M.vertices), np.asarray(mesh_M.triangles)
-    vert_N, triv_N = np.asarray(mesh_N.vertices), np.asarray(mesh_N.triangles)
-    M = ManifoldMesh(vert_M, triv_M, opts, compute_geo=True)
-    N = ManifoldMesh(vert_N, triv_N, opts, compute_geo=False)
-
-    C, v, matches = match_and_refine(M, N, opts)
-    C, v, matches = C.numpy(force=True), v.numpy(force=True), matches.numpy(force=True)
-
-    gt_matches = np.loadtxt(mesh_data.ground_truth, dtype=float).astype(int) - 1
-
-    geodesics_M = M.compute_geodesic_matrix()
-    dist_method_geo = np.array([geodesics_M[gt_matches[i], matches[i]] for i in range(len(matches))])
-    dist_method_geo = dist_method_geo / np.sqrt(M.area)
-    mean_geodesic_error = dist_method_geo.mean()
-    print(f"Mean geodesic error: {mean_geodesic_error:.6f}")
-
+def create_pfm_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, matches, gt_matches, dist_method_geo, opts, output_folder):
+    """Create and save the PFM visualization showing source function, ground truth transfer, and method transfer."""
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
-
-    # --- Prepare visualization data ---
 
     def create_full_colormap(n):
         cmap = plt.get_cmap("hsv")
@@ -85,7 +59,6 @@ def run(mesh_data, output_folder, opts: Options):
     colors_method = M.evecs.numpy(force=True) @ colors_method
 
     dist_gt_geo = np.zeros_like(dist_method_geo)
-
 
     # --- Make figure (2 rows) ---
 
@@ -144,10 +117,31 @@ def run(mesh_data, output_folder, opts: Options):
     pfm_path = os.path.join(output_folder, pfm_fname)
     plt.savefig(pfm_path, dpi=300)
     print(f"Saved visualization to {pfm_path}")
+    
+    return pfm_path
 
 
+def create_indexed_color_transfer_visualization(vert_M, vert_N, triv_M, triv_N, matches, opts, output_folder):
+    """Create and save the indexed color transfer visualization showing full and partial meshes."""
+    import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     import matplotlib as mpl
+
+    def create_full_colormap(n):
+        cmap = plt.get_cmap("hsv")
+        colors = cmap(np.linspace(0, 1, n))[:, :3]
+        return colors
+    
+    def find_boundary_edges(triangles):
+        """Find boundary edges (edges that appear only once in the mesh)."""
+        from collections import defaultdict
+        edge_count = defaultdict(int)
+        for tri in triangles:
+            for i in range(3):
+                edge = tuple(sorted([tri[i], tri[(i+1)%3]]))
+                edge_count[edge] += 1
+        boundary_edges = [edge for edge, count in edge_count.items() if count == 1]
+        return boundary_edges
 
     # create vertex colormap on M and transfer to N by indexing
     colors_M = create_full_colormap(vert_M.shape[0])   # (n_M,3)
@@ -156,6 +150,10 @@ def run(mesh_data, output_folder, opts: Options):
     # prepare centered geometry (use same centering as first block)
     v_M_vis = vert_M - vert_N.mean(0)   # center both shapes on partial-shape center (keeps views consistent)
     v_N_vis = vert_N - vert_N.mean(0)
+    
+    # Find boundary edges
+    boundary_edges_M = find_boundary_edges(triv_M)
+    boundary_edges_N = find_boundary_edges(triv_N)
 
     # compute face polygons and per-face colors (average vertex colors per face)
     poly_M = [v_M_vis[f] for f in triv_M]
@@ -186,8 +184,12 @@ def run(mesh_data, output_folder, opts: Options):
 
     # Full mesh (continuous)
     ax1 = fig.add_subplot(1, 2, 1, projection='3d')
-    pc1 = Poly3DCollection(poly_M, facecolors=facecols_M, linewidths=0, edgecolor=None)
+    pc1 = Poly3DCollection(poly_M, facecolors=facecols_M, linewidths=0, edgecolor=None, alpha=0.9, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
     ax1.add_collection3d(pc1)
+    # Plot boundary edges in black
+    for edge in boundary_edges_M:
+        pts = v_M_vis[list(edge)]
+        ax1.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=3.5)
     ax1.set_title("Full Mesh (M) — continuous colors")
     set_axes_equal_local(ax1)
     ax1.view_init(elev=20, azim=45)
@@ -196,8 +198,12 @@ def run(mesh_data, output_folder, opts: Options):
 
     # Partial mesh (continuous, indexed colors)
     ax2 = fig.add_subplot(1, 2, 2, projection='3d')
-    pc2 = Poly3DCollection(poly_N, facecolors=facecols_N, linewidths=0, edgecolor=None)
+    pc2 = Poly3DCollection(poly_N, facecolors=facecols_N, linewidths=0, edgecolor=None, alpha=0.9, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
     ax2.add_collection3d(pc2)
+    # Plot boundary edges in black
+    for edge in boundary_edges_N:
+        pts = v_N_vis[list(edge)]
+        ax2.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=3.5)
     ax2.set_title("Partial Mesh (N) — colors via matches indexing")
     set_axes_equal_local(ax2)
     ax2.view_init(elev=20, azim=45)
@@ -209,6 +215,45 @@ def run(mesh_data, output_folder, opts: Options):
     idx_path = os.path.join(output_folder, idx_fname)
     plt.savefig(idx_path, dpi=300)
     print(f"Saved: {idx_path}")
+    
+    return idx_path
+
+
+def run(mesh_data, output_folder, opts: Options):
+    os.makedirs(output_folder, exist_ok=True)
+
+    print('#'*60)
+    print(f"Running `{mesh_data.name}` ...")
+    print('#'*60)
+
+    mesh_M = o3d.io.read_triangle_mesh(mesh_data.full_mesh)
+    mesh_N = o3d.io.read_triangle_mesh(mesh_data.partial_mesh)
+
+    vert_M, triv_M = np.asarray(mesh_M.vertices), np.asarray(mesh_M.triangles)
+    vert_N, triv_N = np.asarray(mesh_N.vertices), np.asarray(mesh_N.triangles)
+    M = ManifoldMesh(vert_M, triv_M, opts, compute_geo=True)
+    N = ManifoldMesh(vert_N, triv_N, opts, compute_geo=False)
+
+    C, v, matches = match_and_refine(M, N, opts)
+    C, v, matches = C.numpy(force=True), v.numpy(force=True), matches.numpy(force=True)
+
+    gt_matches = np.loadtxt(mesh_data.ground_truth, dtype=float).astype(int) - 1
+
+    geodesics_M = M.compute_geodesic_matrix()
+    dist_method_geo = np.array([geodesics_M[gt_matches[i], matches[i]] for i in range(len(matches))])
+    dist_method_geo = dist_method_geo / np.sqrt(M.area)
+    mean_geodesic_error = dist_method_geo.mean()
+    print(f"Mean geodesic error: {mean_geodesic_error:.6f}")
+
+    # Create visualizations using helper functions
+    pfm_path = create_pfm_visualization(
+        vert_M, vert_N, triv_M, triv_N, M, N, C, matches, gt_matches, dist_method_geo, opts, output_folder
+    )
+    
+    idx_path = create_indexed_color_transfer_visualization(
+        vert_M, vert_N, triv_M, triv_N, matches, opts, output_folder
+    )
+    
     print()
     print()
 
