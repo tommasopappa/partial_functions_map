@@ -6,7 +6,7 @@ class Options:
     descriptor_type: str = "fpfh"  # "fpfh" or "shot"
     mumford_shah_area_weighted: bool = False
     v_lr : float = 1e-2
-    v_max_iter : int = 1000
+    v_max_iter : int = 2000 #1000
     mu1 : float = 1.0
     mu2 : float = 1e2
     mu3 : float = 1.0
@@ -14,7 +14,7 @@ class Options:
     mu5 : float = 1e3
     tv_sigma = 0.2 * 4e-4
     C_lr : float = 1e-2
-    C_max_iter : int = 10000
+    C_max_iter : int = 2000
     max_outer_iter : int = 7
     n_eigen : int = 100
     mask_sigma : float = 0.03
