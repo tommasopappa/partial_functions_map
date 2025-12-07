@@ -6,6 +6,7 @@ import open3d as o3d
 from scipy.sparse.csgraph import dijkstra
 
 from pfm_py.options import Options
+from pfm_py import dino as dino_module
 
 ALMOST_ZERO = 1e-10
 
@@ -54,6 +55,12 @@ class ManifoldMesh:
             return self.compute_shot_descriptors(opts)
         elif opts.descriptor_type.lower() == "fpfh":
             return self.compute_fpfh_features(opts)
+        elif opts.descriptor_type.lower() == "dino":
+            # Use DINO-based descriptor computation (may be slow)
+            verts = self.vert.clone().detach()
+            faces = self.triv.clone().detach()
+            feats = dino_module.get_shape_dino_features(verts, faces)
+            return torch.tensor(feats, dtype=torch.float32, device=opts.device)
         else:
             raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot' or 'fpfh'.")
         
