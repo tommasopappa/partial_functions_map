@@ -4,4 +4,4 @@ results/*
 pfm_py/results/*
 micromamba
 miniforge/
-pfm_py/miniforge.sh
+miniforge.sh
