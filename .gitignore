@@ -1,5 +1,6 @@
 pfm_py/__pycache__/*
 /.venv/
+venv/
 results/*
 pfm_py/results/*
 micromamba

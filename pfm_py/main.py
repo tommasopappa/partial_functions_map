@@ -18,8 +18,8 @@ class TestMeshData:
     partial_mesh: str
     ground_truth: str
 
-def create_pfm_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, matches, gt_matches, dist_method_geo, opts, output_folder):
-    """Create and save the PFM visualization showing source function, ground truth transfer, and method transfer."""
+def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, matches, gt_matches, dist_method_geo, opts, output_folder):
+    """Create and save the functional map visualization showing source function, ground truth transfer, and method transfer."""
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -110,7 +110,7 @@ def create_pfm_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, matches, g
     # --- Make figure (2 rows) ---
 
     fig = plt.figure(figsize=(14, 10))
-    boundary_line_width = 1.5
+    boundary_line_width = 2
     opacity = 1.0
 
     # ============== ROW 1: Source + GT Transfer ==============
@@ -186,16 +186,16 @@ def create_pfm_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, matches, g
     plt.colorbar(sm5, ax=ax5, shrink=0.6)
 
     plt.tight_layout()
-    pfm_fname = f"pfm_visualization_{opts.descriptor_type}.png"
-    pfm_path = os.path.join(output_folder, pfm_fname)
-    plt.savefig(pfm_path, dpi=300)
-    print(f"Saved visualization to {pfm_path}")
+    functional_map_fname = f"functional_map_visualization_{opts.descriptor_type}.png"
+    functional_map_path = os.path.join(output_folder, functional_map_fname)
+    plt.savefig(functional_map_path, dpi=300)
+    print(f"Saved visualization to {functional_map_path}")
     
-    return pfm_path
+    return functional_map_path
 
 
-def create_indexed_color_transfer_visualization(vert_M, vert_N, triv_M, triv_N, matches, opts, output_folder):
-    """Create and save the indexed color transfer visualization showing full and partial meshes."""
+def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches, gt_matches, opts, output_folder):
+    """Create and save the color pullback visualization showing full and partial meshes with method and ground truth pullbacks."""
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     import matplotlib as mpl
@@ -216,9 +216,10 @@ def create_indexed_color_transfer_visualization(vert_M, vert_N, triv_M, triv_N, 
         boundary_edges = [edge for edge, count in edge_count.items() if count == 1]
         return boundary_edges
 
-    # create vertex colormap on M and transfer to N by indexing
+    # create vertex colormap on M and transfer to N by indexing (pullback)
     colors_M = create_full_colormap(vert_M.shape[0])   # (n_M,3)
-    colors_N = colors_M[matches]                       # (n_N,3)
+    colors_N_method = colors_M[matches]                # (n_N,3) method pullback
+    colors_N_gt = colors_M[gt_matches]                 # (n_N,3) ground truth pullback
 
     # prepare centered geometry (use same centering as first block)
     v_M_vis = vert_M - vert_N.mean(0)   # center both shapes on partial-shape center (keeps views consistent)
@@ -233,7 +234,8 @@ def create_indexed_color_transfer_visualization(vert_M, vert_N, triv_M, triv_N, 
     facecols_M = colors_M[triv_M].mean(axis=1)
 
     poly_N = [v_N_vis[f] for f in triv_N]
-    facecols_N = colors_N[triv_N].mean(axis=1)
+    facecols_N_method = colors_N_method[triv_N].mean(axis=1)
+    facecols_N_gt = colors_N_gt[triv_N].mean(axis=1)
 
     # ensure bounding box and aspect come from the same bbox used in first block (recompute if needed)
     bbox_min = v_N_vis.min(0)
@@ -252,46 +254,60 @@ def create_indexed_color_transfer_visualization(vert_M, vert_N, triv_M, triv_N, 
         except Exception:
             pass
 
-    # create figure: left = continuous full mesh, right = continuous partial mesh
-    fig = plt.figure(figsize=(14, 6))
-    boundary_line_width = 1.5
+    # create figure: left = full mesh, middle = GT pullback, right = method pullback
+    fig = plt.figure(figsize=(18, 7))
+    boundary_line_width = 2
     opacity = 1.0
 
     # Full mesh (continuous)
-    ax1 = fig.add_subplot(1, 2, 1, projection='3d')
+    ax1 = fig.add_subplot(1, 3, 1, projection='3d')
     pc1 = Poly3DCollection(poly_M, facecolors=facecols_M, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
     ax1.add_collection3d(pc1)
     # Plot boundary edges in black
     for edge in boundary_edges_M:
         pts = v_M_vis[list(edge)]
         ax1.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax1.set_title("Full Mesh (M) — continuous colors")
+    ax1.set_title("Full Mesh (M)\ncontinuous colors", pad=20)
     set_axes_equal_local(ax1)
     ax1.view_init(elev=20, azim=45)
     ax1.set_xlabel("X"); ax1.set_ylabel("Y"); ax1.set_zlabel("Z")
     ax1.grid(False)
 
-    # Partial mesh (continuous, indexed colors)
-    ax2 = fig.add_subplot(1, 2, 2, projection='3d')
-    pc2 = Poly3DCollection(poly_N, facecolors=facecols_N, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+    # Partial mesh with ground truth pullback
+    ax2 = fig.add_subplot(1, 3, 2, projection='3d')
+    pc2 = Poly3DCollection(poly_N, facecolors=facecols_N_gt, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
     ax2.add_collection3d(pc2)
     # Plot boundary edges in black
     for edge in boundary_edges_N:
         pts = v_N_vis[list(edge)]
         ax2.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax2.set_title("Partial Mesh (N) — colors via matches indexing")
+    ax2.set_title("Partial Mesh (N)\nGround Truth Pullback", pad=20)
     set_axes_equal_local(ax2)
     ax2.view_init(elev=20, azim=45)
     ax2.set_xlabel("X"); ax2.set_ylabel("Y"); ax2.set_zlabel("Z")
     ax2.grid(False)
 
-    plt.tight_layout()
-    idx_fname = f"indexed_color_transfer_{opts.descriptor_type}.png"
-    idx_path = os.path.join(output_folder, idx_fname)
-    plt.savefig(idx_path, dpi=300)
-    print(f"Saved: {idx_path}")
+    # Partial mesh with method pullback
+    ax3 = fig.add_subplot(1, 3, 3, projection='3d')
+    pc3 = Poly3DCollection(poly_N, facecolors=facecols_N_method, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+    ax3.add_collection3d(pc3)
+    # Plot boundary edges in black
+    for edge in boundary_edges_N:
+        pts = v_N_vis[list(edge)]
+        ax3.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
+    ax3.set_title("Partial Mesh (N)\nMethod Pullback", pad=20)
+    set_axes_equal_local(ax3)
+    ax3.view_init(elev=20, azim=45)
+    ax3.set_xlabel("X"); ax3.set_ylabel("Y"); ax3.set_zlabel("Z")
+    ax3.grid(False)
+
+    plt.tight_layout(pad=2.0)
+    color_pullback_fname = f"color_pullback_{opts.descriptor_type}.png"
+    color_pullback_path = os.path.join(output_folder, color_pullback_fname)
+    plt.savefig(color_pullback_path, dpi=300)
+    print(f"Saved: {color_pullback_path}")
     
-    return idx_path
+    return color_pullback_path
 
 
 def run(mesh_data, output_folder, opts: Options):
@@ -321,12 +337,12 @@ def run(mesh_data, output_folder, opts: Options):
     print(f"Mean geodesic error: {mean_geodesic_error:.6f}")
 
     # Create visualizations using helper functions
-    pfm_path = create_pfm_visualization(
+    functional_map_path = create_functional_map_visualization(
         vert_M, vert_N, triv_M, triv_N, M, N, C, matches, gt_matches, dist_method_geo, opts, output_folder
     )
     
-    idx_path = create_indexed_color_transfer_visualization(
-        vert_M, vert_N, triv_M, triv_N, matches, opts, output_folder
+    color_pullback_path = create_color_pullback_visualization(
+        vert_M, vert_N, triv_M, triv_N, matches, gt_matches, opts, output_folder
     )
     
     print()
@@ -334,17 +350,17 @@ def run(mesh_data, output_folder, opts: Options):
 
     # prepare relative paths for returned result
     try:
-        pfm_rel = os.path.relpath(pfm_path, start=target_path)
-        idx_rel = os.path.relpath(idx_path, start=target_path)
+        functional_map_rel = os.path.relpath(functional_map_path, start=target_path)
+        color_pullback_rel = os.path.relpath(color_pullback_path, start=target_path)
     except Exception:
-        pfm_rel = pfm_path
-        idx_rel = idx_path
+        functional_map_rel = functional_map_path
+        color_pullback_rel = color_pullback_path
 
     # return result dict (do not append to global here)
     return {
         'mean': float(mean_geodesic_error),
-        'pfm': pfm_rel,
-        'idx': idx_rel,
+        'functional_map': functional_map_rel,
+        'color_pullback': color_pullback_rel,
         'output_folder': output_folder,
         'descriptor': opts.descriptor_type,
     }
@@ -358,6 +374,7 @@ def write_summary_html(summary_results, target_path):
     rows = sorted(summary_results, key=lambda x: x['name'])
 
     # compute summary statistics for top summary table
+    dino_vals = np.array([r.get('mean_dino') for r in rows], dtype=float) if rows else np.array([], dtype=float)
     shot_vals = np.array([r.get('mean_shot') for r in rows], dtype=float) if rows else np.array([], dtype=float)
     fpfh_vals = np.array([r.get('mean_fpfh') for r in rows], dtype=float) if rows else np.array([], dtype=float)
 
@@ -366,6 +383,7 @@ def write_summary_html(summary_results, target_path):
             return float('nan')
         return float(np.mean(arr))
 
+    overall_dino = safe_mean(dino_vals)
     overall_shot = safe_mean(shot_vals)
     overall_fpfh = safe_mean(fpfh_vals)
 
@@ -376,8 +394,10 @@ def write_summary_html(summary_results, target_path):
     holes_count = len(holes_rows)
     total_count = len(rows)
 
+    cuts_dino = safe_mean(np.array([r.get('mean_dino') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
     cuts_shot = safe_mean(np.array([r.get('mean_shot') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
     cuts_fpfh = safe_mean(np.array([r.get('mean_fpfh') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
+    holes_dino = safe_mean(np.array([r.get('mean_dino') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
     holes_shot = safe_mean(np.array([r.get('mean_shot') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
     holes_fpfh = safe_mean(np.array([r.get('mean_fpfh') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
 
@@ -399,36 +419,43 @@ def write_summary_html(summary_results, target_path):
         '<h1>Meshes Summary</h1>',
         '<h2>Dataset Statistics</h2>',
         '<table>',
-        '<tr><th>Category</th><th>Count</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th></tr>',
-        f'<tr><td>Cuts</td><td>{cuts_count}</td><td>{cuts_shot:.6f}</td><td>{cuts_fpfh:.6f}</td></tr>',
-        f'<tr><td>Holes</td><td>{holes_count}</td><td>{holes_shot:.6f}</td><td>{holes_fpfh:.6f}</td></tr>',
-        f'<tr><td>Entire dataset</td><td>{total_count}</td><td>{overall_shot:.6f}</td><td>{overall_fpfh:.6f}</td></tr>',
+        '<tr><th>Category</th><th>Count</th><th>Mean Geodesic Error (DINO)</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th></tr>',
+        f'<tr><td>Cuts</td><td>{cuts_count}</td><td>{cuts_dino:.6f}</td><td>{cuts_shot:.6f}</td><td>{cuts_fpfh:.6f}</td></tr>',
+        f'<tr><td>Holes</td><td>{holes_count}</td><td>{holes_dino:.6f}</td><td>{holes_shot:.6f}</td><td>{holes_fpfh:.6f}</td></tr>',
+        f'<tr><td>Entire dataset</td><td>{total_count}</td><td>{overall_dino:.6f}</td><td>{overall_shot:.6f}</td><td>{overall_fpfh:.6f}</td></tr>',
         '</table>',
         '<hr/>',
         '<h2>Individual Mesh Results</h2>',
         '<table>',
-        '<tr><th>Name</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
+        '<tr><th>Name</th><th>Mean Geodesic Error (DINO)</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>DINO Visualizations</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
     ]
 
     for r in rows:
+        dino_links = []
         shot_links = []
         fpfh_links = []
-        if r.get('pfm_shot'):
-            shot_links.append(f'<a href="{r["pfm_shot"]}" target="_blank">pfm_visualization_shot</a>')
-        if r.get('idx_shot'):
-            shot_links.append(f'<a href="{r["idx_shot"]}" target="_blank">indexed_color_transfer_shot</a>')
-        if r.get('pfm_fpfh'):
-            fpfh_links.append(f'<a href="{r["pfm_fpfh"]}" target="_blank">pfm_visualization_fpfh</a>')
-        if r.get('idx_fpfh'):
-            fpfh_links.append(f'<a href="{r["idx_fpfh"]}" target="_blank">indexed_color_transfer_fpfh</a>')
+        if r.get('functional_map_dino'):
+            dino_links.append(f'<a href="{r["functional_map_dino"]}" target="_blank">functional_map_visualization_dino</a>')
+        if r.get('color_pullback_dino'):
+            dino_links.append(f'<a href="{r["color_pullback_dino"]}" target="_blank">color_pullback_dino</a>')
+        if r.get('functional_map_shot'):
+            shot_links.append(f'<a href="{r["functional_map_shot"]}" target="_blank">functional_map_visualization_shot</a>')
+        if r.get('color_pullback_shot'):
+            shot_links.append(f'<a href="{r["color_pullback_shot"]}" target="_blank">color_pullback_shot</a>')
+        if r.get('functional_map_fpfh'):
+            fpfh_links.append(f'<a href="{r["functional_map_fpfh"]}" target="_blank">functional_map_visualization_fpfh</a>')
+        if r.get('color_pullback_fpfh'):
+            fpfh_links.append(f'<a href="{r["color_pullback_fpfh"]}" target="_blank">color_pullback_fpfh</a>')
 
+        dino_html = ' | '.join(dino_links) if dino_links else ''
         shot_html = ' | '.join(shot_links) if shot_links else ''
         fpfh_html = ' | '.join(fpfh_links) if fpfh_links else ''
 
+        mean_dino = r.get('mean_dino') if r.get('mean_dino') is not None else float('nan')
         mean_shot = r.get('mean_shot') if r.get('mean_shot') is not None else float('nan')
         mean_fpfh = r.get('mean_fpfh') if r.get('mean_fpfh') is not None else float('nan')
 
-        html_lines.append(f'<tr><td>{r["name"]}</td><td>{mean_shot:.6f}</td><td>{mean_fpfh:.6f}</td><td>{shot_html}</td><td>{fpfh_html}</td></tr>')
+        html_lines.append(f'<tr><td>{r["name"]}</td><td>{mean_dino:.6f}</td><td>{mean_shot:.6f}</td><td>{mean_fpfh:.6f}</td><td>{dino_html}</td><td>{shot_html}</td><td>{fpfh_html}</td></tr>')
 
     html_lines.extend(['</table>', '</body>', '</html>'])
 
@@ -560,11 +587,14 @@ for folder in partial_folders:
         # skip if already processed (from persisted state)
         if partial_mesh_name in processed_samples:
             continue
-        if partial_mesh_name != "holes_cat_shape_10":
+        if partial_mesh_name != "holes_cat_shape_10" and partial_mesh_name != "cuts_cat_shape_10":
             continue
 
-        # run once with SHOT and once with FPFH
+        # run with DINO, SHOT, and FPFH
         opts.descriptor_type = 'dino'
+        res_dino = run(mesh_data, result_path, opts)
+
+        opts.descriptor_type = 'shot'
         res_shot = run(mesh_data, result_path, opts)
 
         opts.descriptor_type = 'dinov3'
@@ -573,12 +603,15 @@ for folder in partial_folders:
         # aggregate into one summary entry
         entry = {
             'name': partial_mesh_name,
+            'mean_dino': res_dino.get('mean'),
             'mean_shot': res_shot.get('mean'),
             'mean_fpfh': res_fpfh.get('mean'),
-            'pfm_shot': res_shot.get('pfm'),
-            'idx_shot': res_shot.get('idx'),
-            'pfm_fpfh': res_fpfh.get('pfm'),
-            'idx_fpfh': res_fpfh.get('idx'),
+            'functional_map_dino': res_dino.get('functional_map'),
+            'color_pullback_dino': res_dino.get('color_pullback'),
+            'functional_map_shot': res_shot.get('functional_map'),
+            'color_pullback_shot': res_shot.get('color_pullback'),
+            'functional_map_fpfh': res_fpfh.get('functional_map'),
+            'color_pullback_fpfh': res_fpfh.get('color_pullback'),
             'output_folder': result_path,
             'folder': folder,
         }

@@ -18,6 +18,12 @@ def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v,
 
     C = torch.nn.Parameter(C_init)
     optimizer = torch.optim.Adam([C], lr=opts.C_lr)
+    
+    # Early stopping variables
+    best_loss = float('inf')
+    best_C = None
+    patience_counter = 0
+    
     for iter in range(opts.C_max_iter):
         optimizer.zero_grad()
         loss = C_loss(A, B, C, d, W, opts)
@@ -26,8 +32,21 @@ def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v,
 
         if iter == 0 or (iter + 1) % 200 == 0:
             print(f"  Iter {iter+1}/{opts.C_max_iter}, Loss: {loss.item():.6f}")
+        
+        # Early stopping check
+        if opts.early_stopping:
+            if loss.item() < best_loss:
+                best_loss = loss.item()
+                best_C = C.detach().clone()
+                patience_counter = 0
+            else:
+                patience_counter += 1
+            
+            if patience_counter >= opts.C_patience_iters:
+                print(f"  Early stopping at iter {iter+1}: Loss has not decreased for {opts.C_patience_iters} iterations")
+                break
 
-    return C.detach().clone()
+    return best_C if best_C is not None else C.detach().clone()
 
 def C_loss(A, B, C, d, W, opts: Options):
     # Data term: ||CA - B||_{2,1}
