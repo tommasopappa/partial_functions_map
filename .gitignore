@@ -4,4 +4,4 @@ results/*
 pfm_py/results/*
 micromamba
 miniforge/*
-partial_functions_map/miniforge.sh
+partial_functions_map/miniforge.shpartial_functions_map/miniforge/
