@@ -14,7 +14,7 @@ class Options:
     mu5 : float = 1e3
     tv_sigma = 0.2 * 4e-4
     C_lr : float = 1e-2
-    C_max_iter : int = 10000
+    C_max_iter : int = 2000
     max_outer_iter : int = 7
     n_eigen : int = 100
     mask_sigma : float = 0.03
@@ -23,5 +23,6 @@ class Options:
     refine_fps : int = 50
     refine_iters = 3
     fps_variance = 0.7 * 4e-4
-    C_patience_iters : int = 500
-    v_patience_iters : int = 100
+    C_patience_iters : int = 100
+    v_patience_iters : int = 200
+    early_stopping : bool = False

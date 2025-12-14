@@ -32,16 +32,17 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
             print(f"  Iter {i+1}/{opts.v_max_iter}, Loss: {loss.item():.6f}")
         
         # Early stopping check
-        if loss.item() < best_loss:
-            best_loss = loss.item()
-            best_v = v.detach().clone()
-            patience_counter = 0
-        else:
-            patience_counter += 1
-        
-        if patience_counter >= opts.v_patience_iters:
-            print(f"  Early stopping at iter {i+1}: Loss has not decreased for {opts.v_patience_iters} iterations")
-            break
+        if opts.early_stopping:
+            if loss.item() < best_loss:
+                best_loss = loss.item()
+                best_v = v.detach().clone()
+                patience_counter = 0
+            else:
+                patience_counter += 1
+            
+            if patience_counter >= opts.v_patience_iters:
+                print(f"  Early stopping at iter {i+1}: Loss has not decreased for {opts.v_patience_iters} iterations")
+                break
 
     v_opt = best_v if best_v is not None else v.detach().clone()
     return eta(v_opt)
