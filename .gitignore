@@ -3,5 +3,5 @@ pfm_py/__pycache__/*
 results/*
 pfm_py/results/*
 micromamba
-miniforge/
+miniforge/*
 partial_functions_map/miniforge.sh
