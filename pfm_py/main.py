@@ -564,10 +564,10 @@ for folder in partial_folders:
             continue
 
         # run once with SHOT and once with FPFH
-        opts.descriptor_type = 'dinov3'
+        opts.descriptor_type = 'dino'
         res_shot = run(mesh_data, result_path, opts)
 
-        opts.descriptor_type = 'fpfh'
+        opts.descriptor_type = 'dinov3'
         res_fpfh = run(mesh_data, result_path, opts)
 
         # aggregate into one summary entry
