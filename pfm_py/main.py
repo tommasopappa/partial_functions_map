@@ -488,6 +488,12 @@ parser.add_argument(
     help='Use DINO descriptors (requires pytorch3d and internet to download model)'
 )
 parser.add_argument(
+    '--dinov3', '--dino3',
+    dest='dinov3',
+    action='store_true',
+    help='Use DINOv3 descriptors (requires pytorch3d, transformers and internet to download model)'
+)
+parser.add_argument(
     '--data-path',
     type=str,
     default='/usr/prakt/w0010/SAVHA/shape_data',
@@ -510,6 +516,8 @@ elif args.fpfh:
     descriptor_type = "fpfh"
 elif args.dino:
     descriptor_type = "dino"
+elif getattr(args, 'dinov3', False):
+    descriptor_type = "dinov3"
 
 # Data path
 data_path = args.data_path
@@ -559,7 +567,7 @@ for folder in partial_folders:
         opts.descriptor_type = 'dino'
         res_shot = run(mesh_data, result_path, opts)
 
-        opts.descriptor_type = 'fpfh'
+        opts.descriptor_type = 'dinov3'
         res_fpfh = run(mesh_data, result_path, opts)
 
         # aggregate into one summary entry
