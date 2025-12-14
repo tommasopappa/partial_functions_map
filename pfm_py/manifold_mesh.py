@@ -6,7 +6,7 @@ import open3d as o3d
 from scipy.sparse.csgraph import dijkstra
 
 from pfm_py.options import Options
-from pfm_py import dino as dino_module
+# from pfm_py import dino as dino_module
 
 ALMOST_ZERO = 1e-10
 
