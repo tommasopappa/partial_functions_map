@@ -552,11 +552,11 @@ for folder in partial_folders:
         # skip if already processed (from persisted state)
         if partial_mesh_name in processed_samples:
             continue
-        if partial_mesh_name != "holes_cat_shape_10":
+        if partial_mesh_name != "holes_cat_shape_10" and partial_mesh_name != "cuts_cat_shape_10":
             continue
 
         # run once with SHOT and once with FPFH
-        opts.descriptor_type = 'dino'
+        opts.descriptor_type = 'shot'
         res_shot = run(mesh_data, result_path, opts)
 
         opts.descriptor_type = 'fpfh'
