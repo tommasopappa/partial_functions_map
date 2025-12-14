@@ -34,16 +34,17 @@ def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v,
             print(f"  Iter {iter+1}/{opts.C_max_iter}, Loss: {loss.item():.6f}")
         
         # Early stopping check
-        if loss.item() < best_loss:
-            best_loss = loss.item()
-            best_C = C.detach().clone()
-            patience_counter = 0
-        else:
-            patience_counter += 1
-        
-        if patience_counter >= opts.C_patience_iters:
-            print(f"  Early stopping at iter {iter+1}: Loss has not decreased for {opts.C_patience_iters} iterations")
-            break
+        if opts.early_stopping:
+            if loss.item() < best_loss:
+                best_loss = loss.item()
+                best_C = C.detach().clone()
+                patience_counter = 0
+            else:
+                patience_counter += 1
+            
+            if patience_counter >= opts.C_patience_iters:
+                print(f"  Early stopping at iter {iter+1}: Loss has not decreased for {opts.C_patience_iters} iterations")
+                break
 
     return best_C if best_C is not None else C.detach().clone()
 
