@@ -6,7 +6,7 @@ class Options:
     descriptor_type: str = "fpfh"  # "fpfh" or "shot"
     mumford_shah_area_weighted: bool = False
     v_lr : float = 1e-2
-    v_max_iter : int = 2000 #1000
+    v_max_iter : int = 2000
     mu1 : float = 1.0
     mu2 : float = 1e2
     mu3 : float = 1.0
@@ -23,3 +23,6 @@ class Options:
     refine_fps : int = 50
     refine_iters = 3
     fps_variance = 0.7 * 4e-4
+    C_patience_iters : int = 100
+    v_patience_iters : int = 200
+    early_stopping : bool = False

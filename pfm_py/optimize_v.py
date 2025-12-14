@@ -16,6 +16,12 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
 
     v = torch.nn.Parameter(v0)
     optimizer = torch.optim.Adam([v], lr=opts.v_lr)
+    
+    # Early stopping variables
+    best_loss = float('inf')
+    best_v = None
+    patience_counter = 0
+    
     for i in range(opts.v_max_iter):
         optimizer.zero_grad()
         loss = v_loss(M, N, A, B, func_M, v, perturb, opts)
@@ -24,8 +30,21 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
 
         if i == 0 or (i + 1) % 100 == 0:
             print(f"  Iter {i+1}/{opts.v_max_iter}, Loss: {loss.item():.6f}")
+        
+        # Early stopping check
+        if opts.early_stopping:
+            if loss.item() < best_loss:
+                best_loss = loss.item()
+                best_v = v.detach().clone()
+                patience_counter = 0
+            else:
+                patience_counter += 1
+            
+            if patience_counter >= opts.v_patience_iters:
+                print(f"  Early stopping at iter {i+1}: Loss has not decreased for {opts.v_patience_iters} iterations")
+                break
 
-    v_opt = v.detach().clone()
+    v_opt = best_v if best_v is not None else v.detach().clone()
     return eta(v_opt)
 
 def v_loss(M : ManifoldMesh, N : ManifoldMesh, CA, PtS, func_M, v, perturb, opts : Options):
@@ -51,7 +70,7 @@ def eta(t):
 def mumford_shah_cost(M : ManifoldMesh, v, perturb, opts: Options, tv_mean, tv_sigma):
     var = 2 * tv_sigma**2
     # Called "h" in the original code
-    # The functional xi(v) := kronecker_delta(eta(v) - 0.5) is smoothly approximated
+    # The functional xi(v) := kronecker_delta(eta(v) - tv_mean) is smoothly approximated
     xi = torch.exp(-(v - tv_mean)**2 / var)
     # Optional weighting of vertices (currently perturb is set to ones in optimize_v())
     xi = xi * perturb
