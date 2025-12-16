@@ -375,6 +375,7 @@ def write_summary_html(summary_results, target_path):
 
     # compute summary statistics for top summary table
     dino_vals = np.array([r.get('mean_dino') for r in rows], dtype=float) if rows else np.array([], dtype=float)
+    dinov3_vals = np.array([r.get('mean_dinov3') for r in rows], dtype=float) if rows else np.array([], dtype=float)
     shot_vals = np.array([r.get('mean_shot') for r in rows], dtype=float) if rows else np.array([], dtype=float)
     fpfh_vals = np.array([r.get('mean_fpfh') for r in rows], dtype=float) if rows else np.array([], dtype=float)
 
@@ -384,6 +385,7 @@ def write_summary_html(summary_results, target_path):
         return float(np.mean(arr))
 
     overall_dino = safe_mean(dino_vals)
+    overall_dinov3 = safe_mean(dinov3_vals)
     overall_shot = safe_mean(shot_vals)
     overall_fpfh = safe_mean(fpfh_vals)
 
@@ -395,9 +397,11 @@ def write_summary_html(summary_results, target_path):
     total_count = len(rows)
 
     cuts_dino = safe_mean(np.array([r.get('mean_dino') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
+    cuts_dinov3 = safe_mean(np.array([r.get('mean_dinov3') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
     cuts_shot = safe_mean(np.array([r.get('mean_shot') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
     cuts_fpfh = safe_mean(np.array([r.get('mean_fpfh') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
     holes_dino = safe_mean(np.array([r.get('mean_dino') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
+    holes_dinov3 = safe_mean(np.array([r.get('mean_dinov3') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
     holes_shot = safe_mean(np.array([r.get('mean_shot') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
     holes_fpfh = safe_mean(np.array([r.get('mean_fpfh') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
 
@@ -419,25 +423,30 @@ def write_summary_html(summary_results, target_path):
         '<h1>Meshes Summary</h1>',
         '<h2>Dataset Statistics</h2>',
         '<table>',
-        '<tr><th>Category</th><th>Count</th><th>Mean Geodesic Error (DINO)</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th></tr>',
-        f'<tr><td>Cuts</td><td>{cuts_count}</td><td>{cuts_dino:.6f}</td><td>{cuts_shot:.6f}</td><td>{cuts_fpfh:.6f}</td></tr>',
-        f'<tr><td>Holes</td><td>{holes_count}</td><td>{holes_dino:.6f}</td><td>{holes_shot:.6f}</td><td>{holes_fpfh:.6f}</td></tr>',
-        f'<tr><td>Entire dataset</td><td>{total_count}</td><td>{overall_dino:.6f}</td><td>{overall_shot:.6f}</td><td>{overall_fpfh:.6f}</td></tr>',
+        '<tr><th>Category</th><th>Count</th><th>Mean Geodesic Error (DINO)</th><th>Mean Geodesic Error (DINOv3)</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th></tr>',
+        f'<tr><td>Cuts</td><td>{cuts_count}</td><td>{cuts_dino:.6f}</td><td>{cuts_dinov3:.6f}</td><td>{cuts_shot:.6f}</td><td>{cuts_fpfh:.6f}</td></tr>',
+        f'<tr><td>Holes</td><td>{holes_count}</td><td>{holes_dino:.6f}</td><td>{holes_dinov3:.6f}</td><td>{holes_shot:.6f}</td><td>{holes_fpfh:.6f}</td></tr>',
+        f'<tr><td>Entire dataset</td><td>{total_count}</td><td>{overall_dino:.6f}</td><td>{overall_dinov3:.6f}</td><td>{overall_shot:.6f}</td><td>{overall_fpfh:.6f}</td></tr>',
         '</table>',
         '<hr/>',
         '<h2>Individual Mesh Results</h2>',
         '<table>',
-        '<tr><th>Name</th><th>Mean Geodesic Error (DINO)</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>DINO Visualizations</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
+        '<tr><th>Name</th><th>Best</th><th>Mean Geodesic Error (DINO)</th><th>Mean Geodesic Error (DINOv3)</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>DINO Visualizations</th><th>DINOv3 Visualizations</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
     ]
 
     for r in rows:
         dino_links = []
+        dinov3_links = []
         shot_links = []
         fpfh_links = []
         if r.get('functional_map_dino'):
             dino_links.append(f'<a href="{r["functional_map_dino"]}" target="_blank">functional_map_visualization_dino</a>')
         if r.get('color_pullback_dino'):
             dino_links.append(f'<a href="{r["color_pullback_dino"]}" target="_blank">color_pullback_dino</a>')
+        if r.get('functional_map_dinov3'):
+            dinov3_links.append(f'<a href="{r["functional_map_dinov3"]}" target="_blank">functional_map_visualization_dinov3</a>')
+        if r.get('color_pullback_dinov3'):
+            dinov3_links.append(f'<a href="{r["color_pullback_dinov3"]}" target="_blank">color_pullback_dinov3</a>')
         if r.get('functional_map_shot'):
             shot_links.append(f'<a href="{r["functional_map_shot"]}" target="_blank">functional_map_visualization_shot</a>')
         if r.get('color_pullback_shot'):
@@ -448,14 +457,26 @@ def write_summary_html(summary_results, target_path):
             fpfh_links.append(f'<a href="{r["color_pullback_fpfh"]}" target="_blank">color_pullback_fpfh</a>')
 
         dino_html = ' | '.join(dino_links) if dino_links else ''
+        dinov3_html = ' | '.join(dinov3_links) if dinov3_links else ''
         shot_html = ' | '.join(shot_links) if shot_links else ''
         fpfh_html = ' | '.join(fpfh_links) if fpfh_links else ''
 
         mean_dino = r.get('mean_dino') if r.get('mean_dino') is not None else float('nan')
+        mean_dinov3 = r.get('mean_dinov3') if r.get('mean_dinov3') is not None else float('nan')
         mean_shot = r.get('mean_shot') if r.get('mean_shot') is not None else float('nan')
         mean_fpfh = r.get('mean_fpfh') if r.get('mean_fpfh') is not None else float('nan')
 
-        html_lines.append(f'<tr><td>{r["name"]}</td><td>{mean_dino:.6f}</td><td>{mean_shot:.6f}</td><td>{mean_fpfh:.6f}</td><td>{dino_html}</td><td>{shot_html}</td><td>{fpfh_html}</td></tr>')
+        # Determine best descriptor (lowest error)
+        descriptor_errors = {
+            'DINO': mean_dino,
+            'DINOv3': mean_dinov3,
+            'SHOT': mean_shot,
+            'FPFH': mean_fpfh
+        }
+        valid_errors = {k: v for k, v in descriptor_errors.items() if not np.isnan(v)}
+        best_descriptor = min(valid_errors, key=valid_errors.get) if valid_errors else 'N/A'
+
+        html_lines.append(f'<tr><td>{r["name"]}</td><td>{best_descriptor}</td><td>{mean_dino:.6f}</td><td>{mean_dinov3:.6f}</td><td>{mean_shot:.6f}</td><td>{mean_fpfh:.6f}</td><td>{dino_html}</td><td>{dinov3_html}</td><td>{shot_html}</td><td>{fpfh_html}</td></tr>')
 
     html_lines.extend(['</table>', '</body>', '</html>'])
 
@@ -566,6 +587,7 @@ summary_results = list(processed_samples.values())
 partial_folders = ["cuts", "holes"]
 for folder in partial_folders:
     partial_files = os.listdir(data_path + "/SHREC16/" + folder + "/off")
+    i = 0
     for partial_file in partial_files:
         # remove extension safely
         partial_mesh_name = os.path.splitext(partial_file)[0]
@@ -587,27 +609,33 @@ for folder in partial_folders:
         # skip if already processed (from persisted state)
         if partial_mesh_name in processed_samples:
             continue
-        if partial_mesh_name != "holes_cat_shape_10" and partial_mesh_name != "cuts_cat_shape_10":
-            continue
+        # if partial_mesh_name != "holes_cat_shape_10" and partial_mesh_name != "cuts_cat_shape_10":
+        #     continue
 
-        # run with DINO, SHOT, and FPFH
+        # run with DINO, DINOv3, SHOT, and FPFH
         opts.descriptor_type = 'dino'
         res_dino = run(mesh_data, result_path, opts)
+
+        opts.descriptor_type = 'dinov3'
+        res_dinov3 = run(mesh_data, result_path, opts)
 
         opts.descriptor_type = 'shot'
         res_shot = run(mesh_data, result_path, opts)
 
-        opts.descriptor_type = 'dinov3'
+        opts.descriptor_type = 'fpfh'
         res_fpfh = run(mesh_data, result_path, opts)
 
         # aggregate into one summary entry
         entry = {
             'name': partial_mesh_name,
             'mean_dino': res_dino.get('mean'),
+            'mean_dinov3': res_dinov3.get('mean'),
             'mean_shot': res_shot.get('mean'),
             'mean_fpfh': res_fpfh.get('mean'),
             'functional_map_dino': res_dino.get('functional_map'),
             'color_pullback_dino': res_dino.get('color_pullback'),
+            'functional_map_dinov3': res_dinov3.get('functional_map'),
+            'color_pullback_dinov3': res_dinov3.get('color_pullback'),
             'functional_map_shot': res_shot.get('functional_map'),
             'color_pullback_shot': res_shot.get('color_pullback'),
             'functional_map_fpfh': res_fpfh.get('functional_map'),
@@ -621,3 +649,7 @@ for folder in partial_folders:
         # write incremental HTML summary after each processed mesh
         save_state(state, state_path)
         write_summary_html(summary_results, target_path)
+        
+        i += 1
+        if i == 50:
+            break
