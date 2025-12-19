@@ -195,7 +195,7 @@ def batch_render(device, mesh, mesh_vertices, num_views, H, W):
 # -------------------- DINOv3 per-vertex aggregation --------------------
 
 def get_features_per_vertex(device, processor, model, mesh, mesh_vertices,
-                            num_views=32, H=256, W=256):
+                            num_views=100, H=512, W=512):
 
     device = torch.device(device)
     mesh = mesh.to(device)

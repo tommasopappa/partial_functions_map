@@ -91,6 +91,34 @@ def get_representative_sample(data_path):
     return pairs
 
 
+def get_all_pairs(data_path):
+    """Get all mesh pairs from cuts and holes folders."""
+    import glob
+    
+    pairs = []
+    for folder in ["cuts", "holes"]:
+        pattern = f"{data_path}/SHREC16/{folder}/off/*.off"
+        for partial_path in sorted(glob.glob(pattern)):
+            name = os.path.basename(partial_path).replace('.off', '')
+            parts = name.split('_')
+            animal = parts[1]  # e.g., cuts_cat_shape_1 -> cat
+            
+            pair = MeshPair(
+                name=name,
+                full_mesh=f"{data_path}/SHREC16/null/off/{animal}.off",
+                partial_mesh=partial_path,
+                ground_truth=f"{data_path}/SHREC16/{folder}/corres/{name}.vts",
+                folder=folder,
+            )
+            if os.path.exists(pair.full_mesh) and os.path.exists(pair.ground_truth):
+                pairs.append(pair)
+            else:
+                print(f"Skipping {name} - files not found")
+    
+    print(f"Found {len(pairs)} mesh pairs ({len([p for p in pairs if p.folder=='cuts'])} cuts, {len([p for p in pairs if p.folder=='holes'])} holes)")
+    return pairs
+
+
 def compute_geodesic_matrix(vertices, faces):
     n = len(vertices)
     edges = set()
@@ -458,6 +486,8 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=str, default='benchmark_results')
     parser.add_argument('--diff3f-path', type=str, default=None,
                         help='Path to Diffusion-3D-Features repo')
+    parser.add_argument('--all', action='store_true',
+                        help='Run on all mesh pairs instead of representative sample')
     args = parser.parse_args()
     
     # Add Diff3F to path if specified
@@ -475,7 +505,7 @@ if __name__ == '__main__':
     print(f"Diff3F available: {DIFF3F_AVAILABLE}")
     
     opts = Options(device)
-    pairs = get_representative_sample(args.data_path)
+    pairs = get_all_pairs(args.data_path) if args.all else get_representative_sample(args.data_path)
     
     if not pairs:
         print("No valid mesh pairs found!")
