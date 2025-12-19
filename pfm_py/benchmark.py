@@ -1,12 +1,16 @@
 """
 Benchmark script for partial functional maps on a representative sample.
 Runs DINO, SHOT, FPFH and stores results including DINO missing features.
-Computes both argmax (feature NN) and surface map (Diff3F functional map) errors.
+Computes:
+  - Argmax (feature NN)
+  - FM (standard functional maps from Diff3F)
+  - PFM (partial functional maps pipeline)
 """
 import os
 import sys
 import json
 import argparse
+import random
 import numpy as np
 import torch
 import open3d as o3d
@@ -16,19 +20,40 @@ import matplotlib as mpl
 from dataclasses import dataclass
 from scipy.sparse.csgraph import dijkstra
 
+# Set random seeds for reproducibility
+SEED = 42
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed(SEED)
+    torch.cuda.manual_seed_all(SEED)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
 from pfm_py.manifold_mesh import ManifoldMesh
 from pfm_py.match_part_to_whole import match_and_refine
 from pfm_py.options import Options
 
 # Try to import Diff3F's compute_surface_map
+DIFF3F_AVAILABLE = False
+
+# Add Diffusion-3D-Features to path
+_diff3f_paths = [
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'Diffusion-3D-Features'),
+    os.path.join(os.getcwd(), 'Diffusion-3D-Features'),
+]
+for _p in _diff3f_paths:
+    if os.path.isdir(_p) and _p not in sys.path:
+        sys.path.insert(0, _p)
+        print(f"Added {_p} to path")
+
 try:
     from functional_map import compute_surface_map
     DIFF3F_AVAILABLE = True
     print("Diff3F functional_map available")
-except ImportError:
-    DIFF3F_AVAILABLE = False
-    print("Diff3F not found, using match_and_refine as surface map")
-
+except ImportError as e:
+    print(f"WARNING: Diff3F not found ({e}), FM results will be skipped")
 
 @dataclass
 class MeshPair:
@@ -140,9 +165,9 @@ def icp_baseline(v_M, v_N, gt_correspondences, geo_dist_M, area_M):
     return icp_corr, dist_icp
 
 
-def create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, surface_corr, icp_corr,
-                              dist_argmax, dist_surface, dist_icp, method_name, output_path):
-    """4-row comparison: GT, Argmax, Surface Map, ICP."""
+def create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, fm_corr, pfm_corr, icp_corr,
+                              dist_argmax, dist_fm, dist_pfm, dist_icp, method_name, output_path):
+    """5-row comparison: GT, Argmax, FM, PFM, ICP."""
     v_N_vis = v_N - v_N.mean(0)
     v_M_vis = v_M - v_M.mean(0)
     
@@ -159,7 +184,8 @@ def create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, surface_c
     
     colors_gt = np.zeros(len(v_M)); colors_gt[gt_corr] = source
     colors_argmax = np.zeros(len(v_M)); colors_argmax[argmax_corr] = source
-    colors_surface = np.zeros(len(v_M)); colors_surface[surface_corr] = source
+    colors_fm = np.zeros(len(v_M)); colors_fm[fm_corr] = source if fm_corr is not None else 0
+    colors_pfm = np.zeros(len(v_M)); colors_pfm[pfm_corr] = source
     colors_icp = np.zeros(len(v_M)); colors_icp[icp_corr] = source
     
     cmap_v = plt.get_cmap("viridis")
@@ -174,7 +200,7 @@ def create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, surface_c
     poly_N = [v_N_vis[f] for f in f_N]
     poly_M = [v_M_vis[f] for f in f_M]
     
-    fig = plt.figure(figsize=(18, 20))
+    fig = plt.figure(figsize=(18, 25))
     ls = mpl.colors.LightSource(azdeg=315, altdeg=45)
     
     def setup_ax(ax):
@@ -192,18 +218,21 @@ def create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, surface_c
             ax.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', lw=1.5)
     
     dist_gt = np.zeros(len(v_N))
-    vmax = max(np.percentile(dist_argmax, 95), np.percentile(dist_surface, 95), 
+    vmax = max(np.percentile(dist_argmax, 95), 
+               np.percentile(dist_fm, 95) if dist_fm is not None else 0,
+               np.percentile(dist_pfm, 95), 
                np.percentile(dist_icp, 95), 0.1)
     
     rows = [
         ("GT", colors_gt, dist_gt, 0.1),
-        (f"{method_name} Argmax", colors_argmax, dist_argmax, vmax),
-        (f"{method_name} Surface Map", colors_surface, dist_surface, vmax),
+        (f"{method_name}", colors_argmax, dist_argmax, vmax),
+        (f"{method_name}+FM", colors_fm, dist_fm if dist_fm is not None else dist_gt, vmax),
+        (f"{method_name}+PFM", colors_pfm, dist_pfm, vmax),
         ("ICP", colors_icp, dist_icp, vmax),
     ]
     
     for row_idx, (label, colors_M, dist, err_vmax) in enumerate(rows):
-        ax1 = fig.add_subplot(4, 3, row_idx*3 + 1, projection='3d')
+        ax1 = fig.add_subplot(5, 3, row_idx*3 + 1, projection='3d')
         pc1 = Poly3DCollection(poly_N, facecolors=face_colors(source, f_N), 
                                 linewidths=0, alpha=1.0, shade=True, lightsource=ls)
         ax1.add_collection3d(pc1)
@@ -211,7 +240,7 @@ def create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, surface_c
         ax1.set_title("N: Source", fontweight='bold')
         setup_ax(ax1)
         
-        ax2 = fig.add_subplot(4, 3, row_idx*3 + 2, projection='3d')
+        ax2 = fig.add_subplot(5, 3, row_idx*3 + 2, projection='3d')
         pc2 = Poly3DCollection(poly_M, facecolors=face_colors(colors_M, f_M),
                                 linewidths=0, alpha=1.0, shade=True, lightsource=ls)
         ax2.add_collection3d(pc2)
@@ -219,7 +248,7 @@ def create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, surface_c
         ax2.set_title(f"{label} Transfer", fontweight='bold')
         setup_ax(ax2)
         
-        ax3 = fig.add_subplot(4, 3, row_idx*3 + 3, projection='3d')
+        ax3 = fig.add_subplot(5, 3, row_idx*3 + 3, projection='3d')
         pc3 = Poly3DCollection(poly_N, facecolors=error_colors(dist, f_N, err_vmax),
                                 linewidths=0, alpha=1.0, shade=True, lightsource=ls)
         ax3.add_collection3d(pc3)
@@ -270,48 +299,57 @@ def run_single(pair: MeshPair, opts: Options, output_dir: str):
         print(f"\n--- Running {desc_type.upper()} ---")
         opts.descriptor_type = desc_type
         
+        # Build meshes and compute descriptors
         M = ManifoldMesh(v_M, f_M, opts, compute_geo=True)
         N = ManifoldMesh(v_N, f_N, opts, compute_geo=False)
         
-        # get descriptors
         desc_M = M.compute_descriptors(opts)
         desc_N = N.compute_descriptors(opts)
         
-        # capture DINO missing features (set during compute_descriptors)
+        # Capture DINO missing features
         if desc_type == 'dino':
             results['dino_missing_M'] = getattr(M, 'dino_n_missing', 0)
             results['dino_missing_N'] = getattr(N, 'dino_n_missing', 0)
         
-        # argmax correspondences (simple feature NN)
-        print("Computing argmax correspondences...")
+        # 1. Argmax correspondences (simple feature NN)
+        print(f"Computing {desc_type.upper()} argmax correspondences...")
         argmax_corr = compute_argmax_correspondences(desc_M, desc_N)
         dist_argmax = np.array([geo_M[gt_corr[i], argmax_corr[i]] / area_M for i in range(len(v_N))])
         
-        # surface map correspondences
-        print("Computing surface map correspondences...")
+        # 2. FM correspondences (standard functional maps from Diff3F)
+        fm_corr = None
+        dist_fm = None
         if DIFF3F_AVAILABLE:
-            # use Diff3F functional_map
+            print(f"Computing {desc_type.upper()}+FM correspondences...")
             G_M = desc_M.cpu().numpy()
             F_N = desc_N.cpu().numpy()
-            surface_corr = compute_surface_map(pair.full_mesh, pair.partial_mesh, G_M, F_N).cpu().numpy()
+            fm_corr = compute_surface_map(pair.full_mesh, pair.partial_mesh, G_M, F_N).cpu().numpy()
+            dist_fm = np.array([geo_M[gt_corr[i], fm_corr[i]] / area_M for i in range(len(v_N))])
         else:
-            # fallback to match_and_refine
-            M2 = ManifoldMesh(v_M, f_M, opts, compute_geo=True)
-            N2 = ManifoldMesh(v_N, f_N, opts, compute_geo=False)
-            C, v, surface_corr = match_and_refine(M2, N2, opts)
-            surface_corr = surface_corr.numpy(force=True)
+            print(f"Skipping {desc_type.upper()}+FM (Diff3F not available)")
         
-        dist_surface = np.array([geo_M[gt_corr[i], surface_corr[i]] / area_M for i in range(len(v_N))])
+        # 3. PFM correspondences (partial functional maps pipeline)
+        print(f"Computing {desc_type.upper()}+PFM correspondences...")
+        M2 = ManifoldMesh(v_M, f_M, opts, compute_geo=True)
+        N2 = ManifoldMesh(v_N, f_N, opts, compute_geo=False)
+        C, v, pfm_corr = match_and_refine(M2, N2, opts)
+        pfm_corr = pfm_corr.numpy(force=True)
+        dist_pfm = np.array([geo_M[gt_corr[i], pfm_corr[i]] / area_M for i in range(len(v_N))])
         
+        # Store results
         results[f'{desc_type}_argmax_error'] = float(dist_argmax.mean())
-        results[f'{desc_type}_surface_error'] = float(dist_surface.mean())
+        results[f'{desc_type}_fm_error'] = float(dist_fm.mean()) if dist_fm is not None else None
+        results[f'{desc_type}_pfm_error'] = float(dist_pfm.mean())
         
-        print(f"  Argmax:      {dist_argmax.mean():.4f}")
-        print(f"  Surface Map: {dist_surface.mean():.4f}")
+        print(f"  {desc_type.upper()}:      {dist_argmax.mean():.4f}")
+        if dist_fm is not None:
+            print(f"  {desc_type.upper()}+FM:   {dist_fm.mean():.4f}")
+        print(f"  {desc_type.upper()}+PFM:  {dist_pfm.mean():.4f}")
         
+        # Create comparison figure
         fig_path = os.path.join(output_dir, f"{pair.name}_{desc_type}_comparison.png")
-        create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, surface_corr, icp_corr,
-                                  dist_argmax, dist_surface, dist_icp, desc_type.upper(), fig_path)
+        create_comparison_figure(v_M, v_N, f_M, f_N, gt_corr, argmax_corr, fm_corr, pfm_corr, icp_corr,
+                                  dist_argmax, dist_fm, dist_pfm, dist_icp, desc_type.upper(), fig_path)
         results[f'{desc_type}_figure'] = fig_path
     
     return results
@@ -327,42 +365,84 @@ def write_summary(all_results, output_dir):
     print(f"Saved: {json_path}")
     
     md_path = os.path.join(output_dir, 'benchmark_results.md')
+    
+    # Check if FM results exist
+    has_fm = any(r.get('dino_fm_error') is not None for r in all_results)
+    
+    if has_fm:
+        header = "| Mesh | Folder | DINO | DINO+FM | DINO+PFM | SHOT | SHOT+FM | SHOT+PFM | FPFH | FPFH+FM | FPFH+PFM | ICP | DINO Missing (M/N) |"
+        separator = "|------|--------|------|---------|----------|------|---------|----------|------|---------|----------|-----|-------------------|"
+    else:
+        header = "| Mesh | Folder | DINO | DINO+PFM | SHOT | SHOT+PFM | FPFH | FPFH+PFM | ICP | DINO Missing (M/N) |"
+        separator = "|------|--------|------|----------|------|----------|------|----------|-----|-------------------|"
+    
     lines = [
         "# Benchmark Results",
         "",
         "## Summary Table",
         "",
-        "| Mesh | Folder | DINO Argmax | DINO Surface | SHOT Argmax | SHOT Surface | FPFH Argmax | FPFH Surface | ICP | DINO Missing (M/N) |",
-        "|------|--------|-------------|--------------|-------------|--------------|-------------|--------------|-----|-------------------|",
+        header,
+        separator,
     ]
     
     for r in all_results:
         dino_miss = f"{r.get('dino_missing_M', '-')}/{r.get('dino_missing_N', '-')}"
-        lines.append(
-            f"| {r['name']} | {r['folder']} | "
-            f"{r.get('dino_argmax_error', 0):.4f} | {r.get('dino_surface_error', 0):.4f} | "
-            f"{r.get('shot_argmax_error', 0):.4f} | {r.get('shot_surface_error', 0):.4f} | "
-            f"{r.get('fpfh_argmax_error', 0):.4f} | {r.get('fpfh_surface_error', 0):.4f} | "
-            f"{r.get('icp_mean_error', 0):.4f} | {dino_miss} |"
-        )
+        
+        if has_fm:
+            dino_fm = f"{r.get('dino_fm_error', 0):.4f}" if r.get('dino_fm_error') is not None else "-"
+            shot_fm = f"{r.get('shot_fm_error', 0):.4f}" if r.get('shot_fm_error') is not None else "-"
+            fpfh_fm = f"{r.get('fpfh_fm_error', 0):.4f}" if r.get('fpfh_fm_error') is not None else "-"
+            lines.append(
+                f"| {r['name']} | {r['folder']} | "
+                f"{r.get('dino_argmax_error', 0):.4f} | {dino_fm} | {r.get('dino_pfm_error', 0):.4f} | "
+                f"{r.get('shot_argmax_error', 0):.4f} | {shot_fm} | {r.get('shot_pfm_error', 0):.4f} | "
+                f"{r.get('fpfh_argmax_error', 0):.4f} | {fpfh_fm} | {r.get('fpfh_pfm_error', 0):.4f} | "
+                f"{r.get('icp_mean_error', 0):.4f} | {dino_miss} |"
+            )
+        else:
+            lines.append(
+                f"| {r['name']} | {r['folder']} | "
+                f"{r.get('dino_argmax_error', 0):.4f} | {r.get('dino_pfm_error', 0):.4f} | "
+                f"{r.get('shot_argmax_error', 0):.4f} | {r.get('shot_pfm_error', 0):.4f} | "
+                f"{r.get('fpfh_argmax_error', 0):.4f} | {r.get('fpfh_pfm_error', 0):.4f} | "
+                f"{r.get('icp_mean_error', 0):.4f} | {dino_miss} |"
+            )
     
+    # Averages
     n = len(all_results)
     if n > 0:
-        def avg(key): return np.mean([r.get(key, 0) for r in all_results])
-        lines.append(
-            f"| **Average** | - | "
-            f"**{avg('dino_argmax_error'):.4f}** | **{avg('dino_surface_error'):.4f}** | "
-            f"**{avg('shot_argmax_error'):.4f}** | **{avg('shot_surface_error'):.4f}** | "
-            f"**{avg('fpfh_argmax_error'):.4f}** | **{avg('fpfh_surface_error'):.4f}** | "
-            f"**{avg('icp_mean_error'):.4f}** | - |"
-        )
+        def avg(key): 
+            vals = [r.get(key) for r in all_results if r.get(key) is not None]
+            return np.mean(vals) if vals else 0
+        
+        if has_fm:
+            lines.append(
+                f"| **Average** | - | "
+                f"**{avg('dino_argmax_error'):.4f}** | **{avg('dino_fm_error'):.4f}** | **{avg('dino_pfm_error'):.4f}** | "
+                f"**{avg('shot_argmax_error'):.4f}** | **{avg('shot_fm_error'):.4f}** | **{avg('shot_pfm_error'):.4f}** | "
+                f"**{avg('fpfh_argmax_error'):.4f}** | **{avg('fpfh_fm_error'):.4f}** | **{avg('fpfh_pfm_error'):.4f}** | "
+                f"**{avg('icp_mean_error'):.4f}** | - |"
+            )
+        else:
+            lines.append(
+                f"| **Average** | - | "
+                f"**{avg('dino_argmax_error'):.4f}** | **{avg('dino_pfm_error'):.4f}** | "
+                f"**{avg('shot_argmax_error'):.4f}** | **{avg('shot_pfm_error'):.4f}** | "
+                f"**{avg('fpfh_argmax_error'):.4f}** | **{avg('fpfh_pfm_error'):.4f}** | "
+                f"**{avg('icp_mean_error'):.4f}** | - |"
+            )
     
     lines.extend([
         "",
+        "## Methods",
+        "",
+        "- **DINO/SHOT/FPFH**: Simple nearest neighbor matching in feature space (argmax cosine similarity)",
+        "- **+FM**: Standard Functional Maps (from Diffusion-3D-Features)",
+        "- **+PFM**: Partial Functional Maps pipeline (C optimization + spectral ICP refinement)",
+        "- **ICP**: Iterative Closest Point baseline",
+        "",
         "## Notes",
         "",
-        "- **Argmax**: Simple nearest neighbor matching in feature space (cosine similarity)",
-        f"- **Surface Map**: {'Diff3F functional_map' if DIFF3F_AVAILABLE else 'PFM match_and_refine'} pipeline",
         "- All errors are mean geodesic error normalized by sqrt(area)",
         "- DINO Missing shows vertices without feature coverage on M/N",
     ])
@@ -376,8 +456,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Benchmark PFM on representative sample')
     parser.add_argument('--data-path', type=str, default='/usr/prakt/w0010/SAVHA/shape_data')
     parser.add_argument('--output', type=str, default='benchmark_results')
-    parser.add_argument('--diff3f-path', type=str, default=None, 
-                        help='Path to Diffusion-3D-Features repo (adds to PYTHONPATH)')
+    parser.add_argument('--diff3f-path', type=str, default=None,
+                        help='Path to Diffusion-3D-Features repo')
     args = parser.parse_args()
     
     # Add Diff3F to path if specified
@@ -392,6 +472,7 @@ if __name__ == '__main__':
     
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device}")
+    print(f"Diff3F available: {DIFF3F_AVAILABLE}")
     
     opts = Options(device)
     pairs = get_representative_sample(args.data_path)
