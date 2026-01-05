@@ -29,11 +29,6 @@ python3 setup_environment.py --python 3.10      # Python 3.10
 python3 setup_environment.py --recreate         # Recreate venv
 ```
 
-Or use Bash script:
-```bash
-bash setup_environment.sh
-```
-
 ## When to Use This Method
 
 Use this venv-based installation if:
@@ -47,3 +42,33 @@ Otherwise, **use conda** (see [INSTALLATION.md](INSTALLATION.md)) for:
 - Pre-built PyTorch3D binaries
 - Better dependency management for scientific computing
 - Standard approach for ML/3D geometry projects
+
+# Usage Guide
+
+## Running the Project
+
+### Basic Usage
+
+```bash
+# Default (FPFH descriptor)
+python3 -m pfm_py.main --data-path /path/to/data
+
+# With SHOT descriptor
+python3 -m pfm_py.main --shot --data-path /path/to/data
+
+# With FPFH descriptor (explicit)
+python3 -m pfm_py.main --fpfh --data-path /path/to/data
+```
+
+### Options
+
+| Parameter | Description |
+|-----------|-------------|
+| `--data-path PATH` | Path to data directory |
+| `--fpfh` | Use FPFH descriptors (default) |
+| `--shot` | Use SHOT descriptors |
+| `--help` | Show all options |
+
+### Output
+
+Results saved to `results/` directory with visualizations and heatmaps.
