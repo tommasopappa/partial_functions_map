@@ -83,7 +83,7 @@ def batch_render(device, mesh, num_views, H, W):
     return images, camera, depth
 
 
-def compute_dino_features(verts, faces, num_views=32, H=256, W=256, tolerance=0.004):
+def compute_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
     if not PYTORCH3D_AVAILABLE:
         raise RuntimeError('pytorch3d not available')
     
@@ -153,7 +153,7 @@ def compute_dino_features(verts, faces, num_views=32, H=256, W=256, tolerance=0.
 
 
 # convenience aliases for backward compatibility
-def get_shape_dino_features(verts, faces, num_views=32, H=256, W=256, tolerance=0.004):
+def get_shape_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
     feats, _ = compute_dino_features(verts, faces, num_views, H, W, tolerance)
     return feats
 
