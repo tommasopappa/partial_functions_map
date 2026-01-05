@@ -74,20 +74,20 @@ The visualization shows source shape (left), transferred/matched shape (center),
 
 ![Performance Heatmap](heatmap_by_shape.png)
 
-Mean error across all test cases:
+Mean error across all test cases (ICP seems to perform well but usually doesn't have as full coverage over the matched shapes as the methods in question):
 
 | Method | Mean Error |
 |--------|------------|
 | ICP | 0.133 |
-| SHOT+PFM | 0.120 |
-| DINO+PFM | 0.187 |
 | SHOT | 0.200 |
+| SHOT+FM | 0.258 |
+| SHOT+PFM | 0.120 |
 | DINO | 0.238 |
 | DINO+FM | 0.253 |
-| SHOT+FM | 0.258 |
-| FPFH+PFM | 0.268 |
+| DINO+PFM | 0.187 |
 | FPFH | 0.520 |
 | FPFH+FM | 0.525 |
+| FPFH+PFM | 0.268 |
 
 ### Winner Distribution
 
