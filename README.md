@@ -118,14 +118,45 @@ No single method dominates across all cases. Each combination wins on different 
 
 ## Installation
 
+### Recommended: Conda (Fast & Reliable)
+
+Best for most users - installs PyTorch3D and all dependencies in ~10 minutes:
+
 ```bash
-pip install -r requirements.txt
-python setup_environment.py
+# Create environment
+conda create -n pfm python=3.10 -y
+conda activate pfm
+
+# Core dependencies
+conda install -c conda-forge matplotlib=3.7.1 numpy=1.25.0 scikit-learn=1.2.2 scipy=1.10.1 -y
+
+# PyTorch (adjust cuda version as needed)
+pip install torch==2.1.0 torchvision
+
+# 3D/Geometry packages
+conda install -c fvcore -c iopath -c conda-forge fvcore iopath -y
+pip install --no-index --no-cache-dir pytorch3d -f https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/py310_cu121_pyt210/download.html
+
+# Other dependencies
+pip install open3d robust_laplacian==0.2.7 trimesh==4.0.0 potpourri3d==1.0.0
+pip install transformers==4.34.1 huggingface-hub==0.17.3
+pip install einops==0.7.0 meshio==5.3.4 opencv-python==4.8.1.78 plyfile==1.0.1
 ```
 
-## Quick Start
+**See [INSTALLATION.md](INSTALLATION.md) for complete conda installation instructions and verification steps.**
 
-See `SETUP_QUICK_START.md` for basic usage.
+### Alternative: Python venv
+
+If you cannot use conda (e.g., restricted environments), use the automated setup script. **Note**: PyTorch3D compilation may take 30+ minutes:
+
+```bash
+python3 setup_environment.py
+source .venv/bin/activate
+```
+
+**See [SETUP_ALTERNATIVE.md](SETUP_ALTERNATIVE.md) for venv installation options.**
+
+## Quick Start
 
 ### Basic Usage
 
