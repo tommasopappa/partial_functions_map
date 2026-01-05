@@ -1,0 +1,944 @@
+================================================================================
+COMPLETE PFM ERROR COMPARISON: DINO vs SHOT
+================================================================================
+
+SUMMARY:
+  Total cases: 198
+  DINO+PFM better: 67 (33.8%)
+  SHOT+PFM better: 114 (57.6%)
+  Ties: 17 (8.6%)
+
+================================================================================
+ALL CASES WHERE DINO+PFM IS BETTER (sorted by margin)
+================================================================================
+
+cuts_centaur_shape_2
+  DINO PFM: 0.0030
+  SHOT PFM: 0.7768
+  Margin: 0.7738
+
+cuts_horse_shape_13
+  DINO PFM: 0.0820
+  SHOT PFM: 0.6850
+  Margin: 0.6030
+
+cuts_david_shape_7
+  DINO PFM: 0.2031
+  SHOT PFM: 0.7535
+  Margin: 0.5504
+
+cuts_david_shape_6
+  DINO PFM: 0.0230
+  SHOT PFM: 0.5067
+  Margin: 0.4837
+
+cuts_michael_shape_10
+  DINO PFM: 0.1851
+  SHOT PFM: 0.5632
+  Margin: 0.3781
+
+cuts_dog_shape_3
+  DINO PFM: 0.2986
+  SHOT PFM: 0.6481
+  Margin: 0.3495
+
+cuts_michael_shape_15
+  DINO PFM: 0.0251
+  SHOT PFM: 0.3367
+  Margin: 0.3116
+
+cuts_cat_shape_10
+  DINO PFM: 0.0362
+  SHOT PFM: 0.3397
+  Margin: 0.3035
+
+cuts_victoria_shape_9
+  DINO PFM: 0.0948
+  SHOT PFM: 0.3951
+  Margin: 0.3002
+
+cuts_david_shape_1
+  DINO PFM: 0.0042
+  SHOT PFM: 0.2212
+  Margin: 0.2170
+
+cuts_michael_shape_14
+  DINO PFM: 0.2197
+  SHOT PFM: 0.4209
+  Margin: 0.2012
+
+holes_david_shape_9
+  DINO PFM: 0.0847
+  SHOT PFM: 0.2681
+  Margin: 0.1834
+
+cuts_michael_shape_3
+  DINO PFM: 0.1660
+  SHOT PFM: 0.3309
+  Margin: 0.1649
+
+holes_victoria_shape_9
+  DINO PFM: 0.2749
+  SHOT PFM: 0.4311
+  Margin: 0.1562
+
+cuts_dog_shape_1
+  DINO PFM: 0.1794
+  SHOT PFM: 0.3334
+  Margin: 0.1540
+
+cuts_michael_shape_5
+  DINO PFM: 0.0740
+  SHOT PFM: 0.2199
+  Margin: 0.1459
+
+cuts_centaur_shape_5
+  DINO PFM: 0.0280
+  SHOT PFM: 0.1615
+  Margin: 0.1335
+
+cuts_dog_shape_5
+  DINO PFM: 0.0297
+  SHOT PFM: 0.1546
+  Margin: 0.1249
+
+cuts_david_shape_11
+  DINO PFM: 0.2385
+  SHOT PFM: 0.3598
+  Margin: 0.1213
+
+cuts_david_shape_5
+  DINO PFM: 0.1601
+  SHOT PFM: 0.2807
+  Margin: 0.1206
+
+holes_horse_shape_6
+  DINO PFM: 0.0295
+  SHOT PFM: 0.1403
+  Margin: 0.1108
+
+holes_horse_shape_2
+  DINO PFM: 0.1650
+  SHOT PFM: 0.2750
+  Margin: 0.1100
+
+holes_david_shape_7
+  DINO PFM: 0.0862
+  SHOT PFM: 0.1886
+  Margin: 0.1023
+
+cuts_cat_shape_7
+  DINO PFM: 0.0413
+  SHOT PFM: 0.1419
+  Margin: 0.1006
+
+holes_horse_shape_4
+  DINO PFM: 0.1053
+  SHOT PFM: 0.2021
+  Margin: 0.0968
+
+holes_cat_shape_9
+  DINO PFM: 0.1172
+  SHOT PFM: 0.2093
+  Margin: 0.0921
+
+cuts_dog_shape_15
+  DINO PFM: 0.0819
+  SHOT PFM: 0.1739
+  Margin: 0.0920
+
+holes_michael_shape_8
+  DINO PFM: 0.2072
+  SHOT PFM: 0.2943
+  Margin: 0.0870
+
+cuts_horse_shape_15
+  DINO PFM: 0.0958
+  SHOT PFM: 0.1809
+  Margin: 0.0851
+
+cuts_horse_shape_8
+  DINO PFM: 0.1318
+  SHOT PFM: 0.2135
+  Margin: 0.0817
+
+holes_centaur_shape_6
+  DINO PFM: 0.0285
+  SHOT PFM: 0.1064
+  Margin: 0.0780
+
+holes_centaur_shape_10
+  DINO PFM: 0.0311
+  SHOT PFM: 0.1045
+  Margin: 0.0734
+
+cuts_david_shape_13
+  DINO PFM: 0.2772
+  SHOT PFM: 0.3425
+  Margin: 0.0653
+
+cuts_victoria_shape_12
+  DINO PFM: 0.0924
+  SHOT PFM: 0.1512
+  Margin: 0.0589
+
+cuts_victoria_shape_7
+  DINO PFM: 0.1045
+  SHOT PFM: 0.1585
+  Margin: 0.0540
+
+holes_cat_shape_3
+  DINO PFM: 0.0454
+  SHOT PFM: 0.0982
+  Margin: 0.0528
+
+holes_david_shape_5
+  DINO PFM: 0.3242
+  SHOT PFM: 0.3709
+  Margin: 0.0467
+
+cuts_centaur_shape_9
+  DINO PFM: 0.0198
+  SHOT PFM: 0.0658
+  Margin: 0.0460
+
+cuts_horse_shape_12
+  DINO PFM: 0.1471
+  SHOT PFM: 0.1900
+  Margin: 0.0429
+
+holes_david_shape_2
+  DINO PFM: 0.2294
+  SHOT PFM: 0.2688
+  Margin: 0.0394
+
+holes_michael_shape_4
+  DINO PFM: 0.3920
+  SHOT PFM: 0.4303
+  Margin: 0.0383
+
+holes_michael_shape_2
+  DINO PFM: 0.2239
+  SHOT PFM: 0.2574
+  Margin: 0.0335
+
+holes_victoria_shape_5
+  DINO PFM: 0.1235
+  SHOT PFM: 0.1555
+  Margin: 0.0320
+
+holes_cat_shape_6
+  DINO PFM: 0.0686
+  SHOT PFM: 0.0949
+  Margin: 0.0263
+
+holes_horse_shape_5
+  DINO PFM: 0.0401
+  SHOT PFM: 0.0663
+  Margin: 0.0262
+
+holes_centaur_shape_4
+  DINO PFM: 0.1430
+  SHOT PFM: 0.1634
+  Margin: 0.0205
+
+holes_dog_shape_5
+  DINO PFM: 0.1138
+  SHOT PFM: 0.1315
+  Margin: 0.0178
+
+cuts_centaur_shape_4
+  DINO PFM: 0.0096
+  SHOT PFM: 0.0249
+  Margin: 0.0153
+
+holes_horse_shape_8
+  DINO PFM: 0.2433
+  SHOT PFM: 0.2581
+  Margin: 0.0148
+
+cuts_horse_shape_7
+  DINO PFM: 0.0347
+  SHOT PFM: 0.0466
+  Margin: 0.0119
+
+holes_dog_shape_3
+  DINO PFM: 0.0576
+  SHOT PFM: 0.0640
+  Margin: 0.0065
+
+cuts_cat_shape_8
+  DINO PFM: 0.2370
+  SHOT PFM: 0.2433
+  Margin: 0.0063
+
+cuts_centaur_shape_8
+  DINO PFM: 0.1841
+  SHOT PFM: 0.1903
+  Margin: 0.0062
+
+cuts_victoria_shape_4
+  DINO PFM: 0.0142
+  SHOT PFM: 0.0200
+  Margin: 0.0058
+
+cuts_dog_shape_6
+  DINO PFM: 0.0213
+  SHOT PFM: 0.0262
+  Margin: 0.0049
+
+cuts_david_shape_9
+  DINO PFM: 0.4076
+  SHOT PFM: 0.4122
+  Margin: 0.0046
+
+holes_michael_shape_6
+  DINO PFM: 0.0236
+  SHOT PFM: 0.0263
+  Margin: 0.0026
+
+cuts_michael_shape_4
+  DINO PFM: 0.0149
+  SHOT PFM: 0.0175
+  Margin: 0.0026
+
+holes_wolf_shape_3
+  DINO PFM: 0.0126
+  SHOT PFM: 0.0146
+  Margin: 0.0020
+
+cuts_centaur_shape_6
+  DINO PFM: 0.0254
+  SHOT PFM: 0.0273
+  Margin: 0.0019
+
+cuts_cat_shape_15
+  DINO PFM: 0.2239
+  SHOT PFM: 0.2251
+  Margin: 0.0012
+
+cuts_wolf_shape_7
+  DINO PFM: 0.0067
+  SHOT PFM: 0.0073
+  Margin: 0.0006
+
+cuts_wolf_shape_14
+  DINO PFM: 0.3687
+  SHOT PFM: 0.3691
+  Margin: 0.0004
+
+cuts_cat_shape_2
+  DINO PFM: 0.0031
+  SHOT PFM: 0.0032
+  Margin: 0.0001
+
+cuts_dog_shape_11
+  DINO PFM: 0.0214
+  SHOT PFM: 0.0215
+  Margin: 0.0001
+
+cuts_wolf_shape_12
+  DINO PFM: 0.0099
+  SHOT PFM: 0.0099
+  Margin: 0.0000
+
+cuts_victoria_shape_2
+  DINO PFM: 0.0160
+  SHOT PFM: 0.0160
+  Margin: 0.0000
+
+================================================================================
+ALL CASES WHERE SHOT+PFM IS BETTER (sorted by margin)
+================================================================================
+
+cuts_victoria_shape_11
+  SHOT PFM: 0.0160
+  DINO PFM: 0.8926
+  Margin: 0.8765
+
+cuts_victoria_shape_13
+  SHOT PFM: 0.0174
+  DINO PFM: 0.6981
+  Margin: 0.6807
+
+cuts_michael_shape_9
+  SHOT PFM: 0.0075
+  DINO PFM: 0.6810
+  Margin: 0.6735
+
+cuts_michael_shape_6
+  SHOT PFM: 0.0145
+  DINO PFM: 0.6878
+  Margin: 0.6733
+
+cuts_david_shape_8
+  SHOT PFM: 0.0062
+  DINO PFM: 0.6734
+  Margin: 0.6672
+
+cuts_michael_shape_2
+  SHOT PFM: 0.0597
+  DINO PFM: 0.7195
+  Margin: 0.6598
+
+cuts_david_shape_14
+  SHOT PFM: 0.0182
+  DINO PFM: 0.6662
+  Margin: 0.6480
+
+cuts_victoria_shape_6
+  SHOT PFM: 0.0581
+  DINO PFM: 0.6956
+  Margin: 0.6375
+
+holes_michael_shape_9
+  SHOT PFM: 0.0318
+  DINO PFM: 0.6218
+  Margin: 0.5900
+
+cuts_michael_shape_11
+  SHOT PFM: 0.0134
+  DINO PFM: 0.5079
+  Margin: 0.4945
+
+cuts_david_shape_15
+  SHOT PFM: 0.0173
+  DINO PFM: 0.4620
+  Margin: 0.4447
+
+cuts_david_shape_4
+  SHOT PFM: 0.0137
+  DINO PFM: 0.4377
+  Margin: 0.4240
+
+cuts_david_shape_12
+  SHOT PFM: 0.0167
+  DINO PFM: 0.4398
+  Margin: 0.4231
+
+cuts_michael_shape_7
+  SHOT PFM: 0.0370
+  DINO PFM: 0.4407
+  Margin: 0.4037
+
+holes_victoria_shape_10
+  SHOT PFM: 0.0396
+  DINO PFM: 0.4113
+  Margin: 0.3717
+
+cuts_horse_shape_10
+  SHOT PFM: 0.0111
+  DINO PFM: 0.3798
+  Margin: 0.3687
+
+cuts_horse_shape_3
+  SHOT PFM: 0.0115
+  DINO PFM: 0.3750
+  Margin: 0.3635
+
+cuts_wolf_shape_4
+  SHOT PFM: 0.0134
+  DINO PFM: 0.3737
+  Margin: 0.3603
+
+cuts_dog_shape_9
+  SHOT PFM: 0.0223
+  DINO PFM: 0.3731
+  Margin: 0.3508
+
+cuts_dog_shape_12
+  SHOT PFM: 0.0377
+  DINO PFM: 0.3796
+  Margin: 0.3419
+
+cuts_victoria_shape_15
+  SHOT PFM: 0.0933
+  DINO PFM: 0.4159
+  Margin: 0.3226
+
+holes_victoria_shape_6
+  SHOT PFM: 0.1026
+  DINO PFM: 0.4230
+  Margin: 0.3204
+
+holes_centaur_shape_1
+  SHOT PFM: 0.0327
+  DINO PFM: 0.3383
+  Margin: 0.3057
+
+cuts_centaur_shape_15
+  SHOT PFM: 0.0156
+  DINO PFM: 0.3194
+  Margin: 0.3038
+
+cuts_michael_shape_8
+  SHOT PFM: 0.2431
+  DINO PFM: 0.5393
+  Margin: 0.2962
+
+holes_centaur_shape_3
+  SHOT PFM: 0.0261
+  DINO PFM: 0.3176
+  Margin: 0.2915
+
+holes_wolf_shape_4
+  SHOT PFM: 0.0169
+  DINO PFM: 0.3083
+  Margin: 0.2914
+
+holes_david_shape_10
+  SHOT PFM: 0.0428
+  DINO PFM: 0.3225
+  Margin: 0.2796
+
+holes_wolf_shape_6
+  SHOT PFM: 0.0183
+  DINO PFM: 0.2970
+  Margin: 0.2787
+
+holes_victoria_shape_4
+  SHOT PFM: 0.0700
+  DINO PFM: 0.3471
+  Margin: 0.2772
+
+cuts_victoria_shape_5
+  SHOT PFM: 0.0214
+  DINO PFM: 0.2927
+  Margin: 0.2712
+
+cuts_horse_shape_9
+  SHOT PFM: 0.0197
+  DINO PFM: 0.2875
+  Margin: 0.2678
+
+holes_david_shape_8
+  SHOT PFM: 0.1774
+  DINO PFM: 0.4398
+  Margin: 0.2623
+
+cuts_michael_shape_13
+  SHOT PFM: 0.0277
+  DINO PFM: 0.2730
+  Margin: 0.2453
+
+holes_wolf_shape_7
+  SHOT PFM: 0.0117
+  DINO PFM: 0.2549
+  Margin: 0.2432
+
+holes_michael_shape_3
+  SHOT PFM: 0.0165
+  DINO PFM: 0.2526
+  Margin: 0.2361
+
+cuts_horse_shape_4
+  SHOT PFM: 0.0100
+  DINO PFM: 0.2360
+  Margin: 0.2260
+
+cuts_centaur_shape_13
+  SHOT PFM: 0.0225
+  DINO PFM: 0.2458
+  Margin: 0.2233
+
+cuts_victoria_shape_8
+  SHOT PFM: 0.2975
+  DINO PFM: 0.5143
+  Margin: 0.2168
+
+cuts_victoria_shape_14
+  SHOT PFM: 0.0550
+  DINO PFM: 0.2717
+  Margin: 0.2167
+
+holes_dog_shape_10
+  SHOT PFM: 0.0440
+  DINO PFM: 0.2604
+  Margin: 0.2163
+
+cuts_centaur_shape_14
+  SHOT PFM: 0.0695
+  DINO PFM: 0.2722
+  Margin: 0.2027
+
+cuts_cat_shape_11
+  SHOT PFM: 0.0258
+  DINO PFM: 0.2276
+  Margin: 0.2018
+
+holes_centaur_shape_7
+  SHOT PFM: 0.0264
+  DINO PFM: 0.2100
+  Margin: 0.1836
+
+holes_victoria_shape_8
+  SHOT PFM: 0.2569
+  DINO PFM: 0.4326
+  Margin: 0.1758
+
+cuts_wolf_shape_6
+  SHOT PFM: 0.0964
+  DINO PFM: 0.2633
+  Margin: 0.1670
+
+holes_victoria_shape_1
+  SHOT PFM: 0.2365
+  DINO PFM: 0.4018
+  Margin: 0.1653
+
+cuts_michael_shape_12
+  SHOT PFM: 0.1003
+  DINO PFM: 0.2462
+  Margin: 0.1459
+
+cuts_dog_shape_13
+  SHOT PFM: 0.0237
+  DINO PFM: 0.1649
+  Margin: 0.1412
+
+cuts_cat_shape_5
+  SHOT PFM: 0.0657
+  DINO PFM: 0.2065
+  Margin: 0.1408
+
+holes_michael_shape_5
+  SHOT PFM: 0.0254
+  DINO PFM: 0.1645
+  Margin: 0.1392
+
+cuts_michael_shape_1
+  SHOT PFM: 0.0611
+  DINO PFM: 0.2000
+  Margin: 0.1389
+
+holes_dog_shape_7
+  SHOT PFM: 0.0390
+  DINO PFM: 0.1748
+  Margin: 0.1358
+
+holes_michael_shape_10
+  SHOT PFM: 0.0461
+  DINO PFM: 0.1807
+  Margin: 0.1346
+
+cuts_david_shape_3
+  SHOT PFM: 0.2469
+  DINO PFM: 0.3804
+  Margin: 0.1335
+
+holes_david_shape_1
+  SHOT PFM: 0.0354
+  DINO PFM: 0.1683
+  Margin: 0.1329
+
+cuts_dog_shape_14
+  SHOT PFM: 0.1708
+  DINO PFM: 0.2983
+  Margin: 0.1275
+
+cuts_cat_shape_12
+  SHOT PFM: 0.0266
+  DINO PFM: 0.1520
+  Margin: 0.1254
+
+cuts_wolf_shape_11
+  SHOT PFM: 0.0365
+  DINO PFM: 0.1500
+  Margin: 0.1135
+
+holes_cat_shape_5
+  SHOT PFM: 0.1848
+  DINO PFM: 0.2789
+  Margin: 0.0941
+
+holes_victoria_shape_3
+  SHOT PFM: 0.0680
+  DINO PFM: 0.1591
+  Margin: 0.0911
+
+holes_horse_shape_10
+  SHOT PFM: 0.0722
+  DINO PFM: 0.1604
+  Margin: 0.0882
+
+holes_david_shape_4
+  SHOT PFM: 0.1438
+  DINO PFM: 0.2292
+  Margin: 0.0854
+
+holes_horse_shape_3
+  SHOT PFM: 0.0214
+  DINO PFM: 0.1059
+  Margin: 0.0845
+
+holes_cat_shape_7
+  SHOT PFM: 0.1863
+  DINO PFM: 0.2706
+  Margin: 0.0842
+
+cuts_wolf_shape_15
+  SHOT PFM: 0.0442
+  DINO PFM: 0.1252
+  Margin: 0.0810
+
+cuts_cat_shape_4
+  SHOT PFM: 0.1148
+  DINO PFM: 0.1942
+  Margin: 0.0794
+
+cuts_victoria_shape_10
+  SHOT PFM: 0.0411
+  DINO PFM: 0.1198
+  Margin: 0.0786
+
+holes_cat_shape_4
+  SHOT PFM: 0.2054
+  DINO PFM: 0.2821
+  Margin: 0.0767
+
+holes_wolf_shape_1
+  SHOT PFM: 0.1716
+  DINO PFM: 0.2440
+  Margin: 0.0724
+
+holes_victoria_shape_2
+  SHOT PFM: 0.0189
+  DINO PFM: 0.0913
+  Margin: 0.0723
+
+holes_wolf_shape_8
+  SHOT PFM: 0.1457
+  DINO PFM: 0.2146
+  Margin: 0.0689
+
+holes_dog_shape_2
+  SHOT PFM: 0.0291
+  DINO PFM: 0.0953
+  Margin: 0.0662
+
+holes_cat_shape_8
+  SHOT PFM: 0.0330
+  DINO PFM: 0.0907
+  Margin: 0.0577
+
+holes_cat_shape_2
+  SHOT PFM: 0.1256
+  DINO PFM: 0.1832
+  Margin: 0.0576
+
+holes_centaur_shape_5
+  SHOT PFM: 0.0276
+  DINO PFM: 0.0830
+  Margin: 0.0554
+
+holes_centaur_shape_8
+  SHOT PFM: 0.1478
+  DINO PFM: 0.2017
+  Margin: 0.0539
+
+holes_dog_shape_9
+  SHOT PFM: 0.2328
+  DINO PFM: 0.2835
+  Margin: 0.0507
+
+cuts_wolf_shape_13
+  SHOT PFM: 0.0970
+  DINO PFM: 0.1467
+  Margin: 0.0497
+
+holes_david_shape_6
+  SHOT PFM: 0.0205
+  DINO PFM: 0.0653
+  Margin: 0.0448
+
+holes_dog_shape_8
+  SHOT PFM: 0.1622
+  DINO PFM: 0.2061
+  Margin: 0.0439
+
+holes_horse_shape_1
+  SHOT PFM: 0.0177
+  DINO PFM: 0.0594
+  Margin: 0.0417
+
+holes_centaur_shape_2
+  SHOT PFM: 0.0559
+  DINO PFM: 0.0931
+  Margin: 0.0372
+
+holes_horse_shape_7
+  SHOT PFM: 0.1211
+  DINO PFM: 0.1572
+  Margin: 0.0361
+
+holes_dog_shape_6
+  SHOT PFM: 0.0826
+  DINO PFM: 0.1106
+  Margin: 0.0280
+
+holes_michael_shape_7
+  SHOT PFM: 0.0270
+  DINO PFM: 0.0549
+  Margin: 0.0279
+
+cuts_horse_shape_5
+  SHOT PFM: 0.1503
+  DINO PFM: 0.1766
+  Margin: 0.0263
+
+holes_horse_shape_9
+  SHOT PFM: 0.0693
+  DINO PFM: 0.0943
+  Margin: 0.0250
+
+cuts_horse_shape_11
+  SHOT PFM: 0.0325
+  DINO PFM: 0.0547
+  Margin: 0.0222
+
+holes_david_shape_3
+  SHOT PFM: 0.0723
+  DINO PFM: 0.0937
+  Margin: 0.0214
+
+cuts_dog_shape_4
+  SHOT PFM: 0.2076
+  DINO PFM: 0.2278
+  Margin: 0.0202
+
+holes_wolf_shape_9
+  SHOT PFM: 0.0075
+  DINO PFM: 0.0255
+  Margin: 0.0179
+
+cuts_wolf_shape_5
+  SHOT PFM: 0.0159
+  DINO PFM: 0.0293
+  Margin: 0.0135
+
+holes_dog_shape_4
+  SHOT PFM: 0.0450
+  DINO PFM: 0.0582
+  Margin: 0.0133
+
+holes_centaur_shape_9
+  SHOT PFM: 0.0567
+  DINO PFM: 0.0669
+  Margin: 0.0102
+
+holes_dog_shape_1
+  SHOT PFM: 0.0152
+  DINO PFM: 0.0252
+  Margin: 0.0100
+
+holes_cat_shape_10
+  SHOT PFM: 0.2312
+  DINO PFM: 0.2392
+  Margin: 0.0079
+
+holes_cat_shape_1
+  SHOT PFM: 0.2578
+  DINO PFM: 0.2651
+  Margin: 0.0074
+
+cuts_david_shape_10
+  SHOT PFM: 0.0134
+  DINO PFM: 0.0203
+  Margin: 0.0069
+
+cuts_dog_shape_10
+  SHOT PFM: 0.1516
+  DINO PFM: 0.1585
+  Margin: 0.0069
+
+holes_victoria_shape_7
+  SHOT PFM: 0.5548
+  DINO PFM: 0.5617
+  Margin: 0.0069
+
+cuts_wolf_shape_8
+  SHOT PFM: 0.0120
+  DINO PFM: 0.0178
+  Margin: 0.0058
+
+holes_michael_shape_1
+  SHOT PFM: 0.0081
+  DINO PFM: 0.0118
+  Margin: 0.0037
+
+holes_wolf_shape_2
+  SHOT PFM: 0.0062
+  DINO PFM: 0.0087
+  Margin: 0.0025
+
+cuts_cat_shape_14
+  SHOT PFM: 0.1828
+  DINO PFM: 0.1834
+  Margin: 0.0006
+
+cuts_horse_shape_6
+  SHOT PFM: 0.0174
+  DINO PFM: 0.0179
+  Margin: 0.0005
+
+cuts_wolf_shape_9
+  SHOT PFM: 0.0096
+  DINO PFM: 0.0098
+  Margin: 0.0002
+
+cuts_cat_shape_13
+  SHOT PFM: 0.0176
+  DINO PFM: 0.0177
+  Margin: 0.0001
+
+cuts_cat_shape_6
+  SHOT PFM: 0.0200
+  DINO PFM: 0.0201
+  Margin: 0.0001
+
+cuts_centaur_shape_11
+  SHOT PFM: 0.0201
+  DINO PFM: 0.0202
+  Margin: 0.0001
+
+cuts_dog_shape_7
+  SHOT PFM: 0.0240
+  DINO PFM: 0.0241
+  Margin: 0.0001
+
+cuts_wolf_shape_10
+  SHOT PFM: 0.0089
+  DINO PFM: 0.0089
+  Margin: 0.0000
+
+cuts_victoria_shape_3
+  SHOT PFM: 0.0111
+  DINO PFM: 0.0112
+  Margin: 0.0000
+
+cuts_wolf_shape_3
+  SHOT PFM: 0.0090
+  DINO PFM: 0.0090
+  Margin: 0.0000
+
+================================================================================
+TIES (equal performance)
+================================================================================
+
+cuts_cat_shape_1: 0.0076
+cuts_cat_shape_3: 0.0057
+cuts_cat_shape_9: 0.0262
+cuts_centaur_shape_1: 0.0054
+cuts_centaur_shape_10: 0.0091
+cuts_centaur_shape_12: 0.0092
+cuts_centaur_shape_3: 0.0094
+cuts_centaur_shape_7: 0.0199
+cuts_david_shape_2: 0.0012
+cuts_dog_shape_2: 0.0234
+cuts_dog_shape_8: 0.0180
+cuts_horse_shape_1: 0.0046
+cuts_horse_shape_14: 0.0152
+cuts_horse_shape_2: 0.0037
+cuts_wolf_shape_1: 0.0045
+cuts_wolf_shape_2: 0.0154
+holes_wolf_shape_5: 0.0282

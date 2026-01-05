@@ -1,0 +1,2455 @@
+================================================================================
+TOP PERFORMER DISTRIBUTION ANALYSIS
+================================================================================
+
+OVERALL SUMMARY (Across All Metrics)
+--------------------------------------------------------------------------------
+Total comparisons: 594
+
+  SHOT: 304 (51.2%)
+  DINO: 256 (43.1%)
+  FPFH: 34 (5.7%)
+
+================================================================================
+OVERALL DISTRIBUTION BY METRIC
+================================================================================
+
+ARGMAX ERROR:
+  SHOT: 116 / 198 (58.6%)
+  DINO: 82 / 198 (41.4%)
+
+FM ERROR:
+  DINO: 101 / 198 (51.0%)
+  SHOT: 96 / 198 (48.5%)
+  FPFH: 1 / 198 (0.5%)
+
+PFM ERROR:
+  SHOT: 92 / 198 (46.5%)
+  DINO: 73 / 198 (36.9%)
+  FPFH: 33 / 198 (16.7%)
+
+================================================================================
+CUTS DATASET
+================================================================================
+
+ARGMAX ERROR:
+  SHOT: 83 / 119 (69.7%)
+  DINO: 36 / 119 (30.3%)
+
+FM ERROR:
+  DINO: 71 / 119 (59.7%)
+  SHOT: 48 / 119 (40.3%)
+
+PFM ERROR:
+  DINO: 56 / 119 (47.1%)
+  SHOT: 56 / 119 (47.1%)
+  FPFH: 7 / 119 (5.9%)
+
+================================================================================
+HOLES DATASET
+================================================================================
+
+ARGMAX ERROR:
+  DINO: 46 / 79 (58.2%)
+  SHOT: 33 / 79 (41.8%)
+
+FM ERROR:
+  SHOT: 48 / 79 (60.8%)
+  DINO: 30 / 79 (38.0%)
+  FPFH: 1 / 79 (1.3%)
+
+PFM ERROR:
+  SHOT: 36 / 79 (45.6%)
+  FPFH: 26 / 79 (32.9%)
+  DINO: 17 / 79 (21.5%)
+
+================================================================================
+DETAILED RESULTS: ARGMAX ERROR
+================================================================================
+
+cuts_cat_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1636, SHOT=0.0925, FPFH=0.4913
+
+cuts_cat_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2846, SHOT=0.3222, FPFH=0.6106
+
+cuts_cat_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1375, SHOT=0.1905, FPFH=0.4641
+
+cuts_cat_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2370, SHOT=0.2595, FPFH=0.5558
+
+cuts_cat_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2871, SHOT=0.1978, FPFH=0.5479
+
+cuts_cat_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2121, SHOT=0.2283, FPFH=0.4699
+
+cuts_cat_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2820, SHOT=0.3289, FPFH=0.6129
+
+cuts_cat_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1129, SHOT=0.0118, FPFH=0.4564
+
+cuts_cat_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2564, SHOT=0.0478, FPFH=0.5480
+
+cuts_cat_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2344, SHOT=0.3073, FPFH=0.5008
+
+cuts_cat_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1417, SHOT=0.2586, FPFH=0.4344
+
+cuts_cat_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2124, SHOT=0.2147, FPFH=0.5529
+
+cuts_cat_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3632, SHOT=0.3188, FPFH=0.5378
+
+cuts_cat_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1935, SHOT=0.1948, FPFH=0.4923
+
+cuts_cat_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2459, SHOT=0.2252, FPFH=0.5445
+
+cuts_centaur_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0818, SHOT=0.0005, FPFH=0.4956
+
+cuts_centaur_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1689, SHOT=0.1169, FPFH=0.5159
+
+cuts_centaur_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1879, SHOT=0.1128, FPFH=0.6391
+
+cuts_centaur_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1760, SHOT=0.0999, FPFH=0.5561
+
+cuts_centaur_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2031, SHOT=0.0942, FPFH=0.5675
+
+cuts_centaur_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1936, SHOT=0.2916, FPFH=0.5624
+
+cuts_centaur_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1772, SHOT=0.1267, FPFH=0.5488
+
+cuts_centaur_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1383, SHOT=0.0043, FPFH=0.6438
+
+cuts_centaur_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1337, SHOT=0.0054, FPFH=0.5424
+
+cuts_centaur_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1196, SHOT=0.0307, FPFH=0.5653
+
+cuts_centaur_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1906, SHOT=0.0692, FPFH=0.6013
+
+cuts_centaur_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1609, SHOT=0.1383, FPFH=0.5738
+
+cuts_centaur_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2276, SHOT=0.1462, FPFH=0.6644
+
+cuts_centaur_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2171, SHOT=0.2260, FPFH=0.5494
+
+cuts_centaur_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2246, SHOT=0.1949, FPFH=0.5431
+
+cuts_david_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2742, SHOT=0.0651, FPFH=0.5918
+
+cuts_david_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2576, SHOT=0.2849, FPFH=0.5679
+
+cuts_david_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2469, SHOT=0.3397, FPFH=0.4380
+
+cuts_david_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3962, SHOT=0.3943, FPFH=0.6062
+
+cuts_david_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.5316, SHOT=0.2926, FPFH=0.7130
+
+cuts_david_shape_14 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4132, SHOT=0.2387, FPFH=0.6136
+
+cuts_david_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2739, SHOT=0.2098, FPFH=0.5650
+
+cuts_david_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2511, SHOT=0.0083, FPFH=0.5376
+
+cuts_david_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3271, SHOT=0.2498, FPFH=0.5836
+
+cuts_david_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3764, SHOT=0.2040, FPFH=0.6231
+
+cuts_david_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4097, SHOT=0.3645, FPFH=0.6003
+
+cuts_david_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4778, SHOT=0.4627, FPFH=0.5768
+
+cuts_david_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4182, SHOT=0.4118, FPFH=0.4409
+
+cuts_david_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2854, SHOT=0.0693, FPFH=0.5994
+
+cuts_david_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4435, SHOT=0.2695, FPFH=0.6114
+
+cuts_dog_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2086, SHOT=0.0408, FPFH=0.5571
+
+cuts_dog_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2457, SHOT=0.3143, FPFH=0.5047
+
+cuts_dog_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1523, SHOT=0.1811, FPFH=0.4733
+
+cuts_dog_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.5108, SHOT=0.4093, FPFH=0.5982
+
+cuts_dog_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2060, SHOT=0.1451, FPFH=0.4438
+
+cuts_dog_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2491, SHOT=0.3351, FPFH=0.5079
+
+cuts_dog_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1389, SHOT=0.2539, FPFH=0.4520
+
+cuts_dog_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3313, SHOT=0.2769, FPFH=0.6030
+
+cuts_dog_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.4211, SHOT=0.4271, FPFH=0.5579
+
+cuts_dog_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1128, SHOT=0.2572, FPFH=0.4525
+
+cuts_dog_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1657, SHOT=0.2251, FPFH=0.4547
+
+cuts_dog_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1686, SHOT=0.1728, FPFH=0.4617
+
+cuts_dog_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1510, SHOT=0.1828, FPFH=0.4539
+
+cuts_dog_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1747, SHOT=0.1613, FPFH=0.4601
+
+cuts_dog_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2413, SHOT=0.2781, FPFH=0.6116
+
+cuts_horse_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3128, SHOT=0.0076, FPFH=0.5225
+
+cuts_horse_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2897, SHOT=0.0594, FPFH=0.5478
+
+cuts_horse_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1894, SHOT=0.1571, FPFH=0.5184
+
+cuts_horse_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0976, SHOT=0.1997, FPFH=0.5051
+
+cuts_horse_shape_13 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0867, SHOT=0.1395, FPFH=0.5162
+
+cuts_horse_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1858, SHOT=0.2249, FPFH=0.5652
+
+cuts_horse_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1033, SHOT=0.2073, FPFH=0.5176
+
+cuts_horse_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1119, SHOT=0.0124, FPFH=0.5521
+
+cuts_horse_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1374, SHOT=0.0952, FPFH=0.5494
+
+cuts_horse_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2488, SHOT=0.1433, FPFH=0.5142
+
+cuts_horse_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1934, SHOT=0.1976, FPFH=0.5587
+
+cuts_horse_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1289, SHOT=0.1091, FPFH=0.5208
+
+cuts_horse_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3597, SHOT=0.2388, FPFH=0.5085
+
+cuts_horse_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0899, SHOT=0.1728, FPFH=0.5120
+
+cuts_horse_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4028, SHOT=0.2005, FPFH=0.5183
+
+cuts_michael_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1915, SHOT=0.1030, FPFH=0.4567
+
+cuts_michael_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1608, SHOT=0.0974, FPFH=0.4743
+
+cuts_michael_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2453, SHOT=0.1400, FPFH=0.5375
+
+cuts_michael_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3253, SHOT=0.2278, FPFH=0.5567
+
+cuts_michael_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2612, SHOT=0.1848, FPFH=0.4227
+
+cuts_michael_shape_14 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1965, SHOT=0.1074, FPFH=0.4603
+
+cuts_michael_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3132, SHOT=0.2109, FPFH=0.4488
+
+cuts_michael_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3995, SHOT=0.4036, FPFH=0.6808
+
+cuts_michael_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1841, SHOT=0.1038, FPFH=0.4611
+
+cuts_michael_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3270, SHOT=0.3032, FPFH=0.5693
+
+cuts_michael_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1561, SHOT=0.0974, FPFH=0.4693
+
+cuts_michael_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4003, SHOT=0.1877, FPFH=0.6259
+
+cuts_michael_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3162, SHOT=0.2869, FPFH=0.4809
+
+cuts_michael_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2832, SHOT=0.1911, FPFH=0.5689
+
+cuts_michael_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3310, SHOT=0.1044, FPFH=0.5984
+
+cuts_victoria_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2747, SHOT=0.2896, FPFH=0.5956
+
+cuts_victoria_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4748, SHOT=0.1812, FPFH=0.6296
+
+cuts_victoria_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3593, SHOT=0.3728, FPFH=0.5953
+
+cuts_victoria_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3785, SHOT=0.2134, FPFH=0.6255
+
+cuts_victoria_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2158, SHOT=0.3060, FPFH=0.6002
+
+cuts_victoria_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.5120, SHOT=0.2605, FPFH=0.6075
+
+cuts_victoria_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3308, SHOT=0.1957, FPFH=0.5728
+
+cuts_victoria_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3114, SHOT=0.1415, FPFH=0.6171
+
+cuts_victoria_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4434, SHOT=0.1987, FPFH=0.6121
+
+cuts_victoria_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4595, SHOT=0.1426, FPFH=0.6039
+
+cuts_victoria_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4645, SHOT=0.3153, FPFH=0.6440
+
+cuts_victoria_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4168, SHOT=0.2994, FPFH=0.6477
+
+cuts_victoria_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3273, SHOT=0.2361, FPFH=0.5833
+
+cuts_victoria_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2444, SHOT=0.2295, FPFH=0.5783
+
+cuts_wolf_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1775, SHOT=0.0116, FPFH=0.4852
+
+cuts_wolf_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3317, SHOT=0.0323, FPFH=0.4839
+
+cuts_wolf_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1298, SHOT=0.1451, FPFH=0.5987
+
+cuts_wolf_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1602, SHOT=0.0377, FPFH=0.5295
+
+cuts_wolf_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1951, SHOT=0.0409, FPFH=0.5783
+
+cuts_wolf_shape_14 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1825, SHOT=0.0332, FPFH=0.4853
+
+cuts_wolf_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1134, SHOT=0.1629, FPFH=0.5385
+
+cuts_wolf_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1485, SHOT=0.0178, FPFH=0.5828
+
+cuts_wolf_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1881, SHOT=0.0245, FPFH=0.5690
+
+cuts_wolf_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1844, SHOT=0.0338, FPFH=0.4762
+
+cuts_wolf_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0850, SHOT=0.1511, FPFH=0.5317
+
+cuts_wolf_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1601, SHOT=0.1346, FPFH=0.5661
+
+cuts_wolf_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1265, SHOT=0.0275, FPFH=0.4782
+
+cuts_wolf_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3942, SHOT=0.0218, FPFH=0.5797
+
+cuts_wolf_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1740, SHOT=0.0384, FPFH=0.5657
+
+holes_cat_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1705, SHOT=0.0933, FPFH=0.5303
+
+holes_cat_shape_10 (holes)
+  Winner: DINO
+  Errors: DINO=0.2295, SHOT=0.2716, FPFH=0.4389
+
+holes_cat_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.2091, SHOT=0.2937, FPFH=0.5091
+
+holes_cat_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.2274, SHOT=0.2621, FPFH=0.4661
+
+holes_cat_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.2103, SHOT=0.3188, FPFH=0.4662
+
+holes_cat_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.2161, SHOT=0.2368, FPFH=0.4669
+
+holes_cat_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.2372, SHOT=0.3225, FPFH=0.4388
+
+holes_cat_shape_7 (holes)
+  Winner: DINO
+  Errors: DINO=0.2460, SHOT=0.3312, FPFH=0.4644
+
+holes_cat_shape_8 (holes)
+  Winner: DINO
+  Errors: DINO=0.1620, SHOT=0.2391, FPFH=0.4410
+
+holes_cat_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.2048, SHOT=0.3655, FPFH=0.4736
+
+holes_centaur_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1933, SHOT=0.1912, FPFH=0.4691
+
+holes_centaur_shape_10 (holes)
+  Winner: DINO
+  Errors: DINO=0.2540, SHOT=0.2612, FPFH=0.4990
+
+holes_centaur_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.1603, SHOT=0.2346, FPFH=0.4555
+
+holes_centaur_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3134, SHOT=0.1866, FPFH=0.5224
+
+holes_centaur_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1725, SHOT=0.1440, FPFH=0.5106
+
+holes_centaur_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.1335, SHOT=0.1726, FPFH=0.4679
+
+holes_centaur_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.1575, SHOT=0.1712, FPFH=0.4111
+
+holes_centaur_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2025, SHOT=0.1214, FPFH=0.5813
+
+holes_centaur_shape_8 (holes)
+  Winner: DINO
+  Errors: DINO=0.1522, SHOT=0.1998, FPFH=0.4872
+
+holes_centaur_shape_9 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2735, SHOT=0.2057, FPFH=0.6129
+
+holes_david_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2113, SHOT=0.0959, FPFH=0.4311
+
+holes_david_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2866, SHOT=0.2549, FPFH=0.3992
+
+holes_david_shape_2 (holes)
+  Winner: SHOT
+  Errors: DINO=0.6354, SHOT=0.2309, FPFH=0.3696
+
+holes_david_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2471, SHOT=0.2341, FPFH=0.4099
+
+holes_david_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.2105, SHOT=0.2767, FPFH=0.4409
+
+holes_david_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.3862, SHOT=0.4501, FPFH=0.5774
+
+holes_david_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1520, SHOT=0.1028, FPFH=0.4736
+
+holes_david_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3103, SHOT=0.2437, FPFH=0.5129
+
+holes_david_shape_8 (holes)
+  Winner: DINO
+  Errors: DINO=0.3465, SHOT=0.3819, FPFH=0.5654
+
+holes_david_shape_9 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2091, SHOT=0.1923, FPFH=0.5088
+
+holes_dog_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1125, SHOT=0.0670, FPFH=0.4623
+
+holes_dog_shape_10 (holes)
+  Winner: DINO
+  Errors: DINO=0.2196, SHOT=0.2845, FPFH=0.4814
+
+holes_dog_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.0782, SHOT=0.1434, FPFH=0.3800
+
+holes_dog_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.1756, SHOT=0.2044, FPFH=0.3928
+
+holes_dog_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.1957, SHOT=0.3184, FPFH=0.4705
+
+holes_dog_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.1553, SHOT=0.2221, FPFH=0.4625
+
+holes_dog_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.1522, SHOT=0.3165, FPFH=0.4847
+
+holes_dog_shape_7 (holes)
+  Winner: DINO
+  Errors: DINO=0.1668, SHOT=0.2691, FPFH=0.4366
+
+holes_dog_shape_8 (holes)
+  Winner: DINO
+  Errors: DINO=0.1629, SHOT=0.2427, FPFH=0.4674
+
+holes_dog_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.1712, SHOT=0.2790, FPFH=0.4234
+
+holes_horse_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1973, SHOT=0.0879, FPFH=0.5431
+
+holes_horse_shape_10 (holes)
+  Winner: DINO
+  Errors: DINO=0.1584, SHOT=0.2059, FPFH=0.4766
+
+holes_horse_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.2616, SHOT=0.3147, FPFH=0.5468
+
+holes_horse_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.1273, SHOT=0.2345, FPFH=0.4240
+
+holes_horse_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.1477, SHOT=0.1693, FPFH=0.4972
+
+holes_horse_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.1680, SHOT=0.1989, FPFH=0.4554
+
+holes_horse_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.1589, SHOT=0.1790, FPFH=0.4824
+
+holes_horse_shape_7 (holes)
+  Winner: DINO
+  Errors: DINO=0.1050, SHOT=0.1863, FPFH=0.4850
+
+holes_horse_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3403, SHOT=0.2833, FPFH=0.5549
+
+holes_horse_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.1012, SHOT=0.6131, FPFH=0.3949
+
+holes_michael_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1841, SHOT=0.0932, FPFH=0.4703
+
+holes_michael_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3243, SHOT=0.2427, FPFH=0.4570
+
+holes_michael_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.1969, SHOT=0.1976, FPFH=0.4647
+
+holes_michael_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.1780, SHOT=0.1964, FPFH=0.4139
+
+holes_michael_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3658, SHOT=0.2649, FPFH=0.5785
+
+holes_michael_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2039, SHOT=0.1891, FPFH=0.3845
+
+holes_michael_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.2481, SHOT=0.2549, FPFH=0.5070
+
+holes_michael_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3459, SHOT=0.1683, FPFH=0.3498
+
+holes_michael_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3096, SHOT=0.2729, FPFH=0.5759
+
+holes_michael_shape_9 (holes)
+  Winner: SHOT
+  Errors: DINO=0.4417, SHOT=0.3118, FPFH=0.4799
+
+holes_victoria_shape_1 (holes)
+  Winner: DINO
+  Errors: DINO=0.2584, SHOT=0.3876, FPFH=0.5657
+
+holes_victoria_shape_10 (holes)
+  Winner: DINO
+  Errors: DINO=0.2315, SHOT=0.3083, FPFH=0.5221
+
+holes_victoria_shape_2 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1870, SHOT=0.1470, FPFH=0.4405
+
+holes_victoria_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.4125, SHOT=0.3915, FPFH=0.5202
+
+holes_victoria_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3872, SHOT=0.3672, FPFH=0.5999
+
+holes_victoria_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.1918, SHOT=0.2250, FPFH=0.4592
+
+holes_victoria_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.3131, SHOT=0.3790, FPFH=0.6005
+
+holes_victoria_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.4167, SHOT=0.1252, FPFH=0.5040
+
+holes_victoria_shape_8 (holes)
+  Winner: DINO
+  Errors: DINO=0.2248, SHOT=0.2696, FPFH=0.5042
+
+holes_victoria_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.2695, SHOT=0.3273, FPFH=0.5335
+
+holes_wolf_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2630, SHOT=0.1134, FPFH=0.5799
+
+holes_wolf_shape_2 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0728, SHOT=0.0490, FPFH=0.4938
+
+holes_wolf_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.0383, SHOT=0.0903, FPFH=0.3631
+
+holes_wolf_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.0572, SHOT=0.1019, FPFH=0.5194
+
+holes_wolf_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1403, SHOT=0.1096, FPFH=0.4933
+
+holes_wolf_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1497, SHOT=0.1306, FPFH=0.5155
+
+holes_wolf_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1236, SHOT=0.1233, FPFH=0.4234
+
+holes_wolf_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1381, SHOT=0.1079, FPFH=0.5065
+
+holes_wolf_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.0611, SHOT=0.0790, FPFH=0.3907
+
+
+================================================================================
+DETAILED RESULTS: FM ERROR
+================================================================================
+
+cuts_cat_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1476, SHOT=0.2024, FPFH=0.4819
+
+cuts_cat_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2728, SHOT=0.5871, FPFH=0.4419
+
+cuts_cat_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1529, SHOT=0.1905, FPFH=0.4264
+
+cuts_cat_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2539, SHOT=0.2579, FPFH=0.4756
+
+cuts_cat_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2746, SHOT=0.2139, FPFH=0.4800
+
+cuts_cat_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1820, SHOT=0.1944, FPFH=0.4612
+
+cuts_cat_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2321, SHOT=0.6212, FPFH=0.4626
+
+cuts_cat_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1222, SHOT=0.0916, FPFH=0.4877
+
+cuts_cat_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3005, SHOT=0.2050, FPFH=0.4375
+
+cuts_cat_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2198, SHOT=0.2730, FPFH=0.4907
+
+cuts_cat_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1671, SHOT=0.1875, FPFH=0.4191
+
+cuts_cat_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2103, SHOT=0.2291, FPFH=0.4512
+
+cuts_cat_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3852, SHOT=0.4353, FPFH=0.4195
+
+cuts_cat_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1504, SHOT=0.2587, FPFH=0.4616
+
+cuts_cat_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2025, SHOT=0.3481, FPFH=0.4357
+
+cuts_centaur_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1211, SHOT=0.0813, FPFH=0.6518
+
+cuts_centaur_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1424, SHOT=0.1655, FPFH=0.6100
+
+cuts_centaur_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2475, SHOT=0.2902, FPFH=0.5526
+
+cuts_centaur_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1871, SHOT=0.2696, FPFH=0.6458
+
+cuts_centaur_shape_13 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2492, SHOT=0.2895, FPFH=0.6400
+
+cuts_centaur_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2428, SHOT=0.3164, FPFH=0.5133
+
+cuts_centaur_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2262, SHOT=0.2858, FPFH=0.6284
+
+cuts_centaur_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2148, SHOT=0.2905, FPFH=0.6205
+
+cuts_centaur_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1860, SHOT=0.2339, FPFH=0.6711
+
+cuts_centaur_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2720, SHOT=0.2831, FPFH=0.7141
+
+cuts_centaur_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3042, SHOT=0.4633, FPFH=0.6216
+
+cuts_centaur_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2653, SHOT=0.3711, FPFH=0.6682
+
+cuts_centaur_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2531, SHOT=0.3301, FPFH=0.6024
+
+cuts_centaur_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2435, SHOT=0.2913, FPFH=0.5881
+
+cuts_centaur_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1779, SHOT=0.2243, FPFH=0.6203
+
+cuts_david_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3472, SHOT=0.1001, FPFH=0.6344
+
+cuts_david_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2622, SHOT=0.2488, FPFH=0.6711
+
+cuts_david_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2151, SHOT=0.4349, FPFH=1.1646
+
+cuts_david_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3976, SHOT=0.3892, FPFH=0.5355
+
+cuts_david_shape_13 (cuts)
+  Winner: DINO
+  Errors: DINO=0.6061, SHOT=1.0796, FPFH=0.9152
+
+cuts_david_shape_14 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4418, SHOT=0.4294, FPFH=0.6425
+
+cuts_david_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3430, SHOT=0.1969, FPFH=0.5329
+
+cuts_david_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2418, SHOT=0.0987, FPFH=0.5558
+
+cuts_david_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3166, SHOT=0.2476, FPFH=0.6580
+
+cuts_david_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3898, SHOT=0.3029, FPFH=0.6834
+
+cuts_david_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2824, SHOT=0.3081, FPFH=0.6950
+
+cuts_david_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3551, SHOT=0.3819, FPFH=0.6290
+
+cuts_david_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3519, SHOT=0.4510, FPFH=1.2407
+
+cuts_david_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4159, SHOT=0.2089, FPFH=0.6899
+
+cuts_david_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3809, SHOT=0.4130, FPFH=0.5469
+
+cuts_dog_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1936, SHOT=0.5760, FPFH=0.6298
+
+cuts_dog_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2666, SHOT=0.3032, FPFH=0.4994
+
+cuts_dog_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1701, SHOT=0.1319, FPFH=0.4310
+
+cuts_dog_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.4979, SHOT=0.5438, FPFH=0.7061
+
+cuts_dog_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2319, SHOT=0.1446, FPFH=0.4284
+
+cuts_dog_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2714, SHOT=0.3438, FPFH=0.5346
+
+cuts_dog_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1712, SHOT=0.3155, FPFH=0.4201
+
+cuts_dog_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3791, SHOT=0.5190, FPFH=0.7344
+
+cuts_dog_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3784, SHOT=0.6795, FPFH=0.6748
+
+cuts_dog_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1054, SHOT=0.3942, FPFH=0.4679
+
+cuts_dog_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1829, SHOT=0.1481, FPFH=0.4279
+
+cuts_dog_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1915, SHOT=0.1363, FPFH=0.3962
+
+cuts_dog_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1972, SHOT=0.1235, FPFH=0.3676
+
+cuts_dog_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2102, SHOT=0.1312, FPFH=0.4468
+
+cuts_dog_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3646, SHOT=0.5057, FPFH=0.7520
+
+cuts_horse_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3986, SHOT=0.1587, FPFH=0.5140
+
+cuts_horse_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2583, SHOT=0.2474, FPFH=0.7129
+
+cuts_horse_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2630, SHOT=0.2230, FPFH=0.5323
+
+cuts_horse_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1362, SHOT=0.2853, FPFH=0.4351
+
+cuts_horse_shape_13 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1490, SHOT=0.2909, FPFH=0.4705
+
+cuts_horse_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2106, SHOT=0.3563, FPFH=0.6805
+
+cuts_horse_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1392, SHOT=0.3395, FPFH=0.4798
+
+cuts_horse_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1902, SHOT=0.2361, FPFH=0.7213
+
+cuts_horse_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2103, SHOT=0.2149, FPFH=0.7018
+
+cuts_horse_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1826, SHOT=0.4126, FPFH=0.6708
+
+cuts_horse_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1851, SHOT=0.2360, FPFH=0.6281
+
+cuts_horse_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1449, SHOT=0.2172, FPFH=0.4420
+
+cuts_horse_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3068, SHOT=0.4861, FPFH=0.6752
+
+cuts_horse_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1094, SHOT=0.2657, FPFH=0.4632
+
+cuts_horse_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3367, SHOT=0.4654, FPFH=0.6899
+
+cuts_michael_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1777, SHOT=0.2838, FPFH=0.4165
+
+cuts_michael_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1420, SHOT=0.3110, FPFH=0.3842
+
+cuts_michael_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2391, SHOT=0.0455, FPFH=0.4318
+
+cuts_michael_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4202, SHOT=0.2511, FPFH=0.5877
+
+cuts_michael_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3710, SHOT=0.1407, FPFH=0.3478
+
+cuts_michael_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2295, SHOT=0.3197, FPFH=0.3714
+
+cuts_michael_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3104, SHOT=0.0861, FPFH=0.3407
+
+cuts_michael_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4889, SHOT=0.4008, FPFH=0.7300
+
+cuts_michael_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1921, SHOT=0.3126, FPFH=0.3655
+
+cuts_michael_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3704, SHOT=0.3272, FPFH=0.5005
+
+cuts_michael_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1473, SHOT=0.2988, FPFH=0.4007
+
+cuts_michael_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4723, SHOT=0.3802, FPFH=0.6685
+
+cuts_michael_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3722, SHOT=0.1479, FPFH=0.4376
+
+cuts_michael_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4745, SHOT=0.1908, FPFH=0.6049
+
+cuts_michael_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4438, SHOT=0.2475, FPFH=0.5933
+
+cuts_victoria_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2595, SHOT=0.3482, FPFH=0.6130
+
+cuts_victoria_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.4303, SHOT=0.6709, FPFH=0.6770
+
+cuts_victoria_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2702, SHOT=0.3109, FPFH=0.5927
+
+cuts_victoria_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4313, SHOT=0.2296, FPFH=0.6624
+
+cuts_victoria_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2243, SHOT=0.4641, FPFH=0.5676
+
+cuts_victoria_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.4967, SHOT=0.5835, FPFH=0.6618
+
+cuts_victoria_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4520, SHOT=0.2153, FPFH=0.6572
+
+cuts_victoria_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.5036, SHOT=0.2187, FPFH=0.7318
+
+cuts_victoria_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.4778, SHOT=0.6862, FPFH=0.6712
+
+cuts_victoria_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.4325, SHOT=0.5700, FPFH=0.6729
+
+cuts_victoria_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.5148, SHOT=0.2927, FPFH=0.6904
+
+cuts_victoria_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4104, SHOT=0.2931, FPFH=0.7236
+
+cuts_victoria_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3427, SHOT=0.2876, FPFH=0.6243
+
+cuts_victoria_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3133, SHOT=0.3342, FPFH=0.5024
+
+cuts_wolf_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1480, SHOT=0.0496, FPFH=0.4384
+
+cuts_wolf_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1284, SHOT=0.3518, FPFH=0.9085
+
+cuts_wolf_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2335, SHOT=0.0708, FPFH=0.6060
+
+cuts_wolf_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1742, SHOT=0.0745, FPFH=0.4174
+
+cuts_wolf_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2286, SHOT=0.1607, FPFH=0.6100
+
+cuts_wolf_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1081, SHOT=0.3499, FPFH=0.9379
+
+cuts_wolf_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1076, SHOT=0.2117, FPFH=0.3670
+
+cuts_wolf_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2593, SHOT=0.1317, FPFH=0.5270
+
+cuts_wolf_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2291, SHOT=0.1260, FPFH=0.5657
+
+cuts_wolf_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1162, SHOT=0.3507, FPFH=0.9421
+
+cuts_wolf_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1195, SHOT=0.1972, FPFH=0.3892
+
+cuts_wolf_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2607, SHOT=0.0573, FPFH=0.5105
+
+cuts_wolf_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1866, SHOT=0.0627, FPFH=0.4177
+
+cuts_wolf_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4814, SHOT=0.1293, FPFH=0.5411
+
+cuts_wolf_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1921, SHOT=0.1783, FPFH=0.5518
+
+holes_cat_shape_1 (holes)
+  Winner: DINO
+  Errors: DINO=0.2122, SHOT=0.2233, FPFH=0.4510
+
+holes_cat_shape_10 (holes)
+  Winner: DINO
+  Errors: DINO=0.1374, SHOT=0.1593, FPFH=0.4440
+
+holes_cat_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.2297, SHOT=0.3208, FPFH=0.4374
+
+holes_cat_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1935, SHOT=0.1829, FPFH=0.4286
+
+holes_cat_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.1812, SHOT=0.2567, FPFH=0.3950
+
+holes_cat_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.2428, SHOT=0.2975, FPFH=0.3717
+
+holes_cat_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2316, SHOT=0.2050, FPFH=0.4183
+
+holes_cat_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2505, SHOT=0.1692, FPFH=0.4568
+
+holes_cat_shape_8 (holes)
+  Winner: DINO
+  Errors: DINO=0.1138, SHOT=0.1279, FPFH=0.4172
+
+holes_cat_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.2433, SHOT=0.3708, FPFH=0.4490
+
+holes_centaur_shape_1 (holes)
+  Winner: DINO
+  Errors: DINO=0.2186, SHOT=0.2235, FPFH=0.4364
+
+holes_centaur_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2465, SHOT=0.1695, FPFH=0.4531
+
+holes_centaur_shape_2 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1549, SHOT=0.0590, FPFH=0.4084
+
+holes_centaur_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2933, SHOT=0.2552, FPFH=0.5417
+
+holes_centaur_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.2160, SHOT=0.2578, FPFH=0.5869
+
+holes_centaur_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.1348, SHOT=0.1819, FPFH=0.4996
+
+holes_centaur_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1665, SHOT=0.0667, FPFH=0.3296
+
+holes_centaur_shape_7 (holes)
+  Winner: DINO
+  Errors: DINO=0.2550, SHOT=0.3122, FPFH=0.6942
+
+holes_centaur_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1157, SHOT=0.0662, FPFH=0.4963
+
+holes_centaur_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.2998, SHOT=0.3768, FPFH=0.6586
+
+holes_david_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1891, SHOT=0.1369, FPFH=0.3860
+
+holes_david_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2562, SHOT=0.2196, FPFH=0.4479
+
+holes_david_shape_2 (holes)
+  Winner: FPFH
+  Errors: DINO=0.4748, SHOT=0.4334, FPFH=0.3961
+
+holes_david_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2378, SHOT=0.2142, FPFH=0.4399
+
+holes_david_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1759, SHOT=0.1233, FPFH=0.4064
+
+holes_david_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3255, SHOT=0.2602, FPFH=0.5811
+
+holes_david_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1897, SHOT=0.0920, FPFH=0.3890
+
+holes_david_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3677, SHOT=0.2308, FPFH=0.5246
+
+holes_david_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3968, SHOT=0.2396, FPFH=0.5908
+
+holes_david_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.2175, SHOT=0.3290, FPFH=0.4937
+
+holes_dog_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1698, SHOT=0.1382, FPFH=0.4760
+
+holes_dog_shape_10 (holes)
+  Winner: DINO
+  Errors: DINO=0.2153, SHOT=0.2563, FPFH=0.4143
+
+holes_dog_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.0494, SHOT=0.0814, FPFH=0.2352
+
+holes_dog_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1767, SHOT=0.0885, FPFH=0.2283
+
+holes_dog_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1703, SHOT=0.1455, FPFH=0.3513
+
+holes_dog_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1738, SHOT=0.1582, FPFH=0.3337
+
+holes_dog_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.1932, SHOT=0.3210, FPFH=0.4689
+
+holes_dog_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2179, SHOT=0.0733, FPFH=0.3897
+
+holes_dog_shape_8 (holes)
+  Winner: DINO
+  Errors: DINO=0.1629, SHOT=0.1720, FPFH=0.3924
+
+holes_dog_shape_9 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1768, SHOT=0.1000, FPFH=0.3155
+
+holes_horse_shape_1 (holes)
+  Winner: DINO
+  Errors: DINO=0.2640, SHOT=0.2984, FPFH=0.6158
+
+holes_horse_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1729, SHOT=0.0905, FPFH=0.4657
+
+holes_horse_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.2105, SHOT=0.4100, FPFH=0.5243
+
+holes_horse_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.1383, SHOT=0.1393, FPFH=0.2395
+
+holes_horse_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1956, SHOT=0.1200, FPFH=0.4533
+
+holes_horse_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.1235, SHOT=0.1839, FPFH=0.4827
+
+holes_horse_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2359, SHOT=0.1743, FPFH=0.4224
+
+holes_horse_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1579, SHOT=0.1298, FPFH=0.5063
+
+holes_horse_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3491, SHOT=0.2885, FPFH=0.5446
+
+holes_horse_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.1322, SHOT=0.5848, FPFH=0.2696
+
+holes_michael_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2066, SHOT=0.0883, FPFH=0.3700
+
+holes_michael_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3560, SHOT=0.2520, FPFH=0.4423
+
+holes_michael_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.2377, SHOT=0.3716, FPFH=0.4238
+
+holes_michael_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1732, SHOT=0.1580, FPFH=0.3132
+
+holes_michael_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3525, SHOT=0.1692, FPFH=0.5488
+
+holes_michael_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2269, SHOT=0.2084, FPFH=0.2841
+
+holes_michael_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2628, SHOT=0.1965, FPFH=0.4543
+
+holes_michael_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3549, SHOT=0.2657, FPFH=0.3581
+
+holes_michael_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3413, SHOT=0.1930, FPFH=0.4967
+
+holes_michael_shape_9 (holes)
+  Winner: SHOT
+  Errors: DINO=0.6201, SHOT=0.3799, FPFH=0.5138
+
+holes_victoria_shape_1 (holes)
+  Winner: DINO
+  Errors: DINO=0.2303, SHOT=0.2866, FPFH=0.5074
+
+holes_victoria_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2556, SHOT=0.1570, FPFH=0.4505
+
+holes_victoria_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.1846, SHOT=0.3440, FPFH=0.4382
+
+holes_victoria_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.4224, SHOT=0.4691, FPFH=0.5338
+
+holes_victoria_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3076, SHOT=0.2940, FPFH=0.5378
+
+holes_victoria_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1716, SHOT=0.1357, FPFH=0.3408
+
+holes_victoria_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2919, SHOT=0.1975, FPFH=0.5490
+
+holes_victoria_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.4711, SHOT=0.3869, FPFH=0.5384
+
+holes_victoria_shape_8 (holes)
+  Winner: DINO
+  Errors: DINO=0.1711, SHOT=0.2603, FPFH=0.5212
+
+holes_victoria_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.2783, SHOT=0.2837, FPFH=0.5082
+
+holes_wolf_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2254, SHOT=0.1576, FPFH=0.5479
+
+holes_wolf_shape_2 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1285, SHOT=0.0507, FPFH=0.5611
+
+holes_wolf_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.0378, SHOT=0.0539, FPFH=0.2007
+
+holes_wolf_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0654, SHOT=0.0482, FPFH=0.6125
+
+holes_wolf_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1974, SHOT=0.0926, FPFH=0.5133
+
+holes_wolf_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1803, SHOT=0.0430, FPFH=0.5968
+
+holes_wolf_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1348, SHOT=0.0295, FPFH=0.2704
+
+holes_wolf_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1379, SHOT=0.0657, FPFH=0.5816
+
+holes_wolf_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.0443, SHOT=0.0455, FPFH=0.1322
+
+
+================================================================================
+DETAILED RESULTS: PFM ERROR
+================================================================================
+
+cuts_cat_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0076, SHOT=0.0076, FPFH=0.1697
+
+cuts_cat_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0362, SHOT=0.3397, FPFH=0.8017
+
+cuts_cat_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2276, SHOT=0.0258, FPFH=0.0270
+
+cuts_cat_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1520, SHOT=0.0266, FPFH=0.1334
+
+cuts_cat_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0177, SHOT=0.0176, FPFH=0.0233
+
+cuts_cat_shape_14 (cuts)
+  Winner: FPFH
+  Errors: DINO=0.1834, SHOT=0.1828, FPFH=0.0661
+
+cuts_cat_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2239, SHOT=0.2251, FPFH=0.7351
+
+cuts_cat_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0031, SHOT=0.0032, FPFH=0.0032
+
+cuts_cat_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0057, SHOT=0.0057, FPFH=0.1237
+
+cuts_cat_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1942, SHOT=0.1148, FPFH=0.2469
+
+cuts_cat_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2065, SHOT=0.0657, FPFH=0.0659
+
+cuts_cat_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0201, SHOT=0.0200, FPFH=0.3805
+
+cuts_cat_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0413, SHOT=0.1419, FPFH=0.6020
+
+cuts_cat_shape_8 (cuts)
+  Winner: FPFH
+  Errors: DINO=0.2370, SHOT=0.2433, FPFH=0.1049
+
+cuts_cat_shape_9 (cuts)
+  Winner: FPFH
+  Errors: DINO=0.0262, SHOT=0.0262, FPFH=0.0260
+
+cuts_centaur_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0054, SHOT=0.0054, FPFH=0.0054
+
+cuts_centaur_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0091, SHOT=0.0091, FPFH=0.0188
+
+cuts_centaur_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0202, SHOT=0.0201, FPFH=0.7576
+
+cuts_centaur_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0092, SHOT=0.0092, FPFH=0.2830
+
+cuts_centaur_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2458, SHOT=0.0225, FPFH=0.3775
+
+cuts_centaur_shape_14 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2722, SHOT=0.0695, FPFH=0.2960
+
+cuts_centaur_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3194, SHOT=0.0156, FPFH=0.3414
+
+cuts_centaur_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0030, SHOT=0.7768, FPFH=0.5629
+
+cuts_centaur_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0094, SHOT=0.0094, FPFH=0.3381
+
+cuts_centaur_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0096, SHOT=0.0249, FPFH=0.4904
+
+cuts_centaur_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0280, SHOT=0.1615, FPFH=0.8273
+
+cuts_centaur_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0254, SHOT=0.0273, FPFH=0.3601
+
+cuts_centaur_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0199, SHOT=0.0199, FPFH=0.3449
+
+cuts_centaur_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1841, SHOT=0.1903, FPFH=0.3122
+
+cuts_centaur_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0198, SHOT=0.0658, FPFH=0.2007
+
+cuts_david_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0042, SHOT=0.2212, FPFH=0.3097
+
+cuts_david_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0203, SHOT=0.0134, FPFH=0.0251
+
+cuts_david_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2385, SHOT=0.3598, FPFH=0.4693
+
+cuts_david_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4398, SHOT=0.0167, FPFH=0.3654
+
+cuts_david_shape_13 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2772, SHOT=0.3425, FPFH=1.0900
+
+cuts_david_shape_14 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.6662, SHOT=0.0182, FPFH=0.8687
+
+cuts_david_shape_15 (cuts)
+  Winner: FPFH
+  Errors: DINO=0.4620, SHOT=0.0173, FPFH=0.0119
+
+cuts_david_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0012, SHOT=0.0012, FPFH=0.0012
+
+cuts_david_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3804, SHOT=0.2469, FPFH=0.3349
+
+cuts_david_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4377, SHOT=0.0137, FPFH=0.0211
+
+cuts_david_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1601, SHOT=0.2807, FPFH=0.3410
+
+cuts_david_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0230, SHOT=0.5067, FPFH=0.0564
+
+cuts_david_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2031, SHOT=0.7535, FPFH=0.3804
+
+cuts_david_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.6734, SHOT=0.0062, FPFH=0.0062
+
+cuts_david_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.4076, SHOT=0.4122, FPFH=0.5352
+
+cuts_dog_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1794, SHOT=0.3334, FPFH=0.7296
+
+cuts_dog_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1585, SHOT=0.1516, FPFH=0.1721
+
+cuts_dog_shape_11 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0214, SHOT=0.0215, FPFH=0.0264
+
+cuts_dog_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3796, SHOT=0.0377, FPFH=0.4525
+
+cuts_dog_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1649, SHOT=0.0237, FPFH=0.0372
+
+cuts_dog_shape_14 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2983, SHOT=0.1708, FPFH=0.4234
+
+cuts_dog_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0819, SHOT=0.1739, FPFH=0.2579
+
+cuts_dog_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0234, SHOT=0.0234, FPFH=0.4479
+
+cuts_dog_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2986, SHOT=0.6481, FPFH=0.6914
+
+cuts_dog_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2278, SHOT=0.2076, FPFH=0.4548
+
+cuts_dog_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0297, SHOT=0.1546, FPFH=0.0298
+
+cuts_dog_shape_6 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0213, SHOT=0.0262, FPFH=0.0262
+
+cuts_dog_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0241, SHOT=0.0240, FPFH=0.0240
+
+cuts_dog_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0180, SHOT=0.0180, FPFH=0.1906
+
+cuts_dog_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3731, SHOT=0.0223, FPFH=0.6507
+
+cuts_horse_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0046, SHOT=0.0046, FPFH=0.0046
+
+cuts_horse_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3798, SHOT=0.0111, FPFH=0.0111
+
+cuts_horse_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0547, SHOT=0.0325, FPFH=0.4809
+
+cuts_horse_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1471, SHOT=0.1900, FPFH=0.5340
+
+cuts_horse_shape_13 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0820, SHOT=0.6850, FPFH=0.6005
+
+cuts_horse_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0152, SHOT=0.0152, FPFH=0.1625
+
+cuts_horse_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0958, SHOT=0.1809, FPFH=0.4313
+
+cuts_horse_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0037, SHOT=0.0037, FPFH=0.0037
+
+cuts_horse_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3750, SHOT=0.0115, FPFH=0.3776
+
+cuts_horse_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2360, SHOT=0.0100, FPFH=0.6878
+
+cuts_horse_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1766, SHOT=0.1503, FPFH=0.2195
+
+cuts_horse_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0179, SHOT=0.0174, FPFH=0.1734
+
+cuts_horse_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0347, SHOT=0.0466, FPFH=0.5182
+
+cuts_horse_shape_8 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1318, SHOT=0.2135, FPFH=0.4286
+
+cuts_horse_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2875, SHOT=0.0197, FPFH=0.3136
+
+cuts_michael_shape_1 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2000, SHOT=0.0611, FPFH=0.2359
+
+cuts_michael_shape_10 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1851, SHOT=0.5632, FPFH=0.8842
+
+cuts_michael_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.5079, SHOT=0.0134, FPFH=0.0197
+
+cuts_michael_shape_12 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2462, SHOT=0.1003, FPFH=0.5081
+
+cuts_michael_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2730, SHOT=0.0277, FPFH=0.0406
+
+cuts_michael_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.2197, SHOT=0.4209, FPFH=0.3046
+
+cuts_michael_shape_15 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0251, SHOT=0.3367, FPFH=0.2041
+
+cuts_michael_shape_2 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.7195, SHOT=0.0597, FPFH=0.2099
+
+cuts_michael_shape_3 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1660, SHOT=0.3309, FPFH=0.5479
+
+cuts_michael_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0149, SHOT=0.0175, FPFH=0.0260
+
+cuts_michael_shape_5 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0740, SHOT=0.2199, FPFH=0.2822
+
+cuts_michael_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.6878, SHOT=0.0145, FPFH=0.0195
+
+cuts_michael_shape_7 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4407, SHOT=0.0370, FPFH=0.0479
+
+cuts_michael_shape_8 (cuts)
+  Winner: FPFH
+  Errors: DINO=0.5393, SHOT=0.2431, FPFH=0.0176
+
+cuts_michael_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.6810, SHOT=0.0075, FPFH=0.0147
+
+cuts_victoria_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1198, SHOT=0.0411, FPFH=0.7459
+
+cuts_victoria_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.8926, SHOT=0.0160, FPFH=0.8873
+
+cuts_victoria_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0924, SHOT=0.1512, FPFH=0.5575
+
+cuts_victoria_shape_13 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.6981, SHOT=0.0174, FPFH=0.0214
+
+cuts_victoria_shape_14 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2717, SHOT=0.0550, FPFH=0.6835
+
+cuts_victoria_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.4159, SHOT=0.0933, FPFH=0.7174
+
+cuts_victoria_shape_2 (cuts)
+  Winner: FPFH
+  Errors: DINO=0.0160, SHOT=0.0160, FPFH=0.0160
+
+cuts_victoria_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0112, SHOT=0.0111, FPFH=0.0112
+
+cuts_victoria_shape_4 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0142, SHOT=0.0200, FPFH=0.7806
+
+cuts_victoria_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2927, SHOT=0.0214, FPFH=0.8524
+
+cuts_victoria_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.6956, SHOT=0.0581, FPFH=0.7502
+
+cuts_victoria_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.1045, SHOT=0.1585, FPFH=0.4922
+
+cuts_victoria_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.5143, SHOT=0.2975, FPFH=0.4915
+
+cuts_victoria_shape_9 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0948, SHOT=0.3951, FPFH=0.7995
+
+cuts_wolf_shape_1 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0045, SHOT=0.0045, FPFH=0.0045
+
+cuts_wolf_shape_10 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0089, SHOT=0.0089, FPFH=0.8243
+
+cuts_wolf_shape_11 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1500, SHOT=0.0365, FPFH=0.4632
+
+cuts_wolf_shape_12 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0099, SHOT=0.0099, FPFH=0.0099
+
+cuts_wolf_shape_13 (cuts)
+  Winner: FPFH
+  Errors: DINO=0.1467, SHOT=0.0970, FPFH=0.0815
+
+cuts_wolf_shape_14 (cuts)
+  Winner: DINO
+  Errors: DINO=0.3687, SHOT=0.3691, FPFH=0.6774
+
+cuts_wolf_shape_15 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.1252, SHOT=0.0442, FPFH=0.6216
+
+cuts_wolf_shape_2 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0154, SHOT=0.0154, FPFH=0.0210
+
+cuts_wolf_shape_3 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0090, SHOT=0.0090, FPFH=0.1850
+
+cuts_wolf_shape_4 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.3737, SHOT=0.0134, FPFH=0.2192
+
+cuts_wolf_shape_5 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0293, SHOT=0.0159, FPFH=0.2359
+
+cuts_wolf_shape_6 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.2633, SHOT=0.0964, FPFH=0.1500
+
+cuts_wolf_shape_7 (cuts)
+  Winner: DINO
+  Errors: DINO=0.0067, SHOT=0.0073, FPFH=0.0073
+
+cuts_wolf_shape_8 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0178, SHOT=0.0120, FPFH=0.0120
+
+cuts_wolf_shape_9 (cuts)
+  Winner: SHOT
+  Errors: DINO=0.0098, SHOT=0.0096, FPFH=0.1058
+
+holes_cat_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2651, SHOT=0.2578, FPFH=0.4891
+
+holes_cat_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2392, SHOT=0.2312, FPFH=0.2540
+
+holes_cat_shape_2 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1832, SHOT=0.1256, FPFH=0.5870
+
+holes_cat_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.0454, SHOT=0.0982, FPFH=0.1540
+
+holes_cat_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2821, SHOT=0.2054, FPFH=0.2224
+
+holes_cat_shape_5 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2789, SHOT=0.1848, FPFH=0.1788
+
+holes_cat_shape_6 (holes)
+  Winner: FPFH
+  Errors: DINO=0.0686, SHOT=0.0949, FPFH=0.0442
+
+holes_cat_shape_7 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2706, SHOT=0.1863, FPFH=0.1334
+
+holes_cat_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0907, SHOT=0.0330, FPFH=0.0985
+
+holes_cat_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.1172, SHOT=0.2093, FPFH=0.1645
+
+holes_centaur_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3383, SHOT=0.0327, FPFH=0.1001
+
+holes_centaur_shape_10 (holes)
+  Winner: DINO
+  Errors: DINO=0.0311, SHOT=0.1045, FPFH=0.1008
+
+holes_centaur_shape_2 (holes)
+  Winner: FPFH
+  Errors: DINO=0.0931, SHOT=0.0559, FPFH=0.0308
+
+holes_centaur_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3176, SHOT=0.0261, FPFH=0.3018
+
+holes_centaur_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.1430, SHOT=0.1634, FPFH=0.3127
+
+holes_centaur_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0830, SHOT=0.0276, FPFH=0.0550
+
+holes_centaur_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.0285, SHOT=0.1064, FPFH=0.0359
+
+holes_centaur_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2100, SHOT=0.0264, FPFH=0.2765
+
+holes_centaur_shape_8 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2017, SHOT=0.1478, FPFH=0.0230
+
+holes_centaur_shape_9 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0669, SHOT=0.0567, FPFH=0.3742
+
+holes_david_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1683, SHOT=0.0354, FPFH=0.0382
+
+holes_david_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3225, SHOT=0.0428, FPFH=0.0570
+
+holes_david_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.2294, SHOT=0.2688, FPFH=0.4979
+
+holes_david_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0937, SHOT=0.0723, FPFH=0.0736
+
+holes_david_shape_4 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2292, SHOT=0.1438, FPFH=0.0276
+
+holes_david_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.3242, SHOT=0.3709, FPFH=0.3878
+
+holes_david_shape_6 (holes)
+  Winner: FPFH
+  Errors: DINO=0.0653, SHOT=0.0205, FPFH=0.0192
+
+holes_david_shape_7 (holes)
+  Winner: DINO
+  Errors: DINO=0.0862, SHOT=0.1886, FPFH=0.2830
+
+holes_david_shape_8 (holes)
+  Winner: FPFH
+  Errors: DINO=0.4398, SHOT=0.1774, FPFH=0.1062
+
+holes_david_shape_9 (holes)
+  Winner: DINO
+  Errors: DINO=0.0847, SHOT=0.2681, FPFH=0.4980
+
+holes_dog_shape_1 (holes)
+  Winner: FPFH
+  Errors: DINO=0.0252, SHOT=0.0152, FPFH=0.0144
+
+holes_dog_shape_10 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2604, SHOT=0.0440, FPFH=0.0371
+
+holes_dog_shape_2 (holes)
+  Winner: FPFH
+  Errors: DINO=0.0953, SHOT=0.0291, FPFH=0.0290
+
+holes_dog_shape_3 (holes)
+  Winner: FPFH
+  Errors: DINO=0.0576, SHOT=0.0640, FPFH=0.0425
+
+holes_dog_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0582, SHOT=0.0450, FPFH=0.0473
+
+holes_dog_shape_5 (holes)
+  Winner: FPFH
+  Errors: DINO=0.1138, SHOT=0.1315, FPFH=0.0409
+
+holes_dog_shape_6 (holes)
+  Winner: FPFH
+  Errors: DINO=0.1106, SHOT=0.0826, FPFH=0.0693
+
+holes_dog_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1748, SHOT=0.0390, FPFH=0.1190
+
+holes_dog_shape_8 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2061, SHOT=0.1622, FPFH=0.0754
+
+holes_dog_shape_9 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2835, SHOT=0.2328, FPFH=0.1294
+
+holes_horse_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0594, SHOT=0.0177, FPFH=0.6631
+
+holes_horse_shape_10 (holes)
+  Winner: FPFH
+  Errors: DINO=0.1604, SHOT=0.0722, FPFH=0.0334
+
+holes_horse_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.1650, SHOT=0.2750, FPFH=0.2578
+
+holes_horse_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1059, SHOT=0.0214, FPFH=0.1015
+
+holes_horse_shape_4 (holes)
+  Winner: DINO
+  Errors: DINO=0.1053, SHOT=0.2021, FPFH=0.1291
+
+holes_horse_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.0401, SHOT=0.0663, FPFH=0.0490
+
+holes_horse_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.0295, SHOT=0.1403, FPFH=0.0307
+
+holes_horse_shape_7 (holes)
+  Winner: FPFH
+  Errors: DINO=0.1572, SHOT=0.1211, FPFH=0.0355
+
+holes_horse_shape_8 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2433, SHOT=0.2581, FPFH=0.2115
+
+holes_horse_shape_9 (holes)
+  Winner: FPFH
+  Errors: DINO=0.0943, SHOT=0.0693, FPFH=0.0255
+
+holes_michael_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0118, SHOT=0.0081, FPFH=0.0095
+
+holes_michael_shape_10 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1807, SHOT=0.0461, FPFH=0.3208
+
+holes_michael_shape_2 (holes)
+  Winner: DINO
+  Errors: DINO=0.2239, SHOT=0.2574, FPFH=0.3033
+
+holes_michael_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2526, SHOT=0.0165, FPFH=0.0185
+
+holes_michael_shape_4 (holes)
+  Winner: FPFH
+  Errors: DINO=0.3920, SHOT=0.4303, FPFH=0.1648
+
+holes_michael_shape_5 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1645, SHOT=0.0254, FPFH=0.0273
+
+holes_michael_shape_6 (holes)
+  Winner: DINO
+  Errors: DINO=0.0236, SHOT=0.0263, FPFH=0.0315
+
+holes_michael_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0549, SHOT=0.0270, FPFH=0.5234
+
+holes_michael_shape_8 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2072, SHOT=0.2943, FPFH=0.1099
+
+holes_michael_shape_9 (holes)
+  Winner: SHOT
+  Errors: DINO=0.6218, SHOT=0.0318, FPFH=0.5589
+
+holes_victoria_shape_1 (holes)
+  Winner: FPFH
+  Errors: DINO=0.4018, SHOT=0.2365, FPFH=0.1295
+
+holes_victoria_shape_10 (holes)
+  Winner: FPFH
+  Errors: DINO=0.4113, SHOT=0.0396, FPFH=0.0320
+
+holes_victoria_shape_2 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0913, SHOT=0.0189, FPFH=0.3758
+
+holes_victoria_shape_3 (holes)
+  Winner: SHOT
+  Errors: DINO=0.1591, SHOT=0.0680, FPFH=0.4780
+
+holes_victoria_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3471, SHOT=0.0700, FPFH=0.4966
+
+holes_victoria_shape_5 (holes)
+  Winner: FPFH
+  Errors: DINO=0.1235, SHOT=0.1555, FPFH=0.0210
+
+holes_victoria_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.4230, SHOT=0.1026, FPFH=0.1051
+
+holes_victoria_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.5617, SHOT=0.5548, FPFH=0.7327
+
+holes_victoria_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.4326, SHOT=0.2569, FPFH=0.6705
+
+holes_victoria_shape_9 (holes)
+  Winner: FPFH
+  Errors: DINO=0.2749, SHOT=0.4311, FPFH=0.1792
+
+holes_wolf_shape_1 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2440, SHOT=0.1716, FPFH=0.3847
+
+holes_wolf_shape_2 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0087, SHOT=0.0062, FPFH=0.5498
+
+holes_wolf_shape_3 (holes)
+  Winner: DINO
+  Errors: DINO=0.0126, SHOT=0.0146, FPFH=0.0129
+
+holes_wolf_shape_4 (holes)
+  Winner: SHOT
+  Errors: DINO=0.3083, SHOT=0.0169, FPFH=0.1204
+
+holes_wolf_shape_5 (holes)
+  Winner: DINO
+  Errors: DINO=0.0282, SHOT=0.0282, FPFH=0.1549
+
+holes_wolf_shape_6 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2970, SHOT=0.0183, FPFH=0.0211
+
+holes_wolf_shape_7 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2549, SHOT=0.0117, FPFH=0.0131
+
+holes_wolf_shape_8 (holes)
+  Winner: SHOT
+  Errors: DINO=0.2146, SHOT=0.1457, FPFH=0.1804
+
+holes_wolf_shape_9 (holes)
+  Winner: SHOT
+  Errors: DINO=0.0255, SHOT=0.0075, FPFH=0.0257
+

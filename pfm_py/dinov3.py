@@ -1,279 +1,167 @@
-###############################################################################
-# DINOv3 - Shape Feature Extraction (compatible with your current pipeline)
-###############################################################################
-
-import time
-import random
+import os
+import math
 import torch
 import numpy as np
 from PIL import Image
-
 from torchvision import transforms as tfs
-import torchvision
-import os
-from transformers import AutoImageProcessor, AutoModel
-
 
 try:
     from pytorch3d.structures import Meshes
     from pytorch3d.renderer import Textures
-    from pytorch3d.renderer.cameras import (
-        look_at_view_transform,
-        PerspectiveCameras,
-    )
+    from pytorch3d.renderer.cameras import look_at_view_transform, PerspectiveCameras
     from pytorch3d.renderer.mesh.rasterizer import RasterizationSettings, MeshRasterizer
     from pytorch3d.renderer.mesh.shader import HardPhongShader
     from pytorch3d.renderer import MeshRenderer
     from pytorch3d.renderer.lighting import PointLights
+    from pytorch3d.ops import ball_query
     PYTORCH3D_AVAILABLE = True
 except Exception:
     PYTORCH3D_AVAILABLE = False
 
+from transformers import AutoModel
 
-# -------------------- GLOBAL SETTINGS --------------------
-
+PATCH_SIZE = 16
+NUM_SKIP_TOKENS = 5  # CLS + 4 register tokens
+FEATURE_DIMS = 768  # ViT-L
+VERTEX_GPU_LIMIT = 35000
 _DINO_MODEL = None
-_DINO_PROCESSOR = None
-
-# DINOv3 ViT-B/16 feature dim (confirmed: 768)
-FEATURE_DIMS = 768
-
-PATCH_SIZE = 16     # DINOv3 patch size
-
-
-# -------------------- MODEL INIT --------------------
-
-def init_dino(device):
-    """
-    Initialize DINOv3 model using Hugging Face Transformers to avoid fbaipublicfiles.
-    Returns processor + model.
-    """
-
-    global _DINO_MODEL, _DINO_PROCESSOR
-
-    pretrained_model_name = "facebook/dinov3-vitb16-pretrain-lvd1689m"
-    print(f"[INFO] Loading DINOv3 from Hugging Face: {pretrained_model_name}")
-    hf_token = os.environ.get("HF_TOKEN")
-    processor = None
-    try:
-        processor = AutoImageProcessor.from_pretrained(pretrained_model_name, token=hf_token)
-    except Exception as e:
-        print(f"[WARN] Failed to load HF image processor ({e}). Falling back to torchvision transforms.")
-        processor = None
-
-    # trust_remote_code in case model class is custom; supply token if set
-    model = AutoModel.from_pretrained(pretrained_model_name, trust_remote_code=True, token=hf_token)
-    model = model.to(device).eval()
-
-    _DINO_MODEL = model
-    _DINO_PROCESSOR = processor
-    return processor, model
 
 
 def get_dino_model(device):
-    global _DINO_MODEL, _DINO_PROCESSOR
+    global _DINO_MODEL
     if _DINO_MODEL is None:
-        return init_dino(device)
-    return _DINO_PROCESSOR, _DINO_MODEL
+        model_name = "facebook/dinov3-vitb16-pretrain-lvd1689m"
+        hf_token = os.environ.get("HF_TOKEN")
+        _DINO_MODEL = AutoModel.from_pretrained(model_name, trust_remote_code=True, token=hf_token)
+        _DINO_MODEL = _DINO_MODEL.to(device).eval()
+    return _DINO_MODEL
 
-
-# -------------------- DINOv3 Dense Feature Extraction --------------------
 
 @torch.no_grad()
-def get_dino_features(device, processor, model, img_pil, grid):
-    """
-    Extract dense DINOv3 patch-level features and map to 256x256 grid.
-    Equivalent to your previous get_dino_features() for DINOv2.
-    """
-
-    # 1) Use HF processor when available; otherwise fall back to ImageNet transforms
-    if processor is not None:
-        inputs = processor(images=img_pil, return_tensors="pt")
-        pixel_values = inputs["pixel_values"].to(device)
-    else:
-        transform = tfs.Compose([
-            tfs.Resize(518, interpolation=tfs.InterpolationMode.BICUBIC),
-            tfs.CenterCrop(518),
-            tfs.ToTensor(),
-            tfs.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
-        pixel_values = transform(img_pil).unsqueeze(0).to(device)
-
-    # 2) Forward pass
-    # 2) Forward pass via HF model
-    outputs = model(pixel_values=pixel_values)
-    tokens = outputs.last_hidden_state  # [B, N_tokens, C]
-    # tokens: [CLS, REG1..REG4, PATCHES]
-    patch_tokens = tokens[:, 5:, :]
-
-    B, N, C = patch_tokens.shape
-
-    # 3) Convert patch tokens to spatial grid
-    side = int(np.sqrt(N))     # Should be sqrt(#patches)
-    patch_tokens = patch_tokens.reshape(B, side, side, C)
-    patch_tokens = patch_tokens.permute(0, 3, 1, 2)   # [1, C, H_p, W_p]
-
-    # 4) grid_sample to target grid (same as your DINOv2 code)
-    features = torch.nn.functional.grid_sample(
-        patch_tokens, grid, align_corners=False
-    ).reshape(1, C, -1)
-
-    # 5) normalize
-    features = torch.nn.functional.normalize(features, dim=1)
-
-    return features
+def get_dino_features(device, dino_model, img, grid):
+    transform = tfs.Compose([
+        tfs.Resize((518, 518)),
+        tfs.ToTensor(),
+        tfs.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    ])
+    img = transform(img)[:3].unsqueeze(0).to(device)
+    with torch.autocast(device_type='cuda', dtype=torch.float32):
+        outputs = dino_model(img)
+    patch_tokens = outputs.last_hidden_state[:, NUM_SKIP_TOKENS:, :].half()
+    h, w = img.shape[2] // PATCH_SIZE, img.shape[3] // PATCH_SIZE
+    features = patch_tokens.reshape(-1, h, w, FEATURE_DIMS).permute(0, 3, 1, 2)
+    features = torch.nn.functional.grid_sample(features, grid, align_corners=False)
+    features = features.reshape(1, FEATURE_DIMS, -1)
+    return torch.nn.functional.normalize(features, dim=1)
 
 
-
-# -------------------- Rendering + Aggregation --------------------
-
-def arange_pixels(resolution=(128, 128), batch_size=1, invert_y_axis=False, device="cuda"):
+def arange_pixels(resolution, invert_y_axis=False, device="cuda"):
     h, w = resolution
-    uh = 1
-    uw = 1
-    x = torch.linspace(-uw, uw, w, device=device)
-    y = torch.linspace(-uh, uh, h, device=device)
-    x, y = torch.meshgrid(x, y)
-    pixel_scaled = (
-        torch.stack([x, y], -1)
-        .permute(1, 0, 2)
-        .reshape(1, -1, 2)
-        .repeat(batch_size, 1, 1)
-    )
+    x = torch.linspace(-1, 1, w, device=device)
+    y = torch.linspace(-1, 1, h, device=device)
+    x, y = torch.meshgrid(x, y, indexing='xy')
+    pixels = torch.stack([x, y], -1).reshape(1, -1, 2)
     if invert_y_axis:
-        pixel_scaled[..., -1] *= -1.0
-    return pixel_scaled
+        pixels[..., -1] *= -1.0
+    return pixels
 
 
-def batch_render(device, mesh, mesh_vertices, num_views, H, W):
+def batch_render(device, mesh, num_views, H, W):
     bbox = mesh.get_bounding_boxes()
-    bbox_min = bbox.min(dim=-1).values[0]
-    bbox_max = bbox.max(dim=-1).values[0]
-    bb_diff = bbox_max - bbox_min
+    bbox_min, bbox_max = bbox.min(dim=-1).values[0], bbox.max(dim=-1).values[0]
     bbox_center = (bbox_min + bbox_max) / 2.0
+    distance = torch.sqrt(((bbox_max - bbox_min) ** 2).sum()) * 0.65
 
-    distance = torch.sqrt((bb_diff * bb_diff).sum()) * 0.65
-
-    # View grid
-    steps = int(np.ceil(np.sqrt(max(4, num_views))))
+    steps = int(math.ceil(math.sqrt(num_views)))
     end = 360 - 360 / steps
-    elev_grid = torch.linspace(0, end, steps)
-    azim_grid = torch.linspace(0, end, steps)
+    elevation = torch.linspace(0, end, steps).repeat(steps)[:num_views]
+    azimuth = torch.linspace(0, end, steps).repeat_interleave(steps)[:num_views]
 
-    elevation = elev_grid.repeat_interleave(steps)[:num_views]
-    azimuth = azim_grid.repeat(steps)[:num_views]
-
-    R, T = look_at_view_transform(
-        dist=distance,
-        azim=azimuth,
-        elev=elevation,
-        device=device,
-        at=bbox_center.unsqueeze(0)
-    )
-
+    R, T = look_at_view_transform(dist=distance, azim=azimuth, elev=elevation, device=device, at=bbox_center.unsqueeze(0))
     camera = PerspectiveCameras(R=R, T=T, device=device)
-
-    rasterization_settings = RasterizationSettings(
-        image_size=(H, W),
-        blur_radius=0.0,
-        faces_per_pixel=1
-    )
-
-    rasterizer = MeshRasterizer(cameras=camera, raster_settings=rasterization_settings)
-    lights = PointLights(device=device)
+    raster_settings = RasterizationSettings(image_size=(H, W), blur_radius=0.0, faces_per_pixel=1, bin_size=0)
+    rasterizer = MeshRasterizer(cameras=camera, raster_settings=raster_settings)
+    lights = PointLights(device=device, location=camera.get_camera_center())
     shader = HardPhongShader(device=device, cameras=camera, lights=lights)
     renderer = MeshRenderer(rasterizer=rasterizer, shader=shader)
 
     batch_mesh = mesh.extend(num_views)
     images = renderer(batch_mesh)
-    frags = rasterizer(batch_mesh)
-
-    return images, camera, frags.zbuf
-
+    depth = rasterizer(batch_mesh).zbuf
+    return images, camera, depth
 
 
-# -------------------- DINOv3 per-vertex aggregation --------------------
-
-def get_features_per_vertex(device, processor, model, mesh, mesh_vertices,
-                            num_views=100, H=512, W=512):
-
-    device = torch.device(device)
-    mesh = mesh.to(device)
-    mesh_vertices = mesh_vertices.to(device)
-
-    batched_img, camera, depth = batch_render(device, mesh, mesh_vertices,
-                                              num_views, H, W)
-
-    grid = arange_pixels((H, W), invert_y_axis=False, device=device)[0].reshape(1, H, W, 2).to(device)
-
-    ft_per_vertex = torch.zeros((len(mesh_vertices), FEATURE_DIMS), device=device)
-    ft_per_vertex_count = torch.zeros((len(mesh_vertices), 1), device=device)
-
-
-    for i in range(num_views):
-
-        img_np = (batched_img[i, :, :, :3].cpu().numpy() * 255).astype(np.uint8)
-        img_pil = Image.fromarray(img_np)
-
-        dense_feat = get_dino_features(
-            device=device,
-            processor=processor,
-            model=model,
-            img_pil=img_pil,
-            grid=grid,
-        )   # [1, C, H*W]
-
-        dense_feat = dense_feat[0].T     # [H*W, C]
-
-        # naive aggregation (same as your current v2 code)
-        ft_per_vertex += dense_feat[:len(mesh_vertices), :]
-        ft_per_vertex_count += 1
-
-
-    ft_per_vertex = ft_per_vertex / ft_per_vertex_count.clamp(min=1)
-    return ft_per_vertex
-
-
-
-# -------------------- Public API --------------------
-
-def compute_shape_dino_features(verts, faces):
+def compute_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
     if not PYTORCH3D_AVAILABLE:
-        raise RuntimeError('pytorch3d not available in environment')
-
+        raise RuntimeError('pytorch3d not available')
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    processor, dino_model = get_dino_model(device)
+    dino_model = get_dino_model(device)
 
     verts = verts.clone().detach().float()
     faces = faces.clone().detach().long()
-
-    verts_rgb = torch.ones_like(verts)[None] * 0.8
-    textures = Textures(verts_rgb=verts_rgb)
+    textures = Textures(verts_rgb=torch.ones_like(verts)[None] * 0.8)
     mesh = Meshes(verts=[verts], faces=[faces], textures=textures).to(device)
+    mesh_vertices = mesh.verts_list()[0]
 
-    features = get_features_per_vertex(
-        device=device,
-        processor=processor,
-        model=dino_model,
-        mesh=mesh,
-        mesh_vertices=mesh.verts_list()[0],
-        num_views=32,
-        H=256, W=256,
-    )
+    if len(mesh_vertices) > VERTEX_GPU_LIMIT:
+        samples = torch.randperm(len(mesh_vertices))[:10000]
+        max_dist = torch.cdist(mesh_vertices[samples], mesh_vertices[samples]).max()
+    else:
+        max_dist = torch.cdist(mesh_vertices, mesh_vertices).max()
+    ball_radius = max_dist * tolerance
 
-    return features.cpu()
+    images, camera, depth = batch_render(device, mesh, num_views, H, W)
+    pixel_coords = arange_pixels((H, W), invert_y_axis=True, device=device)[0]
+    pixel_coords[:, 0] = torch.flip(pixel_coords[:, 0], dims=[0])
+    grid = arange_pixels((H, W), invert_y_axis=False, device=device)[0].reshape(1, H, W, 2).half()
+
+    ft_per_vertex = torch.zeros((len(mesh_vertices), FEATURE_DIMS), device=device).half()
+    ft_count = torch.zeros((len(mesh_vertices), 1), device=device).half()
+
+    for idx in range(num_views):
+        dp = depth[idx].flatten().unsqueeze(1)
+        xy_depth = torch.cat((pixel_coords, dp), dim=1)
+        visible = xy_depth[:, 2] != -1
+        xy_depth = xy_depth[visible]
+
+        world_coords = camera[idx].unproject_points(xy_depth, world_coordinates=True, from_ndc=True)
+        img = (images[idx, :, :, :3].cpu().numpy() * 255).astype(np.uint8)
+        dino_feats = get_dino_features(device, dino_model, Image.fromarray(img), grid)
+        feats_visible = dino_feats[0, :, visible]
+
+        queried = ball_query(
+            world_coords.unsqueeze(0),
+            mesh_vertices.unsqueeze(0),
+            K=100,
+            radius=ball_radius,
+            return_nn=False,
+        ).idx[0]
+
+        mask = queried != -1
+        repeat_counts = mask.sum(dim=1)
+        ft_count[queried[mask]] += 1
+        ft_per_vertex[queried[mask]] += feats_visible.repeat_interleave(repeat_counts, dim=1).T
+
+    has_feats = ft_count[:, 0] != 0
+    ft_per_vertex[has_feats] /= ft_count[has_feats]
+
+    missing = ~has_feats
+    n_missing = missing.sum().item()
+    if n_missing > 0:
+        print(f"Warning: {n_missing} vertices missing features, using nearest neighbor")
+        dists = torch.cdist(mesh_vertices[missing], mesh_vertices[has_feats])
+        nearest = dists.argmin(dim=1)
+        ft_per_vertex[missing] = ft_per_vertex[has_feats][nearest]
+
+    return ft_per_vertex.cpu(), n_missing
 
 
-def get_shape_dino_features(verts, faces, cache_dir=None):
-    return compute_shape_dino_features(verts, faces)
+def get_shape_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
+    feats, _ = compute_dino_features(verts, faces, num_views, H, W, tolerance)
+    return feats
 
-
-# --- Compatibility wrappers expected by the rest of the pipeline ---
-def get_dinov3_model(device):
-    # returns processor, model
-    return get_dino_model(device)
-
-
-def get_shape_dinov3_features(verts, faces, cache_dir=None):
-    return get_shape_dino_features(verts, faces, cache_dir)
+compute_shape_dino_features = get_shape_dino_features
+def get_shape_dinov3_features(verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
+    return compute_dino_features(verts, faces, num_views, H, W, tolerance)
+get_dinov3_model = get_dino_model

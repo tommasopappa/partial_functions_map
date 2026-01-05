@@ -1,0 +1,2851 @@
+================================================================================
+SUB-METHOD PERFORMANCE ANALYSIS WITH MARGINS
+================================================================================
+
+OVERALL DISTRIBUTION
+--------------------------------------------------------------------------------
+Total cases: 198
+
+Method          Count    Pct   Avg Margin   Min Margin   Max Margin
+--------------------------------------------------------------------------------
+SHOT+PFM           82  41.4%      0.0629        0.0000        0.3487
+DINO+PFM           60  30.3%      0.0300        0.0000        0.2366
+FPFH+PFM           31  15.7%      0.0455        0.0000        0.1732
+SHOT+argmax        13   6.6%      0.0773        0.0040        0.2617
+DINO+FM             5   2.5%      0.0261        0.0074        0.0538
+SHOT+FM             4   2.0%      0.0437        0.0295        0.0641
+DINO+argmax         3   1.5%      0.0196        0.0006        0.0386
+
+================================================================================
+AGGREGATED BY DESCRIPTOR
+--------------------------------------------------------------------------------
+  SHOT: 99 (50.0%), avg_margin=0.0640
+  DINO: 68 (34.3%), avg_margin=0.0292
+  FPFH: 31 (15.7%), avg_margin=0.0455
+
+================================================================================
+AGGREGATED BY METHOD TYPE
+--------------------------------------------------------------------------------
+  PFM: 173 (87.4%), avg_margin=0.0484
+  argmax: 16 (8.1%), avg_margin=0.0665
+  FM: 9 (4.5%), avg_margin=0.0339
+
+================================================================================
+CUTS DATASET
+================================================================================
+
+  SHOT+PFM       :  53 / 119 ( 44.5%)
+  DINO+PFM       :  45 / 119 ( 37.8%)
+  SHOT+argmax    :  10 / 119 (  8.4%)
+  FPFH+PFM       :   6 / 119 (  5.0%)
+  DINO+FM        :   2 / 119 (  1.7%)
+  DINO+argmax    :   2 / 119 (  1.7%)
+  SHOT+FM        :   1 / 119 (  0.8%)
+
+================================================================================
+HOLES DATASET
+================================================================================
+
+  SHOT+PFM       :  29 /  79 ( 36.7%)
+  FPFH+PFM       :  25 /  79 ( 31.6%)
+  DINO+PFM       :  15 /  79 ( 19.0%)
+  SHOT+argmax    :   3 /  79 (  3.8%)
+  DINO+FM        :   3 /  79 (  3.8%)
+  SHOT+FM        :   3 /  79 (  3.8%)
+  DINO+argmax    :   1 /  79 (  1.3%)
+
+================================================================================
+DETAILED CASE-BY-CASE RESULTS
+================================================================================
+
+cuts_cat_shape_1 (cuts)
+  Winner: DINO+PFM = 0.0076 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0076 <-- BEST
+    SHOT+PFM       : 0.0076 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.0925
+    DINO+FM        : 0.1476
+    DINO+argmax    : 0.1636
+    FPFH+PFM       : 0.1697
+    SHOT+FM        : 0.2024
+    FPFH+FM        : 0.4819
+    FPFH+argmax    : 0.4913
+
+cuts_cat_shape_10 (cuts)
+  Winner: DINO+PFM = 0.0362 (margin over 2nd: 0.2366)
+  All errors:
+    DINO+PFM       : 0.0362 <-- BEST
+    DINO+FM        : 0.2728 <-- 2nd (Δ=0.2366)
+    DINO+argmax    : 0.2846
+    SHOT+argmax    : 0.3222
+    SHOT+PFM       : 0.3397
+    FPFH+FM        : 0.4419
+    SHOT+FM        : 0.5871
+    FPFH+argmax    : 0.6106
+    FPFH+PFM       : 0.8017
+
+cuts_cat_shape_11 (cuts)
+  Winner: SHOT+PFM = 0.0258 (margin over 2nd: 0.0012)
+  All errors:
+    SHOT+PFM       : 0.0258 <-- BEST
+    FPFH+PFM       : 0.0270 <-- 2nd (Δ=0.0012)
+    DINO+argmax    : 0.1375
+    DINO+FM        : 0.1529
+    SHOT+argmax    : 0.1905
+    SHOT+FM        : 0.1905
+    DINO+PFM       : 0.2276
+    FPFH+FM        : 0.4264
+    FPFH+argmax    : 0.4641
+
+cuts_cat_shape_12 (cuts)
+  Winner: SHOT+PFM = 0.0266 (margin over 2nd: 0.1068)
+  All errors:
+    SHOT+PFM       : 0.0266 <-- BEST
+    FPFH+PFM       : 0.1334 <-- 2nd (Δ=0.1068)
+    DINO+PFM       : 0.1520
+    DINO+argmax    : 0.2370
+    DINO+FM        : 0.2539
+    SHOT+FM        : 0.2579
+    SHOT+argmax    : 0.2595
+    FPFH+FM        : 0.4756
+    FPFH+argmax    : 0.5558
+
+cuts_cat_shape_13 (cuts)
+  Winner: SHOT+PFM = 0.0176 (margin over 2nd: 0.0001)
+  All errors:
+    SHOT+PFM       : 0.0176 <-- BEST
+    DINO+PFM       : 0.0177 <-- 2nd (Δ=0.0001)
+    FPFH+PFM       : 0.0233
+    SHOT+argmax    : 0.1978
+    SHOT+FM        : 0.2139
+    DINO+FM        : 0.2746
+    DINO+argmax    : 0.2871
+    FPFH+FM        : 0.4800
+    FPFH+argmax    : 0.5479
+
+cuts_cat_shape_14 (cuts)
+  Winner: FPFH+PFM = 0.0661 (margin over 2nd: 0.1159)
+  All errors:
+    FPFH+PFM       : 0.0661 <-- BEST
+    DINO+FM        : 0.1820 <-- 2nd (Δ=0.1159)
+    SHOT+PFM       : 0.1828
+    DINO+PFM       : 0.1834
+    SHOT+FM        : 0.1944
+    DINO+argmax    : 0.2121
+    SHOT+argmax    : 0.2283
+    FPFH+FM        : 0.4612
+    FPFH+argmax    : 0.4699
+
+cuts_cat_shape_15 (cuts)
+  Winner: DINO+PFM = 0.2239 (margin over 2nd: 0.0012)
+  All errors:
+    DINO+PFM       : 0.2239 <-- BEST
+    SHOT+PFM       : 0.2251 <-- 2nd (Δ=0.0012)
+    DINO+FM        : 0.2321
+    DINO+argmax    : 0.2820
+    SHOT+argmax    : 0.3289
+    FPFH+FM        : 0.4626
+    FPFH+argmax    : 0.6129
+    SHOT+FM        : 0.6212
+    FPFH+PFM       : 0.7351
+
+cuts_cat_shape_2 (cuts)
+  Winner: DINO+PFM = 0.0031 (margin over 2nd: 0.0001)
+  All errors:
+    DINO+PFM       : 0.0031 <-- BEST
+    SHOT+PFM       : 0.0032 <-- 2nd (Δ=0.0001)
+    FPFH+PFM       : 0.0032
+    SHOT+argmax    : 0.0118
+    SHOT+FM        : 0.0916
+    DINO+argmax    : 0.1129
+    DINO+FM        : 0.1222
+    FPFH+argmax    : 0.4564
+    FPFH+FM        : 0.4877
+
+cuts_cat_shape_3 (cuts)
+  Winner: DINO+PFM = 0.0057 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0057 <-- BEST
+    SHOT+PFM       : 0.0057 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.0478
+    FPFH+PFM       : 0.1237
+    SHOT+FM        : 0.2050
+    DINO+argmax    : 0.2564
+    DINO+FM        : 0.3005
+    FPFH+FM        : 0.4375
+    FPFH+argmax    : 0.5480
+
+cuts_cat_shape_4 (cuts)
+  Winner: SHOT+PFM = 0.1148 (margin over 2nd: 0.0794)
+  All errors:
+    SHOT+PFM       : 0.1148 <-- BEST
+    DINO+PFM       : 0.1942 <-- 2nd (Δ=0.0794)
+    DINO+FM        : 0.2198
+    DINO+argmax    : 0.2344
+    FPFH+PFM       : 0.2469
+    SHOT+FM        : 0.2730
+    SHOT+argmax    : 0.3073
+    FPFH+FM        : 0.4907
+    FPFH+argmax    : 0.5008
+
+cuts_cat_shape_5 (cuts)
+  Winner: SHOT+PFM = 0.0657 (margin over 2nd: 0.0002)
+  All errors:
+    SHOT+PFM       : 0.0657 <-- BEST
+    FPFH+PFM       : 0.0659 <-- 2nd (Δ=0.0002)
+    DINO+argmax    : 0.1417
+    DINO+FM        : 0.1671
+    SHOT+FM        : 0.1875
+    DINO+PFM       : 0.2065
+    SHOT+argmax    : 0.2586
+    FPFH+FM        : 0.4191
+    FPFH+argmax    : 0.4344
+
+cuts_cat_shape_6 (cuts)
+  Winner: SHOT+PFM = 0.0200 (margin over 2nd: 0.0001)
+  All errors:
+    SHOT+PFM       : 0.0200 <-- BEST
+    DINO+PFM       : 0.0201 <-- 2nd (Δ=0.0001)
+    DINO+FM        : 0.2103
+    DINO+argmax    : 0.2124
+    SHOT+argmax    : 0.2147
+    SHOT+FM        : 0.2291
+    FPFH+PFM       : 0.3805
+    FPFH+FM        : 0.4512
+    FPFH+argmax    : 0.5529
+
+cuts_cat_shape_7 (cuts)
+  Winner: DINO+PFM = 0.0413 (margin over 2nd: 0.1006)
+  All errors:
+    DINO+PFM       : 0.0413 <-- BEST
+    SHOT+PFM       : 0.1419 <-- 2nd (Δ=0.1006)
+    SHOT+argmax    : 0.3188
+    DINO+argmax    : 0.3632
+    DINO+FM        : 0.3852
+    FPFH+FM        : 0.4195
+    SHOT+FM        : 0.4353
+    FPFH+argmax    : 0.5378
+    FPFH+PFM       : 0.6020
+
+cuts_cat_shape_8 (cuts)
+  Winner: FPFH+PFM = 0.1049 (margin over 2nd: 0.0455)
+  All errors:
+    FPFH+PFM       : 0.1049 <-- BEST
+    DINO+FM        : 0.1504 <-- 2nd (Δ=0.0455)
+    DINO+argmax    : 0.1935
+    SHOT+argmax    : 0.1948
+    DINO+PFM       : 0.2370
+    SHOT+PFM       : 0.2433
+    SHOT+FM        : 0.2587
+    FPFH+FM        : 0.4616
+    FPFH+argmax    : 0.4923
+
+cuts_cat_shape_9 (cuts)
+  Winner: FPFH+PFM = 0.0260 (margin over 2nd: 0.0002)
+  All errors:
+    FPFH+PFM       : 0.0260 <-- BEST
+    DINO+PFM       : 0.0262 <-- 2nd (Δ=0.0002)
+    SHOT+PFM       : 0.0262
+    DINO+FM        : 0.2025
+    SHOT+argmax    : 0.2252
+    DINO+argmax    : 0.2459
+    SHOT+FM        : 0.3481
+    FPFH+FM        : 0.4357
+    FPFH+argmax    : 0.5445
+
+cuts_centaur_shape_1 (cuts)
+  Winner: SHOT+argmax = 0.0005 (margin over 2nd: 0.0049)
+  All errors:
+    SHOT+argmax    : 0.0005 <-- BEST
+    DINO+PFM       : 0.0054 <-- 2nd (Δ=0.0049)
+    SHOT+PFM       : 0.0054
+    FPFH+PFM       : 0.0054
+    SHOT+FM        : 0.0813
+    DINO+argmax    : 0.0818
+    DINO+FM        : 0.1211
+    FPFH+argmax    : 0.4956
+    FPFH+FM        : 0.6518
+
+cuts_centaur_shape_10 (cuts)
+  Winner: DINO+PFM = 0.0091 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0091 <-- BEST
+    SHOT+PFM       : 0.0091 <-- 2nd (Δ=0.0000)
+    FPFH+PFM       : 0.0188
+    SHOT+argmax    : 0.1169
+    DINO+FM        : 0.1424
+    SHOT+FM        : 0.1655
+    DINO+argmax    : 0.1689
+    FPFH+argmax    : 0.5159
+    FPFH+FM        : 0.6100
+
+cuts_centaur_shape_11 (cuts)
+  Winner: SHOT+PFM = 0.0201 (margin over 2nd: 0.0001)
+  All errors:
+    SHOT+PFM       : 0.0201 <-- BEST
+    DINO+PFM       : 0.0202 <-- 2nd (Δ=0.0001)
+    SHOT+argmax    : 0.1128
+    DINO+argmax    : 0.1879
+    DINO+FM        : 0.2475
+    SHOT+FM        : 0.2902
+    FPFH+FM        : 0.5526
+    FPFH+argmax    : 0.6391
+    FPFH+PFM       : 0.7576
+
+cuts_centaur_shape_12 (cuts)
+  Winner: DINO+PFM = 0.0092 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0092 <-- BEST
+    SHOT+PFM       : 0.0092 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.0999
+    DINO+argmax    : 0.1760
+    DINO+FM        : 0.1871
+    SHOT+FM        : 0.2696
+    FPFH+PFM       : 0.2830
+    FPFH+argmax    : 0.5561
+    FPFH+FM        : 0.6458
+
+cuts_centaur_shape_13 (cuts)
+  Winner: SHOT+PFM = 0.0225 (margin over 2nd: 0.0717)
+  All errors:
+    SHOT+PFM       : 0.0225 <-- BEST
+    SHOT+argmax    : 0.0942 <-- 2nd (Δ=0.0717)
+    DINO+argmax    : 0.2031
+    DINO+PFM       : 0.2458
+    DINO+FM        : 0.2492
+    SHOT+FM        : 0.2895
+    FPFH+PFM       : 0.3775
+    FPFH+argmax    : 0.5675
+    FPFH+FM        : 0.6400
+
+cuts_centaur_shape_14 (cuts)
+  Winner: SHOT+PFM = 0.0695 (margin over 2nd: 0.1241)
+  All errors:
+    SHOT+PFM       : 0.0695 <-- BEST
+    DINO+argmax    : 0.1936 <-- 2nd (Δ=0.1241)
+    DINO+FM        : 0.2428
+    DINO+PFM       : 0.2722
+    SHOT+argmax    : 0.2916
+    FPFH+PFM       : 0.2960
+    SHOT+FM        : 0.3164
+    FPFH+FM        : 0.5133
+    FPFH+argmax    : 0.5624
+
+cuts_centaur_shape_15 (cuts)
+  Winner: SHOT+PFM = 0.0156 (margin over 2nd: 0.1111)
+  All errors:
+    SHOT+PFM       : 0.0156 <-- BEST
+    SHOT+argmax    : 0.1267 <-- 2nd (Δ=0.1111)
+    DINO+argmax    : 0.1772
+    DINO+FM        : 0.2262
+    SHOT+FM        : 0.2858
+    DINO+PFM       : 0.3194
+    FPFH+PFM       : 0.3414
+    FPFH+argmax    : 0.5488
+    FPFH+FM        : 0.6284
+
+cuts_centaur_shape_2 (cuts)
+  Winner: DINO+PFM = 0.0030 (margin over 2nd: 0.0013)
+  All errors:
+    DINO+PFM       : 0.0030 <-- BEST
+    SHOT+argmax    : 0.0043 <-- 2nd (Δ=0.0013)
+    DINO+argmax    : 0.1383
+    DINO+FM        : 0.2148
+    SHOT+FM        : 0.2905
+    FPFH+PFM       : 0.5629
+    FPFH+FM        : 0.6205
+    FPFH+argmax    : 0.6438
+    SHOT+PFM       : 0.7768
+
+cuts_centaur_shape_3 (cuts)
+  Winner: SHOT+argmax = 0.0054 (margin over 2nd: 0.0040)
+  All errors:
+    SHOT+argmax    : 0.0054 <-- BEST
+    DINO+PFM       : 0.0094 <-- 2nd (Δ=0.0040)
+    SHOT+PFM       : 0.0094
+    DINO+argmax    : 0.1337
+    DINO+FM        : 0.1860
+    SHOT+FM        : 0.2339
+    FPFH+PFM       : 0.3381
+    FPFH+argmax    : 0.5424
+    FPFH+FM        : 0.6711
+
+cuts_centaur_shape_4 (cuts)
+  Winner: DINO+PFM = 0.0096 (margin over 2nd: 0.0153)
+  All errors:
+    DINO+PFM       : 0.0096 <-- BEST
+    SHOT+PFM       : 0.0249 <-- 2nd (Δ=0.0153)
+    SHOT+argmax    : 0.0307
+    DINO+argmax    : 0.1196
+    DINO+FM        : 0.2720
+    SHOT+FM        : 0.2831
+    FPFH+PFM       : 0.4904
+    FPFH+argmax    : 0.5653
+    FPFH+FM        : 0.7141
+
+cuts_centaur_shape_5 (cuts)
+  Winner: DINO+PFM = 0.0280 (margin over 2nd: 0.0412)
+  All errors:
+    DINO+PFM       : 0.0280 <-- BEST
+    SHOT+argmax    : 0.0692 <-- 2nd (Δ=0.0412)
+    SHOT+PFM       : 0.1615
+    DINO+argmax    : 0.1906
+    DINO+FM        : 0.3042
+    SHOT+FM        : 0.4633
+    FPFH+argmax    : 0.6013
+    FPFH+FM        : 0.6216
+    FPFH+PFM       : 0.8273
+
+cuts_centaur_shape_6 (cuts)
+  Winner: DINO+PFM = 0.0254 (margin over 2nd: 0.0019)
+  All errors:
+    DINO+PFM       : 0.0254 <-- BEST
+    SHOT+PFM       : 0.0273 <-- 2nd (Δ=0.0019)
+    SHOT+argmax    : 0.1383
+    DINO+argmax    : 0.1609
+    DINO+FM        : 0.2653
+    FPFH+PFM       : 0.3601
+    SHOT+FM        : 0.3711
+    FPFH+argmax    : 0.5738
+    FPFH+FM        : 0.6682
+
+cuts_centaur_shape_7 (cuts)
+  Winner: DINO+PFM = 0.0199 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0199 <-- BEST
+    SHOT+PFM       : 0.0199 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.1462
+    DINO+argmax    : 0.2276
+    DINO+FM        : 0.2531
+    SHOT+FM        : 0.3301
+    FPFH+PFM       : 0.3449
+    FPFH+FM        : 0.6024
+    FPFH+argmax    : 0.6644
+
+cuts_centaur_shape_8 (cuts)
+  Winner: DINO+PFM = 0.1841 (margin over 2nd: 0.0062)
+  All errors:
+    DINO+PFM       : 0.1841 <-- BEST
+    SHOT+PFM       : 0.1903 <-- 2nd (Δ=0.0062)
+    DINO+argmax    : 0.2171
+    SHOT+argmax    : 0.2260
+    DINO+FM        : 0.2435
+    SHOT+FM        : 0.2913
+    FPFH+PFM       : 0.3122
+    FPFH+argmax    : 0.5494
+    FPFH+FM        : 0.5881
+
+cuts_centaur_shape_9 (cuts)
+  Winner: DINO+PFM = 0.0198 (margin over 2nd: 0.0460)
+  All errors:
+    DINO+PFM       : 0.0198 <-- BEST
+    SHOT+PFM       : 0.0658 <-- 2nd (Δ=0.0460)
+    DINO+FM        : 0.1779
+    SHOT+argmax    : 0.1949
+    FPFH+PFM       : 0.2007
+    SHOT+FM        : 0.2243
+    DINO+argmax    : 0.2246
+    FPFH+argmax    : 0.5431
+    FPFH+FM        : 0.6203
+
+cuts_david_shape_1 (cuts)
+  Winner: DINO+PFM = 0.0042 (margin over 2nd: 0.0609)
+  All errors:
+    DINO+PFM       : 0.0042 <-- BEST
+    SHOT+argmax    : 0.0651 <-- 2nd (Δ=0.0609)
+    SHOT+FM        : 0.1001
+    SHOT+PFM       : 0.2212
+    DINO+argmax    : 0.2742
+    FPFH+PFM       : 0.3097
+    DINO+FM        : 0.3472
+    FPFH+argmax    : 0.5918
+    FPFH+FM        : 0.6344
+
+cuts_david_shape_10 (cuts)
+  Winner: SHOT+PFM = 0.0134 (margin over 2nd: 0.0069)
+  All errors:
+    SHOT+PFM       : 0.0134 <-- BEST
+    DINO+PFM       : 0.0203 <-- 2nd (Δ=0.0069)
+    FPFH+PFM       : 0.0251
+    SHOT+FM        : 0.2488
+    DINO+argmax    : 0.2576
+    DINO+FM        : 0.2622
+    SHOT+argmax    : 0.2849
+    FPFH+argmax    : 0.5679
+    FPFH+FM        : 0.6711
+
+cuts_david_shape_11 (cuts)
+  Winner: DINO+FM = 0.2151 (margin over 2nd: 0.0234)
+  All errors:
+    DINO+FM        : 0.2151 <-- BEST
+    DINO+PFM       : 0.2385 <-- 2nd (Δ=0.0234)
+    DINO+argmax    : 0.2469
+    SHOT+argmax    : 0.3397
+    SHOT+PFM       : 0.3598
+    SHOT+FM        : 0.4349
+    FPFH+argmax    : 0.4380
+    FPFH+PFM       : 0.4693
+    FPFH+FM        : 1.1646
+
+cuts_david_shape_12 (cuts)
+  Winner: SHOT+PFM = 0.0167 (margin over 2nd: 0.3487)
+  All errors:
+    SHOT+PFM       : 0.0167 <-- BEST
+    FPFH+PFM       : 0.3654 <-- 2nd (Δ=0.3487)
+    SHOT+FM        : 0.3892
+    SHOT+argmax    : 0.3943
+    DINO+argmax    : 0.3962
+    DINO+FM        : 0.3976
+    DINO+PFM       : 0.4398
+    FPFH+FM        : 0.5355
+    FPFH+argmax    : 0.6062
+
+cuts_david_shape_13 (cuts)
+  Winner: DINO+PFM = 0.2772 (margin over 2nd: 0.0154)
+  All errors:
+    DINO+PFM       : 0.2772 <-- BEST
+    SHOT+argmax    : 0.2926 <-- 2nd (Δ=0.0154)
+    SHOT+PFM       : 0.3425
+    DINO+argmax    : 0.5316
+    DINO+FM        : 0.6061
+    FPFH+argmax    : 0.7130
+    FPFH+FM        : 0.9152
+    SHOT+FM        : 1.0796
+    FPFH+PFM       : 1.0900
+
+cuts_david_shape_14 (cuts)
+  Winner: SHOT+PFM = 0.0182 (margin over 2nd: 0.2205)
+  All errors:
+    SHOT+PFM       : 0.0182 <-- BEST
+    SHOT+argmax    : 0.2387 <-- 2nd (Δ=0.2205)
+    DINO+argmax    : 0.4132
+    SHOT+FM        : 0.4294
+    DINO+FM        : 0.4418
+    FPFH+argmax    : 0.6136
+    FPFH+FM        : 0.6425
+    DINO+PFM       : 0.6662
+    FPFH+PFM       : 0.8687
+
+cuts_david_shape_15 (cuts)
+  Winner: FPFH+PFM = 0.0119 (margin over 2nd: 0.0054)
+  All errors:
+    FPFH+PFM       : 0.0119 <-- BEST
+    SHOT+PFM       : 0.0173 <-- 2nd (Δ=0.0054)
+    SHOT+FM        : 0.1969
+    SHOT+argmax    : 0.2098
+    DINO+argmax    : 0.2739
+    DINO+FM        : 0.3430
+    DINO+PFM       : 0.4620
+    FPFH+FM        : 0.5329
+    FPFH+argmax    : 0.5650
+
+cuts_david_shape_2 (cuts)
+  Winner: DINO+PFM = 0.0012 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0012 <-- BEST
+    SHOT+PFM       : 0.0012 <-- 2nd (Δ=0.0000)
+    FPFH+PFM       : 0.0012
+    SHOT+argmax    : 0.0083
+    SHOT+FM        : 0.0987
+    DINO+FM        : 0.2418
+    DINO+argmax    : 0.2511
+    FPFH+argmax    : 0.5376
+    FPFH+FM        : 0.5558
+
+cuts_david_shape_3 (cuts)
+  Winner: SHOT+PFM = 0.2469 (margin over 2nd: 0.0007)
+  All errors:
+    SHOT+PFM       : 0.2469 <-- BEST
+    SHOT+FM        : 0.2476 <-- 2nd (Δ=0.0007)
+    SHOT+argmax    : 0.2498
+    DINO+FM        : 0.3166
+    DINO+argmax    : 0.3271
+    FPFH+PFM       : 0.3349
+    DINO+PFM       : 0.3804
+    FPFH+argmax    : 0.5836
+    FPFH+FM        : 0.6580
+
+cuts_david_shape_4 (cuts)
+  Winner: SHOT+PFM = 0.0137 (margin over 2nd: 0.0074)
+  All errors:
+    SHOT+PFM       : 0.0137 <-- BEST
+    FPFH+PFM       : 0.0211 <-- 2nd (Δ=0.0074)
+    SHOT+argmax    : 0.2040
+    SHOT+FM        : 0.3029
+    DINO+argmax    : 0.3764
+    DINO+FM        : 0.3898
+    DINO+PFM       : 0.4377
+    FPFH+argmax    : 0.6231
+    FPFH+FM        : 0.6834
+
+cuts_david_shape_5 (cuts)
+  Winner: DINO+PFM = 0.1601 (margin over 2nd: 0.1206)
+  All errors:
+    DINO+PFM       : 0.1601 <-- BEST
+    SHOT+PFM       : 0.2807 <-- 2nd (Δ=0.1206)
+    DINO+FM        : 0.2824
+    SHOT+FM        : 0.3081
+    FPFH+PFM       : 0.3410
+    SHOT+argmax    : 0.3645
+    DINO+argmax    : 0.4097
+    FPFH+argmax    : 0.6003
+    FPFH+FM        : 0.6950
+
+cuts_david_shape_6 (cuts)
+  Winner: DINO+PFM = 0.0230 (margin over 2nd: 0.0334)
+  All errors:
+    DINO+PFM       : 0.0230 <-- BEST
+    FPFH+PFM       : 0.0564 <-- 2nd (Δ=0.0334)
+    DINO+FM        : 0.3551
+    SHOT+FM        : 0.3819
+    SHOT+argmax    : 0.4627
+    DINO+argmax    : 0.4778
+    SHOT+PFM       : 0.5067
+    FPFH+argmax    : 0.5768
+    FPFH+FM        : 0.6290
+
+cuts_david_shape_7 (cuts)
+  Winner: DINO+PFM = 0.2031 (margin over 2nd: 0.1488)
+  All errors:
+    DINO+PFM       : 0.2031 <-- BEST
+    DINO+FM        : 0.3519 <-- 2nd (Δ=0.1488)
+    FPFH+PFM       : 0.3804
+    SHOT+argmax    : 0.4118
+    DINO+argmax    : 0.4182
+    FPFH+argmax    : 0.4409
+    SHOT+FM        : 0.4510
+    SHOT+PFM       : 0.7535
+    FPFH+FM        : 1.2407
+
+cuts_david_shape_8 (cuts)
+  Winner: SHOT+PFM = 0.0062 (margin over 2nd: 0.0000)
+  All errors:
+    SHOT+PFM       : 0.0062 <-- BEST
+    FPFH+PFM       : 0.0062 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.0693
+    SHOT+FM        : 0.2089
+    DINO+argmax    : 0.2854
+    DINO+FM        : 0.4159
+    FPFH+argmax    : 0.5994
+    DINO+PFM       : 0.6734
+    FPFH+FM        : 0.6899
+
+cuts_david_shape_9 (cuts)
+  Winner: SHOT+argmax = 0.2695 (margin over 2nd: 0.1114)
+  All errors:
+    SHOT+argmax    : 0.2695 <-- BEST
+    DINO+FM        : 0.3809 <-- 2nd (Δ=0.1114)
+    DINO+PFM       : 0.4076
+    SHOT+PFM       : 0.4122
+    SHOT+FM        : 0.4130
+    DINO+argmax    : 0.4435
+    FPFH+PFM       : 0.5352
+    FPFH+FM        : 0.5469
+    FPFH+argmax    : 0.6114
+
+cuts_dog_shape_1 (cuts)
+  Winner: SHOT+argmax = 0.0408 (margin over 2nd: 0.1386)
+  All errors:
+    SHOT+argmax    : 0.0408 <-- BEST
+    DINO+PFM       : 0.1794 <-- 2nd (Δ=0.1386)
+    DINO+FM        : 0.1936
+    DINO+argmax    : 0.2086
+    SHOT+PFM       : 0.3334
+    FPFH+argmax    : 0.5571
+    SHOT+FM        : 0.5760
+    FPFH+FM        : 0.6298
+    FPFH+PFM       : 0.7296
+
+cuts_dog_shape_10 (cuts)
+  Winner: SHOT+PFM = 0.1516 (margin over 2nd: 0.0069)
+  All errors:
+    SHOT+PFM       : 0.1516 <-- BEST
+    DINO+PFM       : 0.1585 <-- 2nd (Δ=0.0069)
+    FPFH+PFM       : 0.1721
+    DINO+argmax    : 0.2457
+    DINO+FM        : 0.2666
+    SHOT+FM        : 0.3032
+    SHOT+argmax    : 0.3143
+    FPFH+FM        : 0.4994
+    FPFH+argmax    : 0.5047
+
+cuts_dog_shape_11 (cuts)
+  Winner: DINO+PFM = 0.0214 (margin over 2nd: 0.0001)
+  All errors:
+    DINO+PFM       : 0.0214 <-- BEST
+    SHOT+PFM       : 0.0215 <-- 2nd (Δ=0.0001)
+    FPFH+PFM       : 0.0264
+    SHOT+FM        : 0.1319
+    DINO+argmax    : 0.1523
+    DINO+FM        : 0.1701
+    SHOT+argmax    : 0.1811
+    FPFH+FM        : 0.4310
+    FPFH+argmax    : 0.4733
+
+cuts_dog_shape_12 (cuts)
+  Winner: SHOT+PFM = 0.0377 (margin over 2nd: 0.3419)
+  All errors:
+    SHOT+PFM       : 0.0377 <-- BEST
+    DINO+PFM       : 0.3796 <-- 2nd (Δ=0.3419)
+    SHOT+argmax    : 0.4093
+    FPFH+PFM       : 0.4525
+    DINO+FM        : 0.4979
+    DINO+argmax    : 0.5108
+    SHOT+FM        : 0.5438
+    FPFH+argmax    : 0.5982
+    FPFH+FM        : 0.7061
+
+cuts_dog_shape_13 (cuts)
+  Winner: SHOT+PFM = 0.0237 (margin over 2nd: 0.0135)
+  All errors:
+    SHOT+PFM       : 0.0237 <-- BEST
+    FPFH+PFM       : 0.0372 <-- 2nd (Δ=0.0135)
+    SHOT+FM        : 0.1446
+    SHOT+argmax    : 0.1451
+    DINO+PFM       : 0.1649
+    DINO+argmax    : 0.2060
+    DINO+FM        : 0.2319
+    FPFH+FM        : 0.4284
+    FPFH+argmax    : 0.4438
+
+cuts_dog_shape_14 (cuts)
+  Winner: SHOT+PFM = 0.1708 (margin over 2nd: 0.0783)
+  All errors:
+    SHOT+PFM       : 0.1708 <-- BEST
+    DINO+argmax    : 0.2491 <-- 2nd (Δ=0.0783)
+    DINO+FM        : 0.2714
+    DINO+PFM       : 0.2983
+    SHOT+argmax    : 0.3351
+    SHOT+FM        : 0.3438
+    FPFH+PFM       : 0.4234
+    FPFH+argmax    : 0.5079
+    FPFH+FM        : 0.5346
+
+cuts_dog_shape_15 (cuts)
+  Winner: DINO+PFM = 0.0819 (margin over 2nd: 0.0570)
+  All errors:
+    DINO+PFM       : 0.0819 <-- BEST
+    DINO+argmax    : 0.1389 <-- 2nd (Δ=0.0570)
+    DINO+FM        : 0.1712
+    SHOT+PFM       : 0.1739
+    SHOT+argmax    : 0.2539
+    FPFH+PFM       : 0.2579
+    SHOT+FM        : 0.3155
+    FPFH+FM        : 0.4201
+    FPFH+argmax    : 0.4520
+
+cuts_dog_shape_2 (cuts)
+  Winner: DINO+PFM = 0.0234 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0234 <-- BEST
+    SHOT+PFM       : 0.0234 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.2769
+    DINO+argmax    : 0.3313
+    DINO+FM        : 0.3791
+    FPFH+PFM       : 0.4479
+    SHOT+FM        : 0.5190
+    FPFH+argmax    : 0.6030
+    FPFH+FM        : 0.7344
+
+cuts_dog_shape_3 (cuts)
+  Winner: DINO+PFM = 0.2986 (margin over 2nd: 0.0798)
+  All errors:
+    DINO+PFM       : 0.2986 <-- BEST
+    DINO+FM        : 0.3784 <-- 2nd (Δ=0.0798)
+    DINO+argmax    : 0.4211
+    SHOT+argmax    : 0.4271
+    FPFH+argmax    : 0.5579
+    SHOT+PFM       : 0.6481
+    FPFH+FM        : 0.6748
+    SHOT+FM        : 0.6795
+    FPFH+PFM       : 0.6914
+
+cuts_dog_shape_4 (cuts)
+  Winner: DINO+FM = 0.1054 (margin over 2nd: 0.0074)
+  All errors:
+    DINO+FM        : 0.1054 <-- BEST
+    DINO+argmax    : 0.1128 <-- 2nd (Δ=0.0074)
+    SHOT+PFM       : 0.2076
+    DINO+PFM       : 0.2278
+    SHOT+argmax    : 0.2572
+    SHOT+FM        : 0.3942
+    FPFH+argmax    : 0.4525
+    FPFH+PFM       : 0.4548
+    FPFH+FM        : 0.4679
+
+cuts_dog_shape_5 (cuts)
+  Winner: DINO+PFM = 0.0297 (margin over 2nd: 0.0001)
+  All errors:
+    DINO+PFM       : 0.0297 <-- BEST
+    FPFH+PFM       : 0.0298 <-- 2nd (Δ=0.0001)
+    SHOT+FM        : 0.1481
+    SHOT+PFM       : 0.1546
+    DINO+argmax    : 0.1657
+    DINO+FM        : 0.1829
+    SHOT+argmax    : 0.2251
+    FPFH+FM        : 0.4279
+    FPFH+argmax    : 0.4547
+
+cuts_dog_shape_6 (cuts)
+  Winner: DINO+PFM = 0.0213 (margin over 2nd: 0.0049)
+  All errors:
+    DINO+PFM       : 0.0213 <-- BEST
+    SHOT+PFM       : 0.0262 <-- 2nd (Δ=0.0049)
+    FPFH+PFM       : 0.0262
+    SHOT+FM        : 0.1363
+    DINO+argmax    : 0.1686
+    SHOT+argmax    : 0.1728
+    DINO+FM        : 0.1915
+    FPFH+FM        : 0.3962
+    FPFH+argmax    : 0.4617
+
+cuts_dog_shape_7 (cuts)
+  Winner: SHOT+PFM = 0.0240 (margin over 2nd: 0.0000)
+  All errors:
+    SHOT+PFM       : 0.0240 <-- BEST
+    FPFH+PFM       : 0.0240 <-- 2nd (Δ=0.0000)
+    DINO+PFM       : 0.0241
+    SHOT+FM        : 0.1235
+    DINO+argmax    : 0.1510
+    SHOT+argmax    : 0.1828
+    DINO+FM        : 0.1972
+    FPFH+FM        : 0.3676
+    FPFH+argmax    : 0.4539
+
+cuts_dog_shape_8 (cuts)
+  Winner: DINO+PFM = 0.0180 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0180 <-- BEST
+    SHOT+PFM       : 0.0180 <-- 2nd (Δ=0.0000)
+    SHOT+FM        : 0.1312
+    SHOT+argmax    : 0.1613
+    DINO+argmax    : 0.1747
+    FPFH+PFM       : 0.1906
+    DINO+FM        : 0.2102
+    FPFH+FM        : 0.4468
+    FPFH+argmax    : 0.4601
+
+cuts_dog_shape_9 (cuts)
+  Winner: SHOT+PFM = 0.0223 (margin over 2nd: 0.2190)
+  All errors:
+    SHOT+PFM       : 0.0223 <-- BEST
+    DINO+argmax    : 0.2413 <-- 2nd (Δ=0.2190)
+    SHOT+argmax    : 0.2781
+    DINO+FM        : 0.3646
+    DINO+PFM       : 0.3731
+    SHOT+FM        : 0.5057
+    FPFH+argmax    : 0.6116
+    FPFH+PFM       : 0.6507
+    FPFH+FM        : 0.7520
+
+cuts_horse_shape_1 (cuts)
+  Winner: DINO+PFM = 0.0046 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0046 <-- BEST
+    SHOT+PFM       : 0.0046 <-- 2nd (Δ=0.0000)
+    FPFH+PFM       : 0.0046
+    SHOT+argmax    : 0.0076
+    SHOT+FM        : 0.1587
+    DINO+argmax    : 0.3128
+    DINO+FM        : 0.3986
+    FPFH+FM        : 0.5140
+    FPFH+argmax    : 0.5225
+
+cuts_horse_shape_10 (cuts)
+  Winner: SHOT+PFM = 0.0111 (margin over 2nd: 0.0000)
+  All errors:
+    SHOT+PFM       : 0.0111 <-- BEST
+    FPFH+PFM       : 0.0111 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.0594
+    SHOT+FM        : 0.2474
+    DINO+FM        : 0.2583
+    DINO+argmax    : 0.2897
+    DINO+PFM       : 0.3798
+    FPFH+argmax    : 0.5478
+    FPFH+FM        : 0.7129
+
+cuts_horse_shape_11 (cuts)
+  Winner: SHOT+PFM = 0.0325 (margin over 2nd: 0.0222)
+  All errors:
+    SHOT+PFM       : 0.0325 <-- BEST
+    DINO+PFM       : 0.0547 <-- 2nd (Δ=0.0222)
+    SHOT+argmax    : 0.1571
+    DINO+argmax    : 0.1894
+    SHOT+FM        : 0.2230
+    DINO+FM        : 0.2630
+    FPFH+PFM       : 0.4809
+    FPFH+argmax    : 0.5184
+    FPFH+FM        : 0.5323
+
+cuts_horse_shape_12 (cuts)
+  Winner: DINO+argmax = 0.0976 (margin over 2nd: 0.0386)
+  All errors:
+    DINO+argmax    : 0.0976 <-- BEST
+    DINO+FM        : 0.1362 <-- 2nd (Δ=0.0386)
+    DINO+PFM       : 0.1471
+    SHOT+PFM       : 0.1900
+    SHOT+argmax    : 0.1997
+    SHOT+FM        : 0.2853
+    FPFH+FM        : 0.4351
+    FPFH+argmax    : 0.5051
+    FPFH+PFM       : 0.5340
+
+cuts_horse_shape_13 (cuts)
+  Winner: DINO+PFM = 0.0820 (margin over 2nd: 0.0047)
+  All errors:
+    DINO+PFM       : 0.0820 <-- BEST
+    DINO+argmax    : 0.0867 <-- 2nd (Δ=0.0047)
+    SHOT+argmax    : 0.1395
+    DINO+FM        : 0.1490
+    SHOT+FM        : 0.2909
+    FPFH+FM        : 0.4705
+    FPFH+argmax    : 0.5162
+    FPFH+PFM       : 0.6005
+    SHOT+PFM       : 0.6850
+
+cuts_horse_shape_14 (cuts)
+  Winner: DINO+PFM = 0.0152 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0152 <-- BEST
+    SHOT+PFM       : 0.0152 <-- 2nd (Δ=0.0000)
+    FPFH+PFM       : 0.1625
+    DINO+argmax    : 0.1858
+    DINO+FM        : 0.2106
+    SHOT+argmax    : 0.2249
+    SHOT+FM        : 0.3563
+    FPFH+argmax    : 0.5652
+    FPFH+FM        : 0.6805
+
+cuts_horse_shape_15 (cuts)
+  Winner: DINO+PFM = 0.0958 (margin over 2nd: 0.0075)
+  All errors:
+    DINO+PFM       : 0.0958 <-- BEST
+    DINO+argmax    : 0.1033 <-- 2nd (Δ=0.0075)
+    DINO+FM        : 0.1392
+    SHOT+PFM       : 0.1809
+    SHOT+argmax    : 0.2073
+    SHOT+FM        : 0.3395
+    FPFH+PFM       : 0.4313
+    FPFH+FM        : 0.4798
+    FPFH+argmax    : 0.5176
+
+cuts_horse_shape_2 (cuts)
+  Winner: DINO+PFM = 0.0037 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0037 <-- BEST
+    SHOT+PFM       : 0.0037 <-- 2nd (Δ=0.0000)
+    FPFH+PFM       : 0.0037
+    SHOT+argmax    : 0.0124
+    DINO+argmax    : 0.1119
+    DINO+FM        : 0.1902
+    SHOT+FM        : 0.2361
+    FPFH+argmax    : 0.5521
+    FPFH+FM        : 0.7213
+
+cuts_horse_shape_3 (cuts)
+  Winner: SHOT+PFM = 0.0115 (margin over 2nd: 0.0837)
+  All errors:
+    SHOT+PFM       : 0.0115 <-- BEST
+    SHOT+argmax    : 0.0952 <-- 2nd (Δ=0.0837)
+    DINO+argmax    : 0.1374
+    DINO+FM        : 0.2103
+    SHOT+FM        : 0.2149
+    DINO+PFM       : 0.3750
+    FPFH+PFM       : 0.3776
+    FPFH+argmax    : 0.5494
+    FPFH+FM        : 0.7018
+
+cuts_horse_shape_4 (cuts)
+  Winner: SHOT+PFM = 0.0100 (margin over 2nd: 0.1333)
+  All errors:
+    SHOT+PFM       : 0.0100 <-- BEST
+    SHOT+argmax    : 0.1433 <-- 2nd (Δ=0.1333)
+    DINO+FM        : 0.1826
+    DINO+PFM       : 0.2360
+    DINO+argmax    : 0.2488
+    SHOT+FM        : 0.4126
+    FPFH+argmax    : 0.5142
+    FPFH+FM        : 0.6708
+    FPFH+PFM       : 0.6878
+
+cuts_horse_shape_5 (cuts)
+  Winner: SHOT+PFM = 0.1503 (margin over 2nd: 0.0263)
+  All errors:
+    SHOT+PFM       : 0.1503 <-- BEST
+    DINO+PFM       : 0.1766 <-- 2nd (Δ=0.0263)
+    DINO+FM        : 0.1851
+    DINO+argmax    : 0.1934
+    SHOT+argmax    : 0.1976
+    FPFH+PFM       : 0.2195
+    SHOT+FM        : 0.2360
+    FPFH+argmax    : 0.5587
+    FPFH+FM        : 0.6281
+
+cuts_horse_shape_6 (cuts)
+  Winner: SHOT+PFM = 0.0174 (margin over 2nd: 0.0005)
+  All errors:
+    SHOT+PFM       : 0.0174 <-- BEST
+    DINO+PFM       : 0.0179 <-- 2nd (Δ=0.0005)
+    SHOT+argmax    : 0.1091
+    DINO+argmax    : 0.1289
+    DINO+FM        : 0.1449
+    FPFH+PFM       : 0.1734
+    SHOT+FM        : 0.2172
+    FPFH+FM        : 0.4420
+    FPFH+argmax    : 0.5208
+
+cuts_horse_shape_7 (cuts)
+  Winner: DINO+PFM = 0.0347 (margin over 2nd: 0.0119)
+  All errors:
+    DINO+PFM       : 0.0347 <-- BEST
+    SHOT+PFM       : 0.0466 <-- 2nd (Δ=0.0119)
+    SHOT+argmax    : 0.2388
+    DINO+FM        : 0.3068
+    DINO+argmax    : 0.3597
+    SHOT+FM        : 0.4861
+    FPFH+argmax    : 0.5085
+    FPFH+PFM       : 0.5182
+    FPFH+FM        : 0.6752
+
+cuts_horse_shape_8 (cuts)
+  Winner: DINO+argmax = 0.0899 (margin over 2nd: 0.0195)
+  All errors:
+    DINO+argmax    : 0.0899 <-- BEST
+    DINO+FM        : 0.1094 <-- 2nd (Δ=0.0195)
+    DINO+PFM       : 0.1318
+    SHOT+argmax    : 0.1728
+    SHOT+PFM       : 0.2135
+    SHOT+FM        : 0.2657
+    FPFH+PFM       : 0.4286
+    FPFH+FM        : 0.4632
+    FPFH+argmax    : 0.5120
+
+cuts_horse_shape_9 (cuts)
+  Winner: SHOT+PFM = 0.0197 (margin over 2nd: 0.1808)
+  All errors:
+    SHOT+PFM       : 0.0197 <-- BEST
+    SHOT+argmax    : 0.2005 <-- 2nd (Δ=0.1808)
+    DINO+PFM       : 0.2875
+    FPFH+PFM       : 0.3136
+    DINO+FM        : 0.3367
+    DINO+argmax    : 0.4028
+    SHOT+FM        : 0.4654
+    FPFH+argmax    : 0.5183
+    FPFH+FM        : 0.6899
+
+cuts_michael_shape_1 (cuts)
+  Winner: SHOT+PFM = 0.0611 (margin over 2nd: 0.0419)
+  All errors:
+    SHOT+PFM       : 0.0611 <-- BEST
+    SHOT+argmax    : 0.1030 <-- 2nd (Δ=0.0419)
+    DINO+FM        : 0.1777
+    DINO+argmax    : 0.1915
+    DINO+PFM       : 0.2000
+    FPFH+PFM       : 0.2359
+    SHOT+FM        : 0.2838
+    FPFH+FM        : 0.4165
+    FPFH+argmax    : 0.4567
+
+cuts_michael_shape_10 (cuts)
+  Winner: SHOT+argmax = 0.0974 (margin over 2nd: 0.0446)
+  All errors:
+    SHOT+argmax    : 0.0974 <-- BEST
+    DINO+FM        : 0.1420 <-- 2nd (Δ=0.0446)
+    DINO+argmax    : 0.1608
+    DINO+PFM       : 0.1851
+    SHOT+FM        : 0.3110
+    FPFH+FM        : 0.3842
+    FPFH+argmax    : 0.4743
+    SHOT+PFM       : 0.5632
+    FPFH+PFM       : 0.8842
+
+cuts_michael_shape_11 (cuts)
+  Winner: SHOT+PFM = 0.0134 (margin over 2nd: 0.0063)
+  All errors:
+    SHOT+PFM       : 0.0134 <-- BEST
+    FPFH+PFM       : 0.0197 <-- 2nd (Δ=0.0063)
+    SHOT+FM        : 0.0455
+    SHOT+argmax    : 0.1400
+    DINO+FM        : 0.2391
+    DINO+argmax    : 0.2453
+    FPFH+FM        : 0.4318
+    DINO+PFM       : 0.5079
+    FPFH+argmax    : 0.5375
+
+cuts_michael_shape_12 (cuts)
+  Winner: SHOT+PFM = 0.1003 (margin over 2nd: 0.1275)
+  All errors:
+    SHOT+PFM       : 0.1003 <-- BEST
+    SHOT+argmax    : 0.2278 <-- 2nd (Δ=0.1275)
+    DINO+PFM       : 0.2462
+    SHOT+FM        : 0.2511
+    DINO+argmax    : 0.3253
+    DINO+FM        : 0.4202
+    FPFH+PFM       : 0.5081
+    FPFH+argmax    : 0.5567
+    FPFH+FM        : 0.5877
+
+cuts_michael_shape_13 (cuts)
+  Winner: SHOT+PFM = 0.0277 (margin over 2nd: 0.0129)
+  All errors:
+    SHOT+PFM       : 0.0277 <-- BEST
+    FPFH+PFM       : 0.0406 <-- 2nd (Δ=0.0129)
+    SHOT+FM        : 0.1407
+    SHOT+argmax    : 0.1848
+    DINO+argmax    : 0.2612
+    DINO+PFM       : 0.2730
+    FPFH+FM        : 0.3478
+    DINO+FM        : 0.3710
+    FPFH+argmax    : 0.4227
+
+cuts_michael_shape_14 (cuts)
+  Winner: SHOT+argmax = 0.1074 (margin over 2nd: 0.0891)
+  All errors:
+    SHOT+argmax    : 0.1074 <-- BEST
+    DINO+argmax    : 0.1965 <-- 2nd (Δ=0.0891)
+    DINO+PFM       : 0.2197
+    DINO+FM        : 0.2295
+    FPFH+PFM       : 0.3046
+    SHOT+FM        : 0.3197
+    FPFH+FM        : 0.3714
+    SHOT+PFM       : 0.4209
+    FPFH+argmax    : 0.4603
+
+cuts_michael_shape_15 (cuts)
+  Winner: DINO+PFM = 0.0251 (margin over 2nd: 0.0610)
+  All errors:
+    DINO+PFM       : 0.0251 <-- BEST
+    SHOT+FM        : 0.0861 <-- 2nd (Δ=0.0610)
+    FPFH+PFM       : 0.2041
+    SHOT+argmax    : 0.2109
+    DINO+FM        : 0.3104
+    DINO+argmax    : 0.3132
+    SHOT+PFM       : 0.3367
+    FPFH+FM        : 0.3407
+    FPFH+argmax    : 0.4488
+
+cuts_michael_shape_2 (cuts)
+  Winner: SHOT+PFM = 0.0597 (margin over 2nd: 0.1502)
+  All errors:
+    SHOT+PFM       : 0.0597 <-- BEST
+    FPFH+PFM       : 0.2099 <-- 2nd (Δ=0.1502)
+    DINO+argmax    : 0.3995
+    SHOT+FM        : 0.4008
+    SHOT+argmax    : 0.4036
+    DINO+FM        : 0.4889
+    FPFH+argmax    : 0.6808
+    DINO+PFM       : 0.7195
+    FPFH+FM        : 0.7300
+
+cuts_michael_shape_3 (cuts)
+  Winner: SHOT+argmax = 0.1038 (margin over 2nd: 0.0622)
+  All errors:
+    SHOT+argmax    : 0.1038 <-- BEST
+    DINO+PFM       : 0.1660 <-- 2nd (Δ=0.0622)
+    DINO+argmax    : 0.1841
+    DINO+FM        : 0.1921
+    SHOT+FM        : 0.3126
+    SHOT+PFM       : 0.3309
+    FPFH+FM        : 0.3655
+    FPFH+argmax    : 0.4611
+    FPFH+PFM       : 0.5479
+
+cuts_michael_shape_4 (cuts)
+  Winner: DINO+PFM = 0.0149 (margin over 2nd: 0.0026)
+  All errors:
+    DINO+PFM       : 0.0149 <-- BEST
+    SHOT+PFM       : 0.0175 <-- 2nd (Δ=0.0026)
+    FPFH+PFM       : 0.0260
+    SHOT+argmax    : 0.3032
+    DINO+argmax    : 0.3270
+    SHOT+FM        : 0.3272
+    DINO+FM        : 0.3704
+    FPFH+FM        : 0.5005
+    FPFH+argmax    : 0.5693
+
+cuts_michael_shape_5 (cuts)
+  Winner: DINO+PFM = 0.0740 (margin over 2nd: 0.0234)
+  All errors:
+    DINO+PFM       : 0.0740 <-- BEST
+    SHOT+argmax    : 0.0974 <-- 2nd (Δ=0.0234)
+    DINO+FM        : 0.1473
+    DINO+argmax    : 0.1561
+    SHOT+PFM       : 0.2199
+    FPFH+PFM       : 0.2822
+    SHOT+FM        : 0.2988
+    FPFH+FM        : 0.4007
+    FPFH+argmax    : 0.4693
+
+cuts_michael_shape_6 (cuts)
+  Winner: SHOT+PFM = 0.0145 (margin over 2nd: 0.0050)
+  All errors:
+    SHOT+PFM       : 0.0145 <-- BEST
+    FPFH+PFM       : 0.0195 <-- 2nd (Δ=0.0050)
+    SHOT+argmax    : 0.1877
+    SHOT+FM        : 0.3802
+    DINO+argmax    : 0.4003
+    DINO+FM        : 0.4723
+    FPFH+argmax    : 0.6259
+    FPFH+FM        : 0.6685
+    DINO+PFM       : 0.6878
+
+cuts_michael_shape_7 (cuts)
+  Winner: SHOT+PFM = 0.0370 (margin over 2nd: 0.0109)
+  All errors:
+    SHOT+PFM       : 0.0370 <-- BEST
+    FPFH+PFM       : 0.0479 <-- 2nd (Δ=0.0109)
+    SHOT+FM        : 0.1479
+    SHOT+argmax    : 0.2869
+    DINO+argmax    : 0.3162
+    DINO+FM        : 0.3722
+    FPFH+FM        : 0.4376
+    DINO+PFM       : 0.4407
+    FPFH+argmax    : 0.4809
+
+cuts_michael_shape_8 (cuts)
+  Winner: FPFH+PFM = 0.0176 (margin over 2nd: 0.1732)
+  All errors:
+    FPFH+PFM       : 0.0176 <-- BEST
+    SHOT+FM        : 0.1908 <-- 2nd (Δ=0.1732)
+    SHOT+argmax    : 0.1911
+    SHOT+PFM       : 0.2431
+    DINO+argmax    : 0.2832
+    DINO+FM        : 0.4745
+    DINO+PFM       : 0.5393
+    FPFH+argmax    : 0.5689
+    FPFH+FM        : 0.6049
+
+cuts_michael_shape_9 (cuts)
+  Winner: SHOT+PFM = 0.0075 (margin over 2nd: 0.0072)
+  All errors:
+    SHOT+PFM       : 0.0075 <-- BEST
+    FPFH+PFM       : 0.0147 <-- 2nd (Δ=0.0072)
+    SHOT+argmax    : 0.1044
+    SHOT+FM        : 0.2475
+    DINO+argmax    : 0.3310
+    DINO+FM        : 0.4438
+    FPFH+FM        : 0.5933
+    FPFH+argmax    : 0.5984
+    DINO+PFM       : 0.6810
+
+cuts_victoria_shape_10 (cuts)
+  Winner: SHOT+PFM = 0.0411 (margin over 2nd: 0.0786)
+  All errors:
+    SHOT+PFM       : 0.0411 <-- BEST
+    DINO+PFM       : 0.1198 <-- 2nd (Δ=0.0786)
+    DINO+FM        : 0.2595
+    DINO+argmax    : 0.2747
+    SHOT+argmax    : 0.2896
+    SHOT+FM        : 0.3482
+    FPFH+argmax    : 0.5956
+    FPFH+FM        : 0.6130
+    FPFH+PFM       : 0.7459
+
+cuts_victoria_shape_11 (cuts)
+  Winner: SHOT+PFM = 0.0160 (margin over 2nd: 0.1652)
+  All errors:
+    SHOT+PFM       : 0.0160 <-- BEST
+    SHOT+argmax    : 0.1812 <-- 2nd (Δ=0.1652)
+    DINO+FM        : 0.4303
+    DINO+argmax    : 0.4748
+    FPFH+argmax    : 0.6296
+    SHOT+FM        : 0.6709
+    FPFH+FM        : 0.6770
+    FPFH+PFM       : 0.8873
+    DINO+PFM       : 0.8926
+
+cuts_victoria_shape_12 (cuts)
+  Winner: DINO+PFM = 0.0924 (margin over 2nd: 0.0589)
+  All errors:
+    DINO+PFM       : 0.0924 <-- BEST
+    SHOT+PFM       : 0.1512 <-- 2nd (Δ=0.0589)
+    DINO+FM        : 0.2702
+    SHOT+FM        : 0.3109
+    DINO+argmax    : 0.3593
+    SHOT+argmax    : 0.3728
+    FPFH+PFM       : 0.5575
+    FPFH+FM        : 0.5927
+    FPFH+argmax    : 0.5953
+
+cuts_victoria_shape_13 (cuts)
+  Winner: SHOT+PFM = 0.0174 (margin over 2nd: 0.0040)
+  All errors:
+    SHOT+PFM       : 0.0174 <-- BEST
+    FPFH+PFM       : 0.0214 <-- 2nd (Δ=0.0040)
+    SHOT+argmax    : 0.2134
+    SHOT+FM        : 0.2296
+    DINO+argmax    : 0.3785
+    DINO+FM        : 0.4313
+    FPFH+argmax    : 0.6255
+    FPFH+FM        : 0.6624
+    DINO+PFM       : 0.6981
+
+cuts_victoria_shape_14 (cuts)
+  Winner: SHOT+PFM = 0.0550 (margin over 2nd: 0.1608)
+  All errors:
+    SHOT+PFM       : 0.0550 <-- BEST
+    DINO+argmax    : 0.2158 <-- 2nd (Δ=0.1608)
+    DINO+FM        : 0.2243
+    DINO+PFM       : 0.2717
+    SHOT+argmax    : 0.3060
+    SHOT+FM        : 0.4641
+    FPFH+FM        : 0.5676
+    FPFH+argmax    : 0.6002
+    FPFH+PFM       : 0.6835
+
+cuts_victoria_shape_15 (cuts)
+  Winner: SHOT+PFM = 0.0933 (margin over 2nd: 0.1671)
+  All errors:
+    SHOT+PFM       : 0.0933 <-- BEST
+    SHOT+argmax    : 0.2605 <-- 2nd (Δ=0.1671)
+    DINO+PFM       : 0.4159
+    DINO+FM        : 0.4967
+    DINO+argmax    : 0.5120
+    SHOT+FM        : 0.5835
+    FPFH+argmax    : 0.6075
+    FPFH+FM        : 0.6618
+    FPFH+PFM       : 0.7174
+
+cuts_victoria_shape_2 (cuts)
+  Winner: FPFH+PFM = 0.0160 (margin over 2nd: 0.0000)
+  All errors:
+    FPFH+PFM       : 0.0160 <-- BEST
+    DINO+PFM       : 0.0160 <-- 2nd (Δ=0.0000)
+    SHOT+PFM       : 0.0160
+    SHOT+argmax    : 0.1957
+    SHOT+FM        : 0.2153
+    DINO+argmax    : 0.3308
+    DINO+FM        : 0.4520
+    FPFH+argmax    : 0.5728
+    FPFH+FM        : 0.6572
+
+cuts_victoria_shape_3 (cuts)
+  Winner: SHOT+PFM = 0.0111 (margin over 2nd: 0.0000)
+  All errors:
+    SHOT+PFM       : 0.0111 <-- BEST
+    FPFH+PFM       : 0.0112 <-- 2nd (Δ=0.0000)
+    DINO+PFM       : 0.0112
+    SHOT+argmax    : 0.1415
+    SHOT+FM        : 0.2187
+    DINO+argmax    : 0.3114
+    DINO+FM        : 0.5036
+    FPFH+argmax    : 0.6171
+    FPFH+FM        : 0.7318
+
+cuts_victoria_shape_4 (cuts)
+  Winner: DINO+PFM = 0.0142 (margin over 2nd: 0.0058)
+  All errors:
+    DINO+PFM       : 0.0142 <-- BEST
+    SHOT+PFM       : 0.0200 <-- 2nd (Δ=0.0058)
+    SHOT+argmax    : 0.1987
+    DINO+argmax    : 0.4434
+    DINO+FM        : 0.4778
+    FPFH+argmax    : 0.6121
+    FPFH+FM        : 0.6712
+    SHOT+FM        : 0.6862
+    FPFH+PFM       : 0.7806
+
+cuts_victoria_shape_5 (cuts)
+  Winner: SHOT+PFM = 0.0214 (margin over 2nd: 0.1211)
+  All errors:
+    SHOT+PFM       : 0.0214 <-- BEST
+    SHOT+argmax    : 0.1426 <-- 2nd (Δ=0.1211)
+    DINO+PFM       : 0.2927
+    DINO+FM        : 0.4325
+    DINO+argmax    : 0.4595
+    SHOT+FM        : 0.5700
+    FPFH+argmax    : 0.6039
+    FPFH+FM        : 0.6729
+    FPFH+PFM       : 0.8524
+
+cuts_victoria_shape_6 (cuts)
+  Winner: SHOT+PFM = 0.0581 (margin over 2nd: 0.2345)
+  All errors:
+    SHOT+PFM       : 0.0581 <-- BEST
+    SHOT+FM        : 0.2927 <-- 2nd (Δ=0.2345)
+    SHOT+argmax    : 0.3153
+    DINO+argmax    : 0.4645
+    DINO+FM        : 0.5148
+    FPFH+argmax    : 0.6440
+    FPFH+FM        : 0.6904
+    DINO+PFM       : 0.6956
+    FPFH+PFM       : 0.7502
+
+cuts_victoria_shape_7 (cuts)
+  Winner: DINO+PFM = 0.1045 (margin over 2nd: 0.0540)
+  All errors:
+    DINO+PFM       : 0.1045 <-- BEST
+    SHOT+PFM       : 0.1585 <-- 2nd (Δ=0.0540)
+    SHOT+FM        : 0.2931
+    SHOT+argmax    : 0.2994
+    DINO+FM        : 0.4104
+    DINO+argmax    : 0.4168
+    FPFH+PFM       : 0.4922
+    FPFH+argmax    : 0.6477
+    FPFH+FM        : 0.7236
+
+cuts_victoria_shape_8 (cuts)
+  Winner: SHOT+argmax = 0.2361 (margin over 2nd: 0.0515)
+  All errors:
+    SHOT+argmax    : 0.2361 <-- BEST
+    SHOT+FM        : 0.2876 <-- 2nd (Δ=0.0515)
+    SHOT+PFM       : 0.2975
+    DINO+argmax    : 0.3273
+    DINO+FM        : 0.3427
+    FPFH+PFM       : 0.4915
+    DINO+PFM       : 0.5143
+    FPFH+argmax    : 0.5833
+    FPFH+FM        : 0.6243
+
+cuts_victoria_shape_9 (cuts)
+  Winner: DINO+PFM = 0.0948 (margin over 2nd: 0.1346)
+  All errors:
+    DINO+PFM       : 0.0948 <-- BEST
+    SHOT+argmax    : 0.2295 <-- 2nd (Δ=0.1346)
+    DINO+argmax    : 0.2444
+    DINO+FM        : 0.3133
+    SHOT+FM        : 0.3342
+    SHOT+PFM       : 0.3951
+    FPFH+FM        : 0.5024
+    FPFH+argmax    : 0.5783
+    FPFH+PFM       : 0.7995
+
+cuts_wolf_shape_1 (cuts)
+  Winner: DINO+PFM = 0.0045 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0045 <-- BEST
+    SHOT+PFM       : 0.0045 <-- 2nd (Δ=0.0000)
+    FPFH+PFM       : 0.0045
+    SHOT+argmax    : 0.0116
+    SHOT+FM        : 0.0496
+    DINO+FM        : 0.1480
+    DINO+argmax    : 0.1775
+    FPFH+FM        : 0.4384
+    FPFH+argmax    : 0.4852
+
+cuts_wolf_shape_10 (cuts)
+  Winner: SHOT+PFM = 0.0089 (margin over 2nd: 0.0000)
+  All errors:
+    SHOT+PFM       : 0.0089 <-- BEST
+    DINO+PFM       : 0.0089 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.0323
+    DINO+FM        : 0.1284
+    DINO+argmax    : 0.3317
+    SHOT+FM        : 0.3518
+    FPFH+argmax    : 0.4839
+    FPFH+PFM       : 0.8243
+    FPFH+FM        : 0.9085
+
+cuts_wolf_shape_11 (cuts)
+  Winner: SHOT+PFM = 0.0365 (margin over 2nd: 0.0343)
+  All errors:
+    SHOT+PFM       : 0.0365 <-- BEST
+    SHOT+FM        : 0.0708 <-- 2nd (Δ=0.0343)
+    DINO+argmax    : 0.1298
+    SHOT+argmax    : 0.1451
+    DINO+PFM       : 0.1500
+    DINO+FM        : 0.2335
+    FPFH+PFM       : 0.4632
+    FPFH+argmax    : 0.5987
+    FPFH+FM        : 0.6060
+
+cuts_wolf_shape_12 (cuts)
+  Winner: DINO+PFM = 0.0099 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0099 <-- BEST
+    FPFH+PFM       : 0.0099 <-- 2nd (Δ=0.0000)
+    SHOT+PFM       : 0.0099
+    SHOT+argmax    : 0.0377
+    SHOT+FM        : 0.0745
+    DINO+argmax    : 0.1602
+    DINO+FM        : 0.1742
+    FPFH+FM        : 0.4174
+    FPFH+argmax    : 0.5295
+
+cuts_wolf_shape_13 (cuts)
+  Winner: SHOT+argmax = 0.0409 (margin over 2nd: 0.0407)
+  All errors:
+    SHOT+argmax    : 0.0409 <-- BEST
+    FPFH+PFM       : 0.0815 <-- 2nd (Δ=0.0407)
+    SHOT+PFM       : 0.0970
+    DINO+PFM       : 0.1467
+    SHOT+FM        : 0.1607
+    DINO+argmax    : 0.1951
+    DINO+FM        : 0.2286
+    FPFH+argmax    : 0.5783
+    FPFH+FM        : 0.6100
+
+cuts_wolf_shape_14 (cuts)
+  Winner: SHOT+argmax = 0.0332 (margin over 2nd: 0.0749)
+  All errors:
+    SHOT+argmax    : 0.0332 <-- BEST
+    DINO+FM        : 0.1081 <-- 2nd (Δ=0.0749)
+    DINO+argmax    : 0.1825
+    SHOT+FM        : 0.3499
+    DINO+PFM       : 0.3687
+    SHOT+PFM       : 0.3691
+    FPFH+argmax    : 0.4853
+    FPFH+PFM       : 0.6774
+    FPFH+FM        : 0.9379
+
+cuts_wolf_shape_15 (cuts)
+  Winner: SHOT+PFM = 0.0442 (margin over 2nd: 0.0634)
+  All errors:
+    SHOT+PFM       : 0.0442 <-- BEST
+    DINO+FM        : 0.1076 <-- 2nd (Δ=0.0634)
+    DINO+argmax    : 0.1134
+    DINO+PFM       : 0.1252
+    SHOT+argmax    : 0.1629
+    SHOT+FM        : 0.2117
+    FPFH+FM        : 0.3670
+    FPFH+argmax    : 0.5385
+    FPFH+PFM       : 0.6216
+
+cuts_wolf_shape_2 (cuts)
+  Winner: DINO+PFM = 0.0154 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0154 <-- BEST
+    SHOT+PFM       : 0.0154 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.0178
+    FPFH+PFM       : 0.0210
+    SHOT+FM        : 0.1317
+    DINO+argmax    : 0.1485
+    DINO+FM        : 0.2593
+    FPFH+FM        : 0.5270
+    FPFH+argmax    : 0.5828
+
+cuts_wolf_shape_3 (cuts)
+  Winner: SHOT+PFM = 0.0090 (margin over 2nd: 0.0000)
+  All errors:
+    SHOT+PFM       : 0.0090 <-- BEST
+    DINO+PFM       : 0.0090 <-- 2nd (Δ=0.0000)
+    SHOT+argmax    : 0.0245
+    SHOT+FM        : 0.1260
+    FPFH+PFM       : 0.1850
+    DINO+argmax    : 0.1881
+    DINO+FM        : 0.2291
+    FPFH+FM        : 0.5657
+    FPFH+argmax    : 0.5690
+
+cuts_wolf_shape_4 (cuts)
+  Winner: SHOT+PFM = 0.0134 (margin over 2nd: 0.0204)
+  All errors:
+    SHOT+PFM       : 0.0134 <-- BEST
+    SHOT+argmax    : 0.0338 <-- 2nd (Δ=0.0204)
+    DINO+FM        : 0.1162
+    DINO+argmax    : 0.1844
+    FPFH+PFM       : 0.2192
+    SHOT+FM        : 0.3507
+    DINO+PFM       : 0.3737
+    FPFH+argmax    : 0.4762
+    FPFH+FM        : 0.9421
+
+cuts_wolf_shape_5 (cuts)
+  Winner: SHOT+PFM = 0.0159 (margin over 2nd: 0.0135)
+  All errors:
+    SHOT+PFM       : 0.0159 <-- BEST
+    DINO+PFM       : 0.0293 <-- 2nd (Δ=0.0135)
+    DINO+argmax    : 0.0850
+    DINO+FM        : 0.1195
+    SHOT+argmax    : 0.1511
+    SHOT+FM        : 0.1972
+    FPFH+PFM       : 0.2359
+    FPFH+FM        : 0.3892
+    FPFH+argmax    : 0.5317
+
+cuts_wolf_shape_6 (cuts)
+  Winner: SHOT+FM = 0.0573 (margin over 2nd: 0.0390)
+  All errors:
+    SHOT+FM        : 0.0573 <-- BEST
+    SHOT+PFM       : 0.0964 <-- 2nd (Δ=0.0390)
+    SHOT+argmax    : 0.1346
+    FPFH+PFM       : 0.1500
+    DINO+argmax    : 0.1601
+    DINO+FM        : 0.2607
+    DINO+PFM       : 0.2633
+    FPFH+FM        : 0.5105
+    FPFH+argmax    : 0.5661
+
+cuts_wolf_shape_7 (cuts)
+  Winner: DINO+PFM = 0.0067 (margin over 2nd: 0.0006)
+  All errors:
+    DINO+PFM       : 0.0067 <-- BEST
+    SHOT+PFM       : 0.0073 <-- 2nd (Δ=0.0006)
+    FPFH+PFM       : 0.0073
+    SHOT+argmax    : 0.0275
+    SHOT+FM        : 0.0627
+    DINO+argmax    : 0.1265
+    DINO+FM        : 0.1866
+    FPFH+FM        : 0.4177
+    FPFH+argmax    : 0.4782
+
+cuts_wolf_shape_8 (cuts)
+  Winner: SHOT+PFM = 0.0120 (margin over 2nd: 0.0000)
+  All errors:
+    SHOT+PFM       : 0.0120 <-- BEST
+    FPFH+PFM       : 0.0120 <-- 2nd (Δ=0.0000)
+    DINO+PFM       : 0.0178
+    SHOT+argmax    : 0.0218
+    SHOT+FM        : 0.1293
+    DINO+argmax    : 0.3942
+    DINO+FM        : 0.4814
+    FPFH+FM        : 0.5411
+    FPFH+argmax    : 0.5797
+
+cuts_wolf_shape_9 (cuts)
+  Winner: SHOT+PFM = 0.0096 (margin over 2nd: 0.0002)
+  All errors:
+    SHOT+PFM       : 0.0096 <-- BEST
+    DINO+PFM       : 0.0098 <-- 2nd (Δ=0.0002)
+    SHOT+argmax    : 0.0384
+    FPFH+PFM       : 0.1058
+    DINO+argmax    : 0.1740
+    SHOT+FM        : 0.1783
+    DINO+FM        : 0.1921
+    FPFH+FM        : 0.5518
+    FPFH+argmax    : 0.5657
+
+holes_cat_shape_1 (holes)
+  Winner: SHOT+argmax = 0.0933 (margin over 2nd: 0.0772)
+  All errors:
+    SHOT+argmax    : 0.0933 <-- BEST
+    DINO+argmax    : 0.1705 <-- 2nd (Δ=0.0772)
+    DINO+FM        : 0.2122
+    SHOT+FM        : 0.2233
+    SHOT+PFM       : 0.2578
+    DINO+PFM       : 0.2651
+    FPFH+FM        : 0.4510
+    FPFH+PFM       : 0.4891
+    FPFH+argmax    : 0.5303
+
+holes_cat_shape_10 (holes)
+  Winner: DINO+FM = 0.1374 (margin over 2nd: 0.0219)
+  All errors:
+    DINO+FM        : 0.1374 <-- BEST
+    SHOT+FM        : 0.1593 <-- 2nd (Δ=0.0219)
+    DINO+argmax    : 0.2295
+    SHOT+PFM       : 0.2312
+    DINO+PFM       : 0.2392
+    FPFH+PFM       : 0.2540
+    SHOT+argmax    : 0.2716
+    FPFH+argmax    : 0.4389
+    FPFH+FM        : 0.4440
+
+holes_cat_shape_2 (holes)
+  Winner: SHOT+PFM = 0.1256 (margin over 2nd: 0.0576)
+  All errors:
+    SHOT+PFM       : 0.1256 <-- BEST
+    DINO+PFM       : 0.1832 <-- 2nd (Δ=0.0576)
+    DINO+argmax    : 0.2091
+    DINO+FM        : 0.2297
+    SHOT+argmax    : 0.2937
+    SHOT+FM        : 0.3208
+    FPFH+FM        : 0.4374
+    FPFH+argmax    : 0.5091
+    FPFH+PFM       : 0.5870
+
+holes_cat_shape_3 (holes)
+  Winner: DINO+PFM = 0.0454 (margin over 2nd: 0.0528)
+  All errors:
+    DINO+PFM       : 0.0454 <-- BEST
+    SHOT+PFM       : 0.0982 <-- 2nd (Δ=0.0528)
+    FPFH+PFM       : 0.1540
+    SHOT+FM        : 0.1829
+    DINO+FM        : 0.1935
+    DINO+argmax    : 0.2274
+    SHOT+argmax    : 0.2621
+    FPFH+FM        : 0.4286
+    FPFH+argmax    : 0.4661
+
+holes_cat_shape_4 (holes)
+  Winner: DINO+FM = 0.1812 (margin over 2nd: 0.0242)
+  All errors:
+    DINO+FM        : 0.1812 <-- BEST
+    SHOT+PFM       : 0.2054 <-- 2nd (Δ=0.0242)
+    DINO+argmax    : 0.2103
+    FPFH+PFM       : 0.2224
+    SHOT+FM        : 0.2567
+    DINO+PFM       : 0.2821
+    SHOT+argmax    : 0.3188
+    FPFH+FM        : 0.3950
+    FPFH+argmax    : 0.4662
+
+holes_cat_shape_5 (holes)
+  Winner: FPFH+PFM = 0.1788 (margin over 2nd: 0.0060)
+  All errors:
+    FPFH+PFM       : 0.1788 <-- BEST
+    SHOT+PFM       : 0.1848 <-- 2nd (Δ=0.0060)
+    DINO+argmax    : 0.2161
+    SHOT+argmax    : 0.2368
+    DINO+FM        : 0.2428
+    DINO+PFM       : 0.2789
+    SHOT+FM        : 0.2975
+    FPFH+FM        : 0.3717
+    FPFH+argmax    : 0.4669
+
+holes_cat_shape_6 (holes)
+  Winner: FPFH+PFM = 0.0442 (margin over 2nd: 0.0245)
+  All errors:
+    FPFH+PFM       : 0.0442 <-- BEST
+    DINO+PFM       : 0.0686 <-- 2nd (Δ=0.0245)
+    SHOT+PFM       : 0.0949
+    SHOT+FM        : 0.2050
+    DINO+FM        : 0.2316
+    DINO+argmax    : 0.2372
+    SHOT+argmax    : 0.3225
+    FPFH+FM        : 0.4183
+    FPFH+argmax    : 0.4388
+
+holes_cat_shape_7 (holes)
+  Winner: FPFH+PFM = 0.1334 (margin over 2nd: 0.0358)
+  All errors:
+    FPFH+PFM       : 0.1334 <-- BEST
+    SHOT+FM        : 0.1692 <-- 2nd (Δ=0.0358)
+    SHOT+PFM       : 0.1863
+    DINO+argmax    : 0.2460
+    DINO+FM        : 0.2505
+    DINO+PFM       : 0.2706
+    SHOT+argmax    : 0.3312
+    FPFH+FM        : 0.4568
+    FPFH+argmax    : 0.4644
+
+holes_cat_shape_8 (holes)
+  Winner: SHOT+PFM = 0.0330 (margin over 2nd: 0.0577)
+  All errors:
+    SHOT+PFM       : 0.0330 <-- BEST
+    DINO+PFM       : 0.0907 <-- 2nd (Δ=0.0577)
+    FPFH+PFM       : 0.0985
+    DINO+FM        : 0.1138
+    SHOT+FM        : 0.1279
+    DINO+argmax    : 0.1620
+    SHOT+argmax    : 0.2391
+    FPFH+FM        : 0.4172
+    FPFH+argmax    : 0.4410
+
+holes_cat_shape_9 (holes)
+  Winner: DINO+PFM = 0.1172 (margin over 2nd: 0.0473)
+  All errors:
+    DINO+PFM       : 0.1172 <-- BEST
+    FPFH+PFM       : 0.1645 <-- 2nd (Δ=0.0473)
+    DINO+argmax    : 0.2048
+    SHOT+PFM       : 0.2093
+    DINO+FM        : 0.2433
+    SHOT+argmax    : 0.3655
+    SHOT+FM        : 0.3708
+    FPFH+FM        : 0.4490
+    FPFH+argmax    : 0.4736
+
+holes_centaur_shape_1 (holes)
+  Winner: SHOT+PFM = 0.0327 (margin over 2nd: 0.0674)
+  All errors:
+    SHOT+PFM       : 0.0327 <-- BEST
+    FPFH+PFM       : 0.1001 <-- 2nd (Δ=0.0674)
+    SHOT+argmax    : 0.1912
+    DINO+argmax    : 0.1933
+    DINO+FM        : 0.2186
+    SHOT+FM        : 0.2235
+    DINO+PFM       : 0.3383
+    FPFH+FM        : 0.4364
+    FPFH+argmax    : 0.4691
+
+holes_centaur_shape_10 (holes)
+  Winner: DINO+PFM = 0.0311 (margin over 2nd: 0.0698)
+  All errors:
+    DINO+PFM       : 0.0311 <-- BEST
+    FPFH+PFM       : 0.1008 <-- 2nd (Δ=0.0698)
+    SHOT+PFM       : 0.1045
+    SHOT+FM        : 0.1695
+    DINO+FM        : 0.2465
+    DINO+argmax    : 0.2540
+    SHOT+argmax    : 0.2612
+    FPFH+FM        : 0.4531
+    FPFH+argmax    : 0.4990
+
+holes_centaur_shape_2 (holes)
+  Winner: FPFH+PFM = 0.0308 (margin over 2nd: 0.0251)
+  All errors:
+    FPFH+PFM       : 0.0308 <-- BEST
+    SHOT+PFM       : 0.0559 <-- 2nd (Δ=0.0251)
+    SHOT+FM        : 0.0590
+    DINO+PFM       : 0.0931
+    DINO+FM        : 0.1549
+    DINO+argmax    : 0.1603
+    SHOT+argmax    : 0.2346
+    FPFH+FM        : 0.4084
+    FPFH+argmax    : 0.4555
+
+holes_centaur_shape_3 (holes)
+  Winner: SHOT+PFM = 0.0261 (margin over 2nd: 0.1605)
+  All errors:
+    SHOT+PFM       : 0.0261 <-- BEST
+    SHOT+argmax    : 0.1866 <-- 2nd (Δ=0.1605)
+    SHOT+FM        : 0.2552
+    DINO+FM        : 0.2933
+    FPFH+PFM       : 0.3018
+    DINO+argmax    : 0.3134
+    DINO+PFM       : 0.3176
+    FPFH+argmax    : 0.5224
+    FPFH+FM        : 0.5417
+
+holes_centaur_shape_4 (holes)
+  Winner: DINO+PFM = 0.1430 (margin over 2nd: 0.0010)
+  All errors:
+    DINO+PFM       : 0.1430 <-- BEST
+    SHOT+argmax    : 0.1440 <-- 2nd (Δ=0.0010)
+    SHOT+PFM       : 0.1634
+    DINO+argmax    : 0.1725
+    DINO+FM        : 0.2160
+    SHOT+FM        : 0.2578
+    FPFH+PFM       : 0.3127
+    FPFH+argmax    : 0.5106
+    FPFH+FM        : 0.5869
+
+holes_centaur_shape_5 (holes)
+  Winner: SHOT+PFM = 0.0276 (margin over 2nd: 0.0275)
+  All errors:
+    SHOT+PFM       : 0.0276 <-- BEST
+    FPFH+PFM       : 0.0550 <-- 2nd (Δ=0.0275)
+    DINO+PFM       : 0.0830
+    DINO+argmax    : 0.1335
+    DINO+FM        : 0.1348
+    SHOT+argmax    : 0.1726
+    SHOT+FM        : 0.1819
+    FPFH+argmax    : 0.4679
+    FPFH+FM        : 0.4996
+
+holes_centaur_shape_6 (holes)
+  Winner: DINO+PFM = 0.0285 (margin over 2nd: 0.0075)
+  All errors:
+    DINO+PFM       : 0.0285 <-- BEST
+    FPFH+PFM       : 0.0359 <-- 2nd (Δ=0.0075)
+    SHOT+FM        : 0.0667
+    SHOT+PFM       : 0.1064
+    DINO+argmax    : 0.1575
+    DINO+FM        : 0.1665
+    SHOT+argmax    : 0.1712
+    FPFH+FM        : 0.3296
+    FPFH+argmax    : 0.4111
+
+holes_centaur_shape_7 (holes)
+  Winner: SHOT+PFM = 0.0264 (margin over 2nd: 0.0950)
+  All errors:
+    SHOT+PFM       : 0.0264 <-- BEST
+    SHOT+argmax    : 0.1214 <-- 2nd (Δ=0.0950)
+    DINO+argmax    : 0.2025
+    DINO+PFM       : 0.2100
+    DINO+FM        : 0.2550
+    FPFH+PFM       : 0.2765
+    SHOT+FM        : 0.3122
+    FPFH+argmax    : 0.5813
+    FPFH+FM        : 0.6942
+
+holes_centaur_shape_8 (holes)
+  Winner: FPFH+PFM = 0.0230 (margin over 2nd: 0.0432)
+  All errors:
+    FPFH+PFM       : 0.0230 <-- BEST
+    SHOT+FM        : 0.0662 <-- 2nd (Δ=0.0432)
+    DINO+FM        : 0.1157
+    SHOT+PFM       : 0.1478
+    DINO+argmax    : 0.1522
+    SHOT+argmax    : 0.1998
+    DINO+PFM       : 0.2017
+    FPFH+argmax    : 0.4872
+    FPFH+FM        : 0.4963
+
+holes_centaur_shape_9 (holes)
+  Winner: SHOT+PFM = 0.0567 (margin over 2nd: 0.0102)
+  All errors:
+    SHOT+PFM       : 0.0567 <-- BEST
+    DINO+PFM       : 0.0669 <-- 2nd (Δ=0.0102)
+    SHOT+argmax    : 0.2057
+    DINO+argmax    : 0.2735
+    DINO+FM        : 0.2998
+    FPFH+PFM       : 0.3742
+    SHOT+FM        : 0.3768
+    FPFH+argmax    : 0.6129
+    FPFH+FM        : 0.6586
+
+holes_david_shape_1 (holes)
+  Winner: SHOT+PFM = 0.0354 (margin over 2nd: 0.0028)
+  All errors:
+    SHOT+PFM       : 0.0354 <-- BEST
+    FPFH+PFM       : 0.0382 <-- 2nd (Δ=0.0028)
+    SHOT+argmax    : 0.0959
+    SHOT+FM        : 0.1369
+    DINO+PFM       : 0.1683
+    DINO+FM        : 0.1891
+    DINO+argmax    : 0.2113
+    FPFH+FM        : 0.3860
+    FPFH+argmax    : 0.4311
+
+holes_david_shape_10 (holes)
+  Winner: SHOT+PFM = 0.0428 (margin over 2nd: 0.0141)
+  All errors:
+    SHOT+PFM       : 0.0428 <-- BEST
+    FPFH+PFM       : 0.0570 <-- 2nd (Δ=0.0141)
+    SHOT+FM        : 0.2196
+    SHOT+argmax    : 0.2549
+    DINO+FM        : 0.2562
+    DINO+argmax    : 0.2866
+    DINO+PFM       : 0.3225
+    FPFH+argmax    : 0.3992
+    FPFH+FM        : 0.4479
+
+holes_david_shape_2 (holes)
+  Winner: DINO+PFM = 0.2294 (margin over 2nd: 0.0015)
+  All errors:
+    DINO+PFM       : 0.2294 <-- BEST
+    SHOT+argmax    : 0.2309 <-- 2nd (Δ=0.0015)
+    SHOT+PFM       : 0.2688
+    FPFH+argmax    : 0.3696
+    FPFH+FM        : 0.3961
+    SHOT+FM        : 0.4334
+    DINO+FM        : 0.4748
+    FPFH+PFM       : 0.4979
+    DINO+argmax    : 0.6354
+
+holes_david_shape_3 (holes)
+  Winner: SHOT+PFM = 0.0723 (margin over 2nd: 0.0013)
+  All errors:
+    SHOT+PFM       : 0.0723 <-- BEST
+    FPFH+PFM       : 0.0736 <-- 2nd (Δ=0.0013)
+    DINO+PFM       : 0.0937
+    SHOT+FM        : 0.2142
+    SHOT+argmax    : 0.2341
+    DINO+FM        : 0.2378
+    DINO+argmax    : 0.2471
+    FPFH+argmax    : 0.4099
+    FPFH+FM        : 0.4399
+
+holes_david_shape_4 (holes)
+  Winner: FPFH+PFM = 0.0276 (margin over 2nd: 0.0958)
+  All errors:
+    FPFH+PFM       : 0.0276 <-- BEST
+    SHOT+FM        : 0.1233 <-- 2nd (Δ=0.0958)
+    SHOT+PFM       : 0.1438
+    DINO+FM        : 0.1759
+    DINO+argmax    : 0.2105
+    DINO+PFM       : 0.2292
+    SHOT+argmax    : 0.2767
+    FPFH+FM        : 0.4064
+    FPFH+argmax    : 0.4409
+
+holes_david_shape_5 (holes)
+  Winner: SHOT+FM = 0.2602 (margin over 2nd: 0.0641)
+  All errors:
+    SHOT+FM        : 0.2602 <-- BEST
+    DINO+PFM       : 0.3242 <-- 2nd (Δ=0.0641)
+    DINO+FM        : 0.3255
+    SHOT+PFM       : 0.3709
+    DINO+argmax    : 0.3862
+    FPFH+PFM       : 0.3878
+    SHOT+argmax    : 0.4501
+    FPFH+argmax    : 0.5774
+    FPFH+FM        : 0.5811
+
+holes_david_shape_6 (holes)
+  Winner: FPFH+PFM = 0.0192 (margin over 2nd: 0.0014)
+  All errors:
+    FPFH+PFM       : 0.0192 <-- BEST
+    SHOT+PFM       : 0.0205 <-- 2nd (Δ=0.0014)
+    DINO+PFM       : 0.0653
+    SHOT+FM        : 0.0920
+    SHOT+argmax    : 0.1028
+    DINO+argmax    : 0.1520
+    DINO+FM        : 0.1897
+    FPFH+FM        : 0.3890
+    FPFH+argmax    : 0.4736
+
+holes_david_shape_7 (holes)
+  Winner: DINO+PFM = 0.0862 (margin over 2nd: 0.1023)
+  All errors:
+    DINO+PFM       : 0.0862 <-- BEST
+    SHOT+PFM       : 0.1886 <-- 2nd (Δ=0.1023)
+    SHOT+FM        : 0.2308
+    SHOT+argmax    : 0.2437
+    FPFH+PFM       : 0.2830
+    DINO+argmax    : 0.3103
+    DINO+FM        : 0.3677
+    FPFH+argmax    : 0.5129
+    FPFH+FM        : 0.5246
+
+holes_david_shape_8 (holes)
+  Winner: FPFH+PFM = 0.1062 (margin over 2nd: 0.0712)
+  All errors:
+    FPFH+PFM       : 0.1062 <-- BEST
+    SHOT+PFM       : 0.1774 <-- 2nd (Δ=0.0712)
+    SHOT+FM        : 0.2396
+    DINO+argmax    : 0.3465
+    SHOT+argmax    : 0.3819
+    DINO+FM        : 0.3968
+    DINO+PFM       : 0.4398
+    FPFH+argmax    : 0.5654
+    FPFH+FM        : 0.5908
+
+holes_david_shape_9 (holes)
+  Winner: DINO+PFM = 0.0847 (margin over 2nd: 0.1076)
+  All errors:
+    DINO+PFM       : 0.0847 <-- BEST
+    SHOT+argmax    : 0.1923 <-- 2nd (Δ=0.1076)
+    DINO+argmax    : 0.2091
+    DINO+FM        : 0.2175
+    SHOT+PFM       : 0.2681
+    SHOT+FM        : 0.3290
+    FPFH+FM        : 0.4937
+    FPFH+PFM       : 0.4980
+    FPFH+argmax    : 0.5088
+
+holes_dog_shape_1 (holes)
+  Winner: FPFH+PFM = 0.0144 (margin over 2nd: 0.0008)
+  All errors:
+    FPFH+PFM       : 0.0144 <-- BEST
+    SHOT+PFM       : 0.0152 <-- 2nd (Δ=0.0008)
+    DINO+PFM       : 0.0252
+    SHOT+argmax    : 0.0670
+    DINO+argmax    : 0.1125
+    SHOT+FM        : 0.1382
+    DINO+FM        : 0.1698
+    FPFH+argmax    : 0.4623
+    FPFH+FM        : 0.4760
+
+holes_dog_shape_10 (holes)
+  Winner: FPFH+PFM = 0.0371 (margin over 2nd: 0.0070)
+  All errors:
+    FPFH+PFM       : 0.0371 <-- BEST
+    SHOT+PFM       : 0.0440 <-- 2nd (Δ=0.0070)
+    DINO+FM        : 0.2153
+    DINO+argmax    : 0.2196
+    SHOT+FM        : 0.2563
+    DINO+PFM       : 0.2604
+    SHOT+argmax    : 0.2845
+    FPFH+FM        : 0.4143
+    FPFH+argmax    : 0.4814
+
+holes_dog_shape_2 (holes)
+  Winner: FPFH+PFM = 0.0290 (margin over 2nd: 0.0001)
+  All errors:
+    FPFH+PFM       : 0.0290 <-- BEST
+    SHOT+PFM       : 0.0291 <-- 2nd (Δ=0.0001)
+    DINO+FM        : 0.0494
+    DINO+argmax    : 0.0782
+    SHOT+FM        : 0.0814
+    DINO+PFM       : 0.0953
+    SHOT+argmax    : 0.1434
+    FPFH+FM        : 0.2352
+    FPFH+argmax    : 0.3800
+
+holes_dog_shape_3 (holes)
+  Winner: FPFH+PFM = 0.0425 (margin over 2nd: 0.0151)
+  All errors:
+    FPFH+PFM       : 0.0425 <-- BEST
+    DINO+PFM       : 0.0576 <-- 2nd (Δ=0.0151)
+    SHOT+PFM       : 0.0640
+    SHOT+FM        : 0.0885
+    DINO+argmax    : 0.1756
+    DINO+FM        : 0.1767
+    SHOT+argmax    : 0.2044
+    FPFH+FM        : 0.2283
+    FPFH+argmax    : 0.3928
+
+holes_dog_shape_4 (holes)
+  Winner: SHOT+PFM = 0.0450 (margin over 2nd: 0.0024)
+  All errors:
+    SHOT+PFM       : 0.0450 <-- BEST
+    FPFH+PFM       : 0.0473 <-- 2nd (Δ=0.0024)
+    DINO+PFM       : 0.0582
+    SHOT+FM        : 0.1455
+    DINO+FM        : 0.1703
+    DINO+argmax    : 0.1957
+    SHOT+argmax    : 0.3184
+    FPFH+FM        : 0.3513
+    FPFH+argmax    : 0.4705
+
+holes_dog_shape_5 (holes)
+  Winner: FPFH+PFM = 0.0409 (margin over 2nd: 0.0728)
+  All errors:
+    FPFH+PFM       : 0.0409 <-- BEST
+    DINO+PFM       : 0.1138 <-- 2nd (Δ=0.0728)
+    SHOT+PFM       : 0.1315
+    DINO+argmax    : 0.1553
+    SHOT+FM        : 0.1582
+    DINO+FM        : 0.1738
+    SHOT+argmax    : 0.2221
+    FPFH+FM        : 0.3337
+    FPFH+argmax    : 0.4625
+
+holes_dog_shape_6 (holes)
+  Winner: FPFH+PFM = 0.0693 (margin over 2nd: 0.0133)
+  All errors:
+    FPFH+PFM       : 0.0693 <-- BEST
+    SHOT+PFM       : 0.0826 <-- 2nd (Δ=0.0133)
+    DINO+PFM       : 0.1106
+    DINO+argmax    : 0.1522
+    DINO+FM        : 0.1932
+    SHOT+argmax    : 0.3165
+    SHOT+FM        : 0.3210
+    FPFH+FM        : 0.4689
+    FPFH+argmax    : 0.4847
+
+holes_dog_shape_7 (holes)
+  Winner: SHOT+PFM = 0.0390 (margin over 2nd: 0.0343)
+  All errors:
+    SHOT+PFM       : 0.0390 <-- BEST
+    SHOT+FM        : 0.0733 <-- 2nd (Δ=0.0343)
+    FPFH+PFM       : 0.1190
+    DINO+argmax    : 0.1668
+    DINO+PFM       : 0.1748
+    DINO+FM        : 0.2179
+    SHOT+argmax    : 0.2691
+    FPFH+FM        : 0.3897
+    FPFH+argmax    : 0.4366
+
+holes_dog_shape_8 (holes)
+  Winner: FPFH+PFM = 0.0754 (margin over 2nd: 0.0868)
+  All errors:
+    FPFH+PFM       : 0.0754 <-- BEST
+    SHOT+PFM       : 0.1622 <-- 2nd (Δ=0.0868)
+    DINO+argmax    : 0.1629
+    DINO+FM        : 0.1629
+    SHOT+FM        : 0.1720
+    DINO+PFM       : 0.2061
+    SHOT+argmax    : 0.2427
+    FPFH+FM        : 0.3924
+    FPFH+argmax    : 0.4674
+
+holes_dog_shape_9 (holes)
+  Winner: SHOT+FM = 0.1000 (margin over 2nd: 0.0295)
+  All errors:
+    SHOT+FM        : 0.1000 <-- BEST
+    FPFH+PFM       : 0.1294 <-- 2nd (Δ=0.0295)
+    DINO+argmax    : 0.1712
+    DINO+FM        : 0.1768
+    SHOT+PFM       : 0.2328
+    SHOT+argmax    : 0.2790
+    DINO+PFM       : 0.2835
+    FPFH+FM        : 0.3155
+    FPFH+argmax    : 0.4234
+
+holes_horse_shape_1 (holes)
+  Winner: SHOT+PFM = 0.0177 (margin over 2nd: 0.0417)
+  All errors:
+    SHOT+PFM       : 0.0177 <-- BEST
+    DINO+PFM       : 0.0594 <-- 2nd (Δ=0.0417)
+    SHOT+argmax    : 0.0879
+    DINO+argmax    : 0.1973
+    DINO+FM        : 0.2640
+    SHOT+FM        : 0.2984
+    FPFH+argmax    : 0.5431
+    FPFH+FM        : 0.6158
+    FPFH+PFM       : 0.6631
+
+holes_horse_shape_10 (holes)
+  Winner: FPFH+PFM = 0.0334 (margin over 2nd: 0.0388)
+  All errors:
+    FPFH+PFM       : 0.0334 <-- BEST
+    SHOT+PFM       : 0.0722 <-- 2nd (Δ=0.0388)
+    SHOT+FM        : 0.0905
+    DINO+argmax    : 0.1584
+    DINO+PFM       : 0.1604
+    DINO+FM        : 0.1729
+    SHOT+argmax    : 0.2059
+    FPFH+FM        : 0.4657
+    FPFH+argmax    : 0.4766
+
+holes_horse_shape_2 (holes)
+  Winner: DINO+PFM = 0.1650 (margin over 2nd: 0.0455)
+  All errors:
+    DINO+PFM       : 0.1650 <-- BEST
+    DINO+FM        : 0.2105 <-- 2nd (Δ=0.0455)
+    FPFH+PFM       : 0.2578
+    DINO+argmax    : 0.2616
+    SHOT+PFM       : 0.2750
+    SHOT+argmax    : 0.3147
+    SHOT+FM        : 0.4100
+    FPFH+FM        : 0.5243
+    FPFH+argmax    : 0.5468
+
+holes_horse_shape_3 (holes)
+  Winner: SHOT+PFM = 0.0214 (margin over 2nd: 0.0801)
+  All errors:
+    SHOT+PFM       : 0.0214 <-- BEST
+    FPFH+PFM       : 0.1015 <-- 2nd (Δ=0.0801)
+    DINO+PFM       : 0.1059
+    DINO+argmax    : 0.1273
+    DINO+FM        : 0.1383
+    SHOT+FM        : 0.1393
+    SHOT+argmax    : 0.2345
+    FPFH+FM        : 0.2395
+    FPFH+argmax    : 0.4240
+
+holes_horse_shape_4 (holes)
+  Winner: DINO+PFM = 0.1053 (margin over 2nd: 0.0147)
+  All errors:
+    DINO+PFM       : 0.1053 <-- BEST
+    SHOT+FM        : 0.1200 <-- 2nd (Δ=0.0147)
+    FPFH+PFM       : 0.1291
+    DINO+argmax    : 0.1477
+    SHOT+argmax    : 0.1693
+    DINO+FM        : 0.1956
+    SHOT+PFM       : 0.2021
+    FPFH+FM        : 0.4533
+    FPFH+argmax    : 0.4972
+
+holes_horse_shape_5 (holes)
+  Winner: DINO+PFM = 0.0401 (margin over 2nd: 0.0089)
+  All errors:
+    DINO+PFM       : 0.0401 <-- BEST
+    FPFH+PFM       : 0.0490 <-- 2nd (Δ=0.0089)
+    SHOT+PFM       : 0.0663
+    DINO+FM        : 0.1235
+    DINO+argmax    : 0.1680
+    SHOT+FM        : 0.1839
+    SHOT+argmax    : 0.1989
+    FPFH+argmax    : 0.4554
+    FPFH+FM        : 0.4827
+
+holes_horse_shape_6 (holes)
+  Winner: DINO+PFM = 0.0295 (margin over 2nd: 0.0011)
+  All errors:
+    DINO+PFM       : 0.0295 <-- BEST
+    FPFH+PFM       : 0.0307 <-- 2nd (Δ=0.0011)
+    SHOT+PFM       : 0.1403
+    DINO+argmax    : 0.1589
+    SHOT+FM        : 0.1743
+    SHOT+argmax    : 0.1790
+    DINO+FM        : 0.2359
+    FPFH+FM        : 0.4224
+    FPFH+argmax    : 0.4824
+
+holes_horse_shape_7 (holes)
+  Winner: FPFH+PFM = 0.0355 (margin over 2nd: 0.0694)
+  All errors:
+    FPFH+PFM       : 0.0355 <-- BEST
+    DINO+argmax    : 0.1050 <-- 2nd (Δ=0.0694)
+    SHOT+PFM       : 0.1211
+    SHOT+FM        : 0.1298
+    DINO+PFM       : 0.1572
+    DINO+FM        : 0.1579
+    SHOT+argmax    : 0.1863
+    FPFH+argmax    : 0.4850
+    FPFH+FM        : 0.5063
+
+holes_horse_shape_8 (holes)
+  Winner: FPFH+PFM = 0.2115 (margin over 2nd: 0.0319)
+  All errors:
+    FPFH+PFM       : 0.2115 <-- BEST
+    DINO+PFM       : 0.2433 <-- 2nd (Δ=0.0319)
+    SHOT+PFM       : 0.2581
+    SHOT+argmax    : 0.2833
+    SHOT+FM        : 0.2885
+    DINO+argmax    : 0.3403
+    DINO+FM        : 0.3491
+    FPFH+FM        : 0.5446
+    FPFH+argmax    : 0.5549
+
+holes_horse_shape_9 (holes)
+  Winner: FPFH+PFM = 0.0255 (margin over 2nd: 0.0438)
+  All errors:
+    FPFH+PFM       : 0.0255 <-- BEST
+    SHOT+PFM       : 0.0693 <-- 2nd (Δ=0.0438)
+    DINO+PFM       : 0.0943
+    DINO+argmax    : 0.1012
+    DINO+FM        : 0.1322
+    FPFH+FM        : 0.2696
+    FPFH+argmax    : 0.3949
+    SHOT+FM        : 0.5848
+    SHOT+argmax    : 0.6131
+
+holes_michael_shape_1 (holes)
+  Winner: SHOT+PFM = 0.0081 (margin over 2nd: 0.0015)
+  All errors:
+    SHOT+PFM       : 0.0081 <-- BEST
+    FPFH+PFM       : 0.0095 <-- 2nd (Δ=0.0015)
+    DINO+PFM       : 0.0118
+    SHOT+FM        : 0.0883
+    SHOT+argmax    : 0.0932
+    DINO+argmax    : 0.1841
+    DINO+FM        : 0.2066
+    FPFH+FM        : 0.3700
+    FPFH+argmax    : 0.4703
+
+holes_michael_shape_10 (holes)
+  Winner: SHOT+PFM = 0.0461 (margin over 2nd: 0.1346)
+  All errors:
+    SHOT+PFM       : 0.0461 <-- BEST
+    DINO+PFM       : 0.1807 <-- 2nd (Δ=0.1346)
+    SHOT+argmax    : 0.2427
+    SHOT+FM        : 0.2520
+    FPFH+PFM       : 0.3208
+    DINO+argmax    : 0.3243
+    DINO+FM        : 0.3560
+    FPFH+FM        : 0.4423
+    FPFH+argmax    : 0.4570
+
+holes_michael_shape_2 (holes)
+  Winner: DINO+argmax = 0.1969 (margin over 2nd: 0.0006)
+  All errors:
+    DINO+argmax    : 0.1969 <-- BEST
+    SHOT+argmax    : 0.1976 <-- 2nd (Δ=0.0006)
+    DINO+PFM       : 0.2239
+    DINO+FM        : 0.2377
+    SHOT+PFM       : 0.2574
+    FPFH+PFM       : 0.3033
+    SHOT+FM        : 0.3716
+    FPFH+FM        : 0.4238
+    FPFH+argmax    : 0.4647
+
+holes_michael_shape_3 (holes)
+  Winner: SHOT+PFM = 0.0165 (margin over 2nd: 0.0020)
+  All errors:
+    SHOT+PFM       : 0.0165 <-- BEST
+    FPFH+PFM       : 0.0185 <-- 2nd (Δ=0.0020)
+    SHOT+FM        : 0.1580
+    DINO+FM        : 0.1732
+    DINO+argmax    : 0.1780
+    SHOT+argmax    : 0.1964
+    DINO+PFM       : 0.2526
+    FPFH+FM        : 0.3132
+    FPFH+argmax    : 0.4139
+
+holes_michael_shape_4 (holes)
+  Winner: FPFH+PFM = 0.1648 (margin over 2nd: 0.0044)
+  All errors:
+    FPFH+PFM       : 0.1648 <-- BEST
+    SHOT+FM        : 0.1692 <-- 2nd (Δ=0.0044)
+    SHOT+argmax    : 0.2649
+    DINO+FM        : 0.3525
+    DINO+argmax    : 0.3658
+    DINO+PFM       : 0.3920
+    SHOT+PFM       : 0.4303
+    FPFH+FM        : 0.5488
+    FPFH+argmax    : 0.5785
+
+holes_michael_shape_5 (holes)
+  Winner: SHOT+PFM = 0.0254 (margin over 2nd: 0.0020)
+  All errors:
+    SHOT+PFM       : 0.0254 <-- BEST
+    FPFH+PFM       : 0.0273 <-- 2nd (Δ=0.0020)
+    DINO+PFM       : 0.1645
+    SHOT+argmax    : 0.1891
+    DINO+argmax    : 0.2039
+    SHOT+FM        : 0.2084
+    DINO+FM        : 0.2269
+    FPFH+FM        : 0.2841
+    FPFH+argmax    : 0.3845
+
+holes_michael_shape_6 (holes)
+  Winner: DINO+PFM = 0.0236 (margin over 2nd: 0.0026)
+  All errors:
+    DINO+PFM       : 0.0236 <-- BEST
+    SHOT+PFM       : 0.0263 <-- 2nd (Δ=0.0026)
+    FPFH+PFM       : 0.0315
+    SHOT+FM        : 0.1965
+    DINO+argmax    : 0.2481
+    SHOT+argmax    : 0.2549
+    DINO+FM        : 0.2628
+    FPFH+FM        : 0.4543
+    FPFH+argmax    : 0.5070
+
+holes_michael_shape_7 (holes)
+  Winner: SHOT+PFM = 0.0270 (margin over 2nd: 0.0279)
+  All errors:
+    SHOT+PFM       : 0.0270 <-- BEST
+    DINO+PFM       : 0.0549 <-- 2nd (Δ=0.0279)
+    SHOT+argmax    : 0.1683
+    SHOT+FM        : 0.2657
+    DINO+argmax    : 0.3459
+    FPFH+argmax    : 0.3498
+    DINO+FM        : 0.3549
+    FPFH+FM        : 0.3581
+    FPFH+PFM       : 0.5234
+
+holes_michael_shape_8 (holes)
+  Winner: FPFH+PFM = 0.1099 (margin over 2nd: 0.0830)
+  All errors:
+    FPFH+PFM       : 0.1099 <-- BEST
+    SHOT+FM        : 0.1930 <-- 2nd (Δ=0.0830)
+    DINO+PFM       : 0.2072
+    SHOT+argmax    : 0.2729
+    SHOT+PFM       : 0.2943
+    DINO+argmax    : 0.3096
+    DINO+FM        : 0.3413
+    FPFH+FM        : 0.4967
+    FPFH+argmax    : 0.5759
+
+holes_michael_shape_9 (holes)
+  Winner: SHOT+PFM = 0.0318 (margin over 2nd: 0.2801)
+  All errors:
+    SHOT+PFM       : 0.0318 <-- BEST
+    SHOT+argmax    : 0.3118 <-- 2nd (Δ=0.2801)
+    SHOT+FM        : 0.3799
+    DINO+argmax    : 0.4417
+    FPFH+argmax    : 0.4799
+    FPFH+FM        : 0.5138
+    FPFH+PFM       : 0.5589
+    DINO+FM        : 0.6201
+    DINO+PFM       : 0.6218
+
+holes_victoria_shape_1 (holes)
+  Winner: FPFH+PFM = 0.1295 (margin over 2nd: 0.1009)
+  All errors:
+    FPFH+PFM       : 0.1295 <-- BEST
+    DINO+FM        : 0.2303 <-- 2nd (Δ=0.1009)
+    SHOT+PFM       : 0.2365
+    DINO+argmax    : 0.2584
+    SHOT+FM        : 0.2866
+    SHOT+argmax    : 0.3876
+    DINO+PFM       : 0.4018
+    FPFH+FM        : 0.5074
+    FPFH+argmax    : 0.5657
+
+holes_victoria_shape_10 (holes)
+  Winner: FPFH+PFM = 0.0320 (margin over 2nd: 0.0076)
+  All errors:
+    FPFH+PFM       : 0.0320 <-- BEST
+    SHOT+PFM       : 0.0396 <-- 2nd (Δ=0.0076)
+    SHOT+FM        : 0.1570
+    DINO+argmax    : 0.2315
+    DINO+FM        : 0.2556
+    SHOT+argmax    : 0.3083
+    DINO+PFM       : 0.4113
+    FPFH+FM        : 0.4505
+    FPFH+argmax    : 0.5221
+
+holes_victoria_shape_2 (holes)
+  Winner: SHOT+PFM = 0.0189 (margin over 2nd: 0.0723)
+  All errors:
+    SHOT+PFM       : 0.0189 <-- BEST
+    DINO+PFM       : 0.0913 <-- 2nd (Δ=0.0723)
+    SHOT+argmax    : 0.1470
+    DINO+FM        : 0.1846
+    DINO+argmax    : 0.1870
+    SHOT+FM        : 0.3440
+    FPFH+PFM       : 0.3758
+    FPFH+FM        : 0.4382
+    FPFH+argmax    : 0.4405
+
+holes_victoria_shape_3 (holes)
+  Winner: SHOT+PFM = 0.0680 (margin over 2nd: 0.0911)
+  All errors:
+    SHOT+PFM       : 0.0680 <-- BEST
+    DINO+PFM       : 0.1591 <-- 2nd (Δ=0.0911)
+    SHOT+argmax    : 0.3915
+    DINO+argmax    : 0.4125
+    DINO+FM        : 0.4224
+    SHOT+FM        : 0.4691
+    FPFH+PFM       : 0.4780
+    FPFH+argmax    : 0.5202
+    FPFH+FM        : 0.5338
+
+holes_victoria_shape_4 (holes)
+  Winner: SHOT+PFM = 0.0700 (margin over 2nd: 0.2240)
+  All errors:
+    SHOT+PFM       : 0.0700 <-- BEST
+    SHOT+FM        : 0.2940 <-- 2nd (Δ=0.2240)
+    DINO+FM        : 0.3076
+    DINO+PFM       : 0.3471
+    SHOT+argmax    : 0.3672
+    DINO+argmax    : 0.3872
+    FPFH+PFM       : 0.4966
+    FPFH+FM        : 0.5378
+    FPFH+argmax    : 0.5999
+
+holes_victoria_shape_5 (holes)
+  Winner: FPFH+PFM = 0.0210 (margin over 2nd: 0.1025)
+  All errors:
+    FPFH+PFM       : 0.0210 <-- BEST
+    DINO+PFM       : 0.1235 <-- 2nd (Δ=0.1025)
+    SHOT+FM        : 0.1357
+    SHOT+PFM       : 0.1555
+    DINO+FM        : 0.1716
+    DINO+argmax    : 0.1918
+    SHOT+argmax    : 0.2250
+    FPFH+FM        : 0.3408
+    FPFH+argmax    : 0.4592
+
+holes_victoria_shape_6 (holes)
+  Winner: SHOT+PFM = 0.1026 (margin over 2nd: 0.0025)
+  All errors:
+    SHOT+PFM       : 0.1026 <-- BEST
+    FPFH+PFM       : 0.1051 <-- 2nd (Δ=0.0025)
+    SHOT+FM        : 0.1975
+    DINO+FM        : 0.2919
+    DINO+argmax    : 0.3131
+    SHOT+argmax    : 0.3790
+    DINO+PFM       : 0.4230
+    FPFH+FM        : 0.5490
+    FPFH+argmax    : 0.6005
+
+holes_victoria_shape_7 (holes)
+  Winner: SHOT+argmax = 0.1252 (margin over 2nd: 0.2617)
+  All errors:
+    SHOT+argmax    : 0.1252 <-- BEST
+    SHOT+FM        : 0.3869 <-- 2nd (Δ=0.2617)
+    DINO+argmax    : 0.4167
+    DINO+FM        : 0.4711
+    FPFH+argmax    : 0.5040
+    FPFH+FM        : 0.5384
+    SHOT+PFM       : 0.5548
+    DINO+PFM       : 0.5617
+    FPFH+PFM       : 0.7327
+
+holes_victoria_shape_8 (holes)
+  Winner: DINO+FM = 0.1711 (margin over 2nd: 0.0538)
+  All errors:
+    DINO+FM        : 0.1711 <-- BEST
+    DINO+argmax    : 0.2248 <-- 2nd (Δ=0.0538)
+    SHOT+PFM       : 0.2569
+    SHOT+FM        : 0.2603
+    SHOT+argmax    : 0.2696
+    DINO+PFM       : 0.4326
+    FPFH+argmax    : 0.5042
+    FPFH+FM        : 0.5212
+    FPFH+PFM       : 0.6705
+
+holes_victoria_shape_9 (holes)
+  Winner: FPFH+PFM = 0.1792 (margin over 2nd: 0.0903)
+  All errors:
+    FPFH+PFM       : 0.1792 <-- BEST
+    DINO+argmax    : 0.2695 <-- 2nd (Δ=0.0903)
+    DINO+PFM       : 0.2749
+    DINO+FM        : 0.2783
+    SHOT+FM        : 0.2837
+    SHOT+argmax    : 0.3273
+    SHOT+PFM       : 0.4311
+    FPFH+FM        : 0.5082
+    FPFH+argmax    : 0.5335
+
+holes_wolf_shape_1 (holes)
+  Winner: SHOT+argmax = 0.1134 (margin over 2nd: 0.0442)
+  All errors:
+    SHOT+argmax    : 0.1134 <-- BEST
+    SHOT+FM        : 0.1576 <-- 2nd (Δ=0.0442)
+    SHOT+PFM       : 0.1716
+    DINO+FM        : 0.2254
+    DINO+PFM       : 0.2440
+    DINO+argmax    : 0.2630
+    FPFH+PFM       : 0.3847
+    FPFH+FM        : 0.5479
+    FPFH+argmax    : 0.5799
+
+holes_wolf_shape_2 (holes)
+  Winner: SHOT+PFM = 0.0062 (margin over 2nd: 0.0025)
+  All errors:
+    SHOT+PFM       : 0.0062 <-- BEST
+    DINO+PFM       : 0.0087 <-- 2nd (Δ=0.0025)
+    SHOT+argmax    : 0.0490
+    SHOT+FM        : 0.0507
+    DINO+argmax    : 0.0728
+    DINO+FM        : 0.1285
+    FPFH+argmax    : 0.4938
+    FPFH+PFM       : 0.5498
+    FPFH+FM        : 0.5611
+
+holes_wolf_shape_3 (holes)
+  Winner: DINO+PFM = 0.0126 (margin over 2nd: 0.0003)
+  All errors:
+    DINO+PFM       : 0.0126 <-- BEST
+    FPFH+PFM       : 0.0129 <-- 2nd (Δ=0.0003)
+    SHOT+PFM       : 0.0146
+    DINO+FM        : 0.0378
+    DINO+argmax    : 0.0383
+    SHOT+FM        : 0.0539
+    SHOT+argmax    : 0.0903
+    FPFH+FM        : 0.2007
+    FPFH+argmax    : 0.3631
+
+holes_wolf_shape_4 (holes)
+  Winner: SHOT+PFM = 0.0169 (margin over 2nd: 0.0313)
+  All errors:
+    SHOT+PFM       : 0.0169 <-- BEST
+    SHOT+FM        : 0.0482 <-- 2nd (Δ=0.0313)
+    DINO+argmax    : 0.0572
+    DINO+FM        : 0.0654
+    SHOT+argmax    : 0.1019
+    FPFH+PFM       : 0.1204
+    DINO+PFM       : 0.3083
+    FPFH+argmax    : 0.5194
+    FPFH+FM        : 0.6125
+
+holes_wolf_shape_5 (holes)
+  Winner: DINO+PFM = 0.0282 (margin over 2nd: 0.0000)
+  All errors:
+    DINO+PFM       : 0.0282 <-- BEST
+    SHOT+PFM       : 0.0282 <-- 2nd (Δ=0.0000)
+    SHOT+FM        : 0.0926
+    SHOT+argmax    : 0.1096
+    DINO+argmax    : 0.1403
+    FPFH+PFM       : 0.1549
+    DINO+FM        : 0.1974
+    FPFH+argmax    : 0.4933
+    FPFH+FM        : 0.5133
+
+holes_wolf_shape_6 (holes)
+  Winner: SHOT+PFM = 0.0183 (margin over 2nd: 0.0028)
+  All errors:
+    SHOT+PFM       : 0.0183 <-- BEST
+    FPFH+PFM       : 0.0211 <-- 2nd (Δ=0.0028)
+    SHOT+FM        : 0.0430
+    SHOT+argmax    : 0.1306
+    DINO+argmax    : 0.1497
+    DINO+FM        : 0.1803
+    DINO+PFM       : 0.2970
+    FPFH+argmax    : 0.5155
+    FPFH+FM        : 0.5968
+
+holes_wolf_shape_7 (holes)
+  Winner: SHOT+PFM = 0.0117 (margin over 2nd: 0.0014)
+  All errors:
+    SHOT+PFM       : 0.0117 <-- BEST
+    FPFH+PFM       : 0.0131 <-- 2nd (Δ=0.0014)
+    SHOT+FM        : 0.0295
+    SHOT+argmax    : 0.1233
+    DINO+argmax    : 0.1236
+    DINO+FM        : 0.1348
+    DINO+PFM       : 0.2549
+    FPFH+FM        : 0.2704
+    FPFH+argmax    : 0.4234
+
+holes_wolf_shape_8 (holes)
+  Winner: SHOT+FM = 0.0657 (margin over 2nd: 0.0423)
+  All errors:
+    SHOT+FM        : 0.0657 <-- BEST
+    SHOT+argmax    : 0.1079 <-- 2nd (Δ=0.0423)
+    DINO+FM        : 0.1379
+    DINO+argmax    : 0.1381
+    SHOT+PFM       : 0.1457
+    FPFH+PFM       : 0.1804
+    DINO+PFM       : 0.2146
+    FPFH+argmax    : 0.5065
+    FPFH+FM        : 0.5816
+
+holes_wolf_shape_9 (holes)
+  Winner: SHOT+PFM = 0.0075 (margin over 2nd: 0.0179)
+  All errors:
+    SHOT+PFM       : 0.0075 <-- BEST
+    DINO+PFM       : 0.0255 <-- 2nd (Δ=0.0179)
+    FPFH+PFM       : 0.0257
+    DINO+FM        : 0.0443
+    SHOT+FM        : 0.0455
+    DINO+argmax    : 0.0611
+    SHOT+argmax    : 0.0790
+    FPFH+FM        : 0.1322
+    FPFH+argmax    : 0.3907
+
+
+================================================================================
+CASES GROUPED BY WINNING SUB-METHOD
+================================================================================
+
+DINO+FM (5 cases, avg_margin=0.0261):
+  cuts_david_shape_11                      error=0.2151, margin=0.0234
+  cuts_dog_shape_4                         error=0.1054, margin=0.0074
+  holes_cat_shape_10                       error=0.1374, margin=0.0219
+  holes_cat_shape_4                        error=0.1812, margin=0.0242
+  holes_victoria_shape_8                   error=0.1711, margin=0.0538
+
+DINO+PFM (60 cases, avg_margin=0.0300):
+  cuts_cat_shape_1                         error=0.0076, margin=0.0000
+  cuts_cat_shape_10                        error=0.0362, margin=0.2366
+  cuts_cat_shape_15                        error=0.2239, margin=0.0012
+  cuts_cat_shape_2                         error=0.0031, margin=0.0001
+  cuts_cat_shape_3                         error=0.0057, margin=0.0000
+  cuts_cat_shape_7                         error=0.0413, margin=0.1006
+  cuts_centaur_shape_10                    error=0.0091, margin=0.0000
+  cuts_centaur_shape_12                    error=0.0092, margin=0.0000
+  cuts_centaur_shape_2                     error=0.0030, margin=0.0013
+  cuts_centaur_shape_4                     error=0.0096, margin=0.0153
+  cuts_centaur_shape_5                     error=0.0280, margin=0.0412
+  cuts_centaur_shape_6                     error=0.0254, margin=0.0019
+  cuts_centaur_shape_7                     error=0.0199, margin=0.0000
+  cuts_centaur_shape_8                     error=0.1841, margin=0.0062
+  cuts_centaur_shape_9                     error=0.0198, margin=0.0460
+  cuts_david_shape_1                       error=0.0042, margin=0.0609
+  cuts_david_shape_13                      error=0.2772, margin=0.0154
+  cuts_david_shape_2                       error=0.0012, margin=0.0000
+  cuts_david_shape_5                       error=0.1601, margin=0.1206
+  cuts_david_shape_6                       error=0.0230, margin=0.0334
+  cuts_david_shape_7                       error=0.2031, margin=0.1488
+  cuts_dog_shape_11                        error=0.0214, margin=0.0001
+  cuts_dog_shape_15                        error=0.0819, margin=0.0570
+  cuts_dog_shape_2                         error=0.0234, margin=0.0000
+  cuts_dog_shape_3                         error=0.2986, margin=0.0798
+  cuts_dog_shape_5                         error=0.0297, margin=0.0001
+  cuts_dog_shape_6                         error=0.0213, margin=0.0049
+  cuts_dog_shape_8                         error=0.0180, margin=0.0000
+  cuts_horse_shape_1                       error=0.0046, margin=0.0000
+  cuts_horse_shape_13                      error=0.0820, margin=0.0047
+  cuts_horse_shape_14                      error=0.0152, margin=0.0000
+  cuts_horse_shape_15                      error=0.0958, margin=0.0075
+  cuts_horse_shape_2                       error=0.0037, margin=0.0000
+  cuts_horse_shape_7                       error=0.0347, margin=0.0119
+  cuts_michael_shape_15                    error=0.0251, margin=0.0610
+  cuts_michael_shape_4                     error=0.0149, margin=0.0026
+  cuts_michael_shape_5                     error=0.0740, margin=0.0234
+  cuts_victoria_shape_12                   error=0.0924, margin=0.0589
+  cuts_victoria_shape_4                    error=0.0142, margin=0.0058
+  cuts_victoria_shape_7                    error=0.1045, margin=0.0540
+  cuts_victoria_shape_9                    error=0.0948, margin=0.1346
+  cuts_wolf_shape_1                        error=0.0045, margin=0.0000
+  cuts_wolf_shape_12                       error=0.0099, margin=0.0000
+  cuts_wolf_shape_2                        error=0.0154, margin=0.0000
+  cuts_wolf_shape_7                        error=0.0067, margin=0.0006
+  holes_cat_shape_3                        error=0.0454, margin=0.0528
+  holes_cat_shape_9                        error=0.1172, margin=0.0473
+  holes_centaur_shape_10                   error=0.0311, margin=0.0698
+  holes_centaur_shape_4                    error=0.1430, margin=0.0010
+  holes_centaur_shape_6                    error=0.0285, margin=0.0075
+  holes_david_shape_2                      error=0.2294, margin=0.0015
+  holes_david_shape_7                      error=0.0862, margin=0.1023
+  holes_david_shape_9                      error=0.0847, margin=0.1076
+  holes_horse_shape_2                      error=0.1650, margin=0.0455
+  holes_horse_shape_4                      error=0.1053, margin=0.0147
+  holes_horse_shape_5                      error=0.0401, margin=0.0089
+  holes_horse_shape_6                      error=0.0295, margin=0.0011
+  holes_michael_shape_6                    error=0.0236, margin=0.0026
+  holes_wolf_shape_3                       error=0.0126, margin=0.0003
+  holes_wolf_shape_5                       error=0.0282, margin=0.0000
+
+DINO+argmax (3 cases, avg_margin=0.0196):
+  cuts_horse_shape_12                      error=0.0976, margin=0.0386
+  cuts_horse_shape_8                       error=0.0899, margin=0.0195
+  holes_michael_shape_2                    error=0.1969, margin=0.0006
+
+FPFH+PFM (31 cases, avg_margin=0.0455):
+  cuts_cat_shape_14                        error=0.0661, margin=0.1159
+  cuts_cat_shape_8                         error=0.1049, margin=0.0455
+  cuts_cat_shape_9                         error=0.0260, margin=0.0002
+  cuts_david_shape_15                      error=0.0119, margin=0.0054
+  cuts_michael_shape_8                     error=0.0176, margin=0.1732
+  cuts_victoria_shape_2                    error=0.0160, margin=0.0000
+  holes_cat_shape_5                        error=0.1788, margin=0.0060
+  holes_cat_shape_6                        error=0.0442, margin=0.0245
+  holes_cat_shape_7                        error=0.1334, margin=0.0358
+  holes_centaur_shape_2                    error=0.0308, margin=0.0251
+  holes_centaur_shape_8                    error=0.0230, margin=0.0432
+  holes_david_shape_4                      error=0.0276, margin=0.0958
+  holes_david_shape_6                      error=0.0192, margin=0.0014
+  holes_david_shape_8                      error=0.1062, margin=0.0712
+  holes_dog_shape_1                        error=0.0144, margin=0.0008
+  holes_dog_shape_10                       error=0.0371, margin=0.0070
+  holes_dog_shape_2                        error=0.0290, margin=0.0001
+  holes_dog_shape_3                        error=0.0425, margin=0.0151
+  holes_dog_shape_5                        error=0.0409, margin=0.0728
+  holes_dog_shape_6                        error=0.0693, margin=0.0133
+  holes_dog_shape_8                        error=0.0754, margin=0.0868
+  holes_horse_shape_10                     error=0.0334, margin=0.0388
+  holes_horse_shape_7                      error=0.0355, margin=0.0694
+  holes_horse_shape_8                      error=0.2115, margin=0.0319
+  holes_horse_shape_9                      error=0.0255, margin=0.0438
+  holes_michael_shape_4                    error=0.1648, margin=0.0044
+  holes_michael_shape_8                    error=0.1099, margin=0.0830
+  holes_victoria_shape_1                   error=0.1295, margin=0.1009
+  holes_victoria_shape_10                  error=0.0320, margin=0.0076
+  holes_victoria_shape_5                   error=0.0210, margin=0.1025
+  holes_victoria_shape_9                   error=0.1792, margin=0.0903
+
+SHOT+FM (4 cases, avg_margin=0.0437):
+  cuts_wolf_shape_6                        error=0.0573, margin=0.0390
+  holes_david_shape_5                      error=0.2602, margin=0.0641
+  holes_dog_shape_9                        error=0.1000, margin=0.0295
+  holes_wolf_shape_8                       error=0.0657, margin=0.0423
+
+SHOT+PFM (82 cases, avg_margin=0.0629):
+  cuts_cat_shape_11                        error=0.0258, margin=0.0012
+  cuts_cat_shape_12                        error=0.0266, margin=0.1068
+  cuts_cat_shape_13                        error=0.0176, margin=0.0001
+  cuts_cat_shape_4                         error=0.1148, margin=0.0794
+  cuts_cat_shape_5                         error=0.0657, margin=0.0002
+  cuts_cat_shape_6                         error=0.0200, margin=0.0001
+  cuts_centaur_shape_11                    error=0.0201, margin=0.0001
+  cuts_centaur_shape_13                    error=0.0225, margin=0.0717
+  cuts_centaur_shape_14                    error=0.0695, margin=0.1241
+  cuts_centaur_shape_15                    error=0.0156, margin=0.1111
+  cuts_david_shape_10                      error=0.0134, margin=0.0069
+  cuts_david_shape_12                      error=0.0167, margin=0.3487
+  cuts_david_shape_14                      error=0.0182, margin=0.2205
+  cuts_david_shape_3                       error=0.2469, margin=0.0007
+  cuts_david_shape_4                       error=0.0137, margin=0.0074
+  cuts_david_shape_8                       error=0.0062, margin=0.0000
+  cuts_dog_shape_10                        error=0.1516, margin=0.0069
+  cuts_dog_shape_12                        error=0.0377, margin=0.3419
+  cuts_dog_shape_13                        error=0.0237, margin=0.0135
+  cuts_dog_shape_14                        error=0.1708, margin=0.0783
+  cuts_dog_shape_7                         error=0.0240, margin=0.0000
+  cuts_dog_shape_9                         error=0.0223, margin=0.2190
+  cuts_horse_shape_10                      error=0.0111, margin=0.0000
+  cuts_horse_shape_11                      error=0.0325, margin=0.0222
+  cuts_horse_shape_3                       error=0.0115, margin=0.0837
+  cuts_horse_shape_4                       error=0.0100, margin=0.1333
+  cuts_horse_shape_5                       error=0.1503, margin=0.0263
+  cuts_horse_shape_6                       error=0.0174, margin=0.0005
+  cuts_horse_shape_9                       error=0.0197, margin=0.1808
+  cuts_michael_shape_1                     error=0.0611, margin=0.0419
+  cuts_michael_shape_11                    error=0.0134, margin=0.0063
+  cuts_michael_shape_12                    error=0.1003, margin=0.1275
+  cuts_michael_shape_13                    error=0.0277, margin=0.0129
+  cuts_michael_shape_2                     error=0.0597, margin=0.1502
+  cuts_michael_shape_6                     error=0.0145, margin=0.0050
+  cuts_michael_shape_7                     error=0.0370, margin=0.0109
+  cuts_michael_shape_9                     error=0.0075, margin=0.0072
+  cuts_victoria_shape_10                   error=0.0411, margin=0.0786
+  cuts_victoria_shape_11                   error=0.0160, margin=0.1652
+  cuts_victoria_shape_13                   error=0.0174, margin=0.0040
+  cuts_victoria_shape_14                   error=0.0550, margin=0.1608
+  cuts_victoria_shape_15                   error=0.0933, margin=0.1671
+  cuts_victoria_shape_3                    error=0.0111, margin=0.0000
+  cuts_victoria_shape_5                    error=0.0214, margin=0.1211
+  cuts_victoria_shape_6                    error=0.0581, margin=0.2345
+  cuts_wolf_shape_10                       error=0.0089, margin=0.0000
+  cuts_wolf_shape_11                       error=0.0365, margin=0.0343
+  cuts_wolf_shape_15                       error=0.0442, margin=0.0634
+  cuts_wolf_shape_3                        error=0.0090, margin=0.0000
+  cuts_wolf_shape_4                        error=0.0134, margin=0.0204
+  cuts_wolf_shape_5                        error=0.0159, margin=0.0135
+  cuts_wolf_shape_8                        error=0.0120, margin=0.0000
+  cuts_wolf_shape_9                        error=0.0096, margin=0.0002
+  holes_cat_shape_2                        error=0.1256, margin=0.0576
+  holes_cat_shape_8                        error=0.0330, margin=0.0577
+  holes_centaur_shape_1                    error=0.0327, margin=0.0674
+  holes_centaur_shape_3                    error=0.0261, margin=0.1605
+  holes_centaur_shape_5                    error=0.0276, margin=0.0275
+  holes_centaur_shape_7                    error=0.0264, margin=0.0950
+  holes_centaur_shape_9                    error=0.0567, margin=0.0102
+  holes_david_shape_1                      error=0.0354, margin=0.0028
+  holes_david_shape_10                     error=0.0428, margin=0.0141
+  holes_david_shape_3                      error=0.0723, margin=0.0013
+  holes_dog_shape_4                        error=0.0450, margin=0.0024
+  holes_dog_shape_7                        error=0.0390, margin=0.0343
+  holes_horse_shape_1                      error=0.0177, margin=0.0417
+  holes_horse_shape_3                      error=0.0214, margin=0.0801
+  holes_michael_shape_1                    error=0.0081, margin=0.0015
+  holes_michael_shape_10                   error=0.0461, margin=0.1346
+  holes_michael_shape_3                    error=0.0165, margin=0.0020
+  holes_michael_shape_5                    error=0.0254, margin=0.0020
+  holes_michael_shape_7                    error=0.0270, margin=0.0279
+  holes_michael_shape_9                    error=0.0318, margin=0.2801
+  holes_victoria_shape_2                   error=0.0189, margin=0.0723
+  holes_victoria_shape_3                   error=0.0680, margin=0.0911
+  holes_victoria_shape_4                   error=0.0700, margin=0.2240
+  holes_victoria_shape_6                   error=0.1026, margin=0.0025
+  holes_wolf_shape_2                       error=0.0062, margin=0.0025
+  holes_wolf_shape_4                       error=0.0169, margin=0.0313
+  holes_wolf_shape_6                       error=0.0183, margin=0.0028
+  holes_wolf_shape_7                       error=0.0117, margin=0.0014
+  holes_wolf_shape_9                       error=0.0075, margin=0.0179
+
+SHOT+argmax (13 cases, avg_margin=0.0773):
+  cuts_centaur_shape_1                     error=0.0005, margin=0.0049
+  cuts_centaur_shape_3                     error=0.0054, margin=0.0040
+  cuts_david_shape_9                       error=0.2695, margin=0.1114
+  cuts_dog_shape_1                         error=0.0408, margin=0.1386
+  cuts_michael_shape_10                    error=0.0974, margin=0.0446
+  cuts_michael_shape_14                    error=0.1074, margin=0.0891
+  cuts_michael_shape_3                     error=0.1038, margin=0.0622
+  cuts_victoria_shape_8                    error=0.2361, margin=0.0515
+  cuts_wolf_shape_13                       error=0.0409, margin=0.0407
+  cuts_wolf_shape_14                       error=0.0332, margin=0.0749
+  holes_cat_shape_1                        error=0.0933, margin=0.0772
+  holes_victoria_shape_7                   error=0.1252, margin=0.2617
+  holes_wolf_shape_1                       error=0.1134, margin=0.0442
+

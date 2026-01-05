@@ -14,10 +14,19 @@ def match_and_refine(M : ManifoldMesh, N : ManifoldMesh, opts: Options):
     print(f"Estimate rank of functional map: {est_rank} / {opts.n_eigen}")
 
     W = create_slanted_diagonal_mask(est_rank, opts)
-    M_descriptors, N_descriptors = M.compute_descriptors(opts), N.compute_descriptors(opts)
+    
+    # Use cached descriptors if available (avoid re-rendering)
+    if hasattr(M, '_cached_descriptors') and M._cached_descriptors is not None:
+        M_descriptors = M._cached_descriptors
+    else:
+        M_descriptors = M.compute_descriptors(opts)
+    if hasattr(N, '_cached_descriptors') and N._cached_descriptors is not None:
+        N_descriptors = N._cached_descriptors
+    else:
+        N_descriptors = N.compute_descriptors(opts)
 
     # Only for the FIRST stage: per-feature mass normalization for SHOT and DINO descriptors
-    if opts.descriptor_type.lower() in ["shot", "dino"]:
+    if opts.descriptor_type.lower() in ["shot", "dino", "dinov3"]:
         eps = 1e-10
         M_norm = torch.sqrt(M.S @ (M_descriptors ** 2) + eps)   # (feat_dim,)
         N_norm = torch.sqrt(N.S @ (N_descriptors ** 2) + eps)
