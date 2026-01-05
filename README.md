@@ -156,58 +156,6 @@ source .venv/bin/activate
 
 **See [SETUP_ALTERNATIVE.md](SETUP_ALTERNATIVE.md) for venv installation options.**
 
-## Quick Start
-
-### Basic Usage
-
-```python
-from pfm_py import PartialFunctionalMap, compute_laplacian_basis
-import numpy as np
-
-# Load meshes (vertices, faces)
-source_verts, source_faces = load_mesh("source.obj")
-target_verts, target_faces = load_mesh("target.obj")
-
-# Compute spectral basis
-k = 50
-source_evecs, source_evals = compute_laplacian_basis(source_verts, source_faces, k)
-target_evecs, target_evals = compute_laplacian_basis(target_verts, target_faces, k)
-
-# Extract features (e.g., SHOT descriptors)
-source_features = extract_shot(source_verts, source_faces)
-target_features = extract_shot(target_verts, target_faces)
-
-# Compute partial functional map
-pfm = PartialFunctionalMap(source_evecs, target_evecs, source_evals, target_evals)
-C = pfm.compute(source_features, target_features)
-
-# Convert to point-to-point map
-p2p = pfm.fmap_to_p2p(C, source_evecs, target_evecs)
-```
-
-### Running Benchmarks
-
-```bash
-# Full benchmark across all methods
-python benchmark_Dinov3_only.py
-
-# Results saved to benchmark_results.json and benchmark_results.md
-```
-
-## Project Structure
-
-```
-pfm/
-├── pfm_py/                  # Core implementation
-│   ├── functional_maps.py   # FM/PFM algorithms
-│   ├── features.py          # Feature extraction (DINO, SHOT, FPFH)
-│   ├── geometry.py          # Mesh utilities, Laplacian computation
-│   └── visualization.py     # Result visualization
-├── examples/                # Usage examples
-├── benchmark_Dinov3_only.py # Benchmark runner
-└── requirements.txt         # Dependencies
-```
-
 ## Key Features
 
 - **Spectral Methods**: Laplace-Beltrami eigenbasis computation with cotangent weights
