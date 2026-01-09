@@ -55,6 +55,21 @@ class ManifoldMesh:
             return self.compute_shot_descriptors(opts)
         elif opts.descriptor_type.lower() == "fpfh":
             return self.compute_fpfh_features(opts)
+        elif opts.descriptor_type.lower() == "shot_fpfh":
+            # Compute SHOT and FPFH descriptors, normalize, and concatenate
+            shot_desc = self.compute_shot_descriptors(opts)
+            fpfh_desc = self.compute_fpfh_features(opts)
+            
+            # Normalize by L2 norm of the entire matrix
+            shot_norm = torch.norm(shot_desc, p=2)
+            fpfh_norm = torch.norm(fpfh_desc, p=2)
+            print(f"SHOT norm: {shot_norm.item()}, FPFH norm: {fpfh_norm.item()}")
+            
+            shot_normalized = shot_desc / (shot_norm + ALMOST_ZERO)
+            fpfh_normalized = fpfh_desc / (fpfh_norm + ALMOST_ZERO)
+            
+            # Concatenate along feature dimension
+            return torch.cat([shot_normalized, fpfh_normalized], dim=1)
         elif opts.descriptor_type.lower() == "dino":
             # Use DINO-based descriptor computation (may be slow)
             verts = self.vert.clone().detach()
@@ -68,7 +83,7 @@ class ManifoldMesh:
             feats = dinov3_module.get_shape_dinov3_features(verts, faces)
             return torch.tensor(feats, dtype=torch.float32, device=opts.device)
         else:
-            raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'dino' or 'dinov3'.")
+            raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'shot_fpfh', 'dino' or 'dinov3'.")
         
     def compute_shot_descriptors(self, opts: Options, radius=0.05, n_bins=10,
                                  min_neighbors=10, local_rf_radius=None, query_idx=None):

@@ -4,6 +4,7 @@ from pfm_py.manifold_mesh import ManifoldMesh
 from pfm_py.options import Options
 
 ALMOST_ZERO = 1e-10
+MIN_IMPROVEMENT = 1e-3
 
 def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v, est_rank, opts : Options):
     A = N.evecs.T @ (N.S.unsqueeze(1) * func_N)
@@ -35,7 +36,7 @@ def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v,
         
         # Early stopping check
         if opts.early_stopping:
-            if loss.item() < best_loss:
+            if loss.item() <= best_loss - MIN_IMPROVEMENT:
                 best_loss = loss.item()
                 best_C = C.detach().clone()
                 patience_counter = 0
