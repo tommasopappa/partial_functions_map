@@ -71,16 +71,16 @@ class ManifoldMesh:
             # Concatenate along feature dimension
             return torch.cat([shot_normalized, fpfh_normalized], dim=1)
         elif opts.descriptor_type.lower() == "dino":
-            # Use DINO-based descriptor computation (may be slow)
             verts = self.vert.clone().detach()
             faces = self.triv.clone().detach()
-            feats = dino_module.get_shape_dino_features(verts, faces)
+            feats, n_missing = dino_module.compute_dino_features(verts, faces)
+            self.dino_n_missing = n_missing
             return torch.tensor(feats, dtype=torch.float32, device=opts.device)
         elif opts.descriptor_type.lower() == "dinov3":
-            # Use DINOv3-based descriptor computation (may be slow)
             verts = self.vert.clone().detach()
             faces = self.triv.clone().detach()
-            feats = dinov3_module.get_shape_dinov3_features(verts, faces)
+            feats, n_missing = dinov3_module.get_shape_dinov3_features(verts, faces)
+            self.dino_n_missing = n_missing
             return torch.tensor(feats, dtype=torch.float32, device=opts.device)
         else:
             raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'shot_fpfh', 'dino' or 'dinov3'.")

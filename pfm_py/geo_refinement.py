@@ -10,8 +10,14 @@ from pfm_py.options import Options
 def compute_geodesic_descriptors(M : ManifoldMesh, N : ManifoldMesh, matches, opts: Options):
     v_N, f_N = N.vert.numpy(force=True), N.triv.numpy(force=True)
     v_M, f_M = M.vert.numpy(force=True), M.triv.numpy(force=True)
+    
+    # Dynamic fps_variance scaling based on mesh area
+    scale_factor = np.sqrt(M.area / 17500)
+    fps_variance = 0.7 * scale_factor
+    print(f"  Refinement scale factor: {scale_factor:.6f}, fps_variance: {fps_variance:.6f}")
+    
     fps_indices = _fps_euclidean(v_N, opts.refine_fps)
-    func_M, func_N = _compute_indicator_functions(v_M, v_N, f_M, f_N, fps_indices, matches.numpy(force=True), opts.fps_variance)
+    func_M, func_N = _compute_indicator_functions(v_M, v_N, f_M, f_N, fps_indices, matches.numpy(force=True), fps_variance)
     func_M = torch.tensor(func_M, dtype=torch.float32, device=opts.device)
     func_N = torch.tensor(func_N, dtype=torch.float32, device=opts.device)
     return func_M, func_N
