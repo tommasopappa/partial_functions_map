@@ -320,8 +320,8 @@ def run(mesh_data, output_folder, opts: Options):
 
     vert_M, triv_M = np.asarray(mesh_M.vertices), np.asarray(mesh_M.triangles)
     vert_N, triv_N = np.asarray(mesh_N.vertices), np.asarray(mesh_N.triangles)
-    M = ManifoldMesh(vert_M, triv_M, opts, compute_geo=True)
-    N = ManifoldMesh(vert_N, triv_N, opts, compute_geo=False)
+    M = ManifoldMesh(vert_M, triv_M, opts, compute_geo=True, mesh_name=mesh_data.name + "_full")
+    N = ManifoldMesh(vert_N, triv_N, opts, compute_geo=False, mesh_name=mesh_data.name + "_partial")
 
     C, v, matches = match_and_refine(M, N, opts)
     C, v, matches = C.numpy(force=True), v.numpy(force=True), matches.numpy(force=True)

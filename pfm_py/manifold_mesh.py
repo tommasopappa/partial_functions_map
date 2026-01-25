@@ -2,6 +2,7 @@ import torch
 import robust_laplacian
 import scipy.sparse.linalg as sla
 import numpy as np
+import os
 import open3d as o3d
 from scipy.sparse.csgraph import dijkstra
 
@@ -11,7 +12,7 @@ from pfm_py import dino as dino_module, dinov3 as dinov3_module
 ALMOST_ZERO = 1e-10
 
 class ManifoldMesh:
-    def __init__(self, vertices, triangles, opts: Options, compute_geo=False):
+    def __init__(self, vertices, triangles, opts: Options, compute_geo=False, mesh_name=None):
         """
         A simple container for mesh/manifold data.
 
@@ -21,8 +22,12 @@ class ManifoldMesh:
             Vertex coordinates.
         triangles : np.ndarray, shape (n_faces, 3)
             Triangle indices (0-based).
-        k : int
-            Number of eigenvectors/eigenvalues to compute
+        opts : Options
+            Options object
+        compute_geo : bool
+            Whether to compute geometry matrices
+        mesh_name : str, optional
+            Name of the mesh for caching eigenvectors
         """
         self.vert = torch.tensor(vertices, dtype=torch.float32, device=opts.device)    
         self.triv = torch.tensor(triangles, dtype=torch.long, device=opts.device)
@@ -30,9 +35,33 @@ class ManifoldMesh:
 
         L, S = robust_laplacian.mesh_laplacian(vertices, triangles, mollify_factor=1e-5)
         L, S = L.tocsr(), S.tocsr() # CSR for efficiency
-        evals, evecs = sla.eigsh(L, k=opts.n_eigen, M=S, sigma=0.0, which='LM', maxiter=1e9, tol=1.e-15) # type: ignore
-        for i in range(opts.n_eigen): # Normalize eigenvectors w.r.t mass matrix
-            evecs[:, i] = evecs[:, i] / np.sqrt(evecs[:, i].T @ S @ evecs[:, i])
+        
+        # Try to load cached eigenvectors if mesh_name is provided
+        evecs = None
+        if mesh_name is not None and opts.cache_evecs:
+            cache_dir = 'evecs'
+            cache_file = os.path.join(cache_dir, f"{mesh_name}.npy")
+            if os.path.exists(cache_file):
+                print(f"[DEBUG] Loading cached eigenvectors from {cache_file}")
+                evecs = np.load(cache_file)
+        
+        # Compute eigenvectors if not cached
+        if evecs is None:
+            evals, evecs = sla.eigsh(L, k=opts.n_eigen, M=S, sigma=0.0, which='LM', maxiter=1e9, tol=1.e-15) # type: ignore
+            for i in range(opts.n_eigen): # Normalize eigenvectors w.r.t mass matrix
+                evecs[:, i] = evecs[:, i] / np.sqrt(evecs[:, i].T @ S @ evecs[:, i])
+            
+            # Cache the eigenvectors if mesh_name is provided
+            if mesh_name is not None and opts.cache_evecs:
+                cache_dir = 'evecs'
+                os.makedirs(cache_dir, exist_ok=True)
+                cache_file = os.path.join(cache_dir, f"{mesh_name}.npy")
+                print(f"[DEBUG] Caching eigenvectors to {cache_file}")
+                np.save(cache_file, evecs)
+        else:
+            # Load eigenvalues when using cached eigenvectors
+            evals, _ = sla.eigsh(L, k=opts.n_eigen, M=S, sigma=0.0, which='LM', maxiter=1e9, tol=1.e-15) # type: ignore
+        
         self.evals = torch.tensor(evals, dtype=torch.float32, device=opts.device)
         self.evecs = torch.tensor(evecs, dtype=torch.float32, device=opts.device)
         self.S = torch.tensor(S.diagonal(), dtype=torch.float32, device=opts.device)

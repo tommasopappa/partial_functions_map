@@ -26,3 +26,4 @@ class Options:
     C_patience_iters : int = 100
     v_patience_iters : int = 2000
     early_stopping : bool = False
+    cache_evecs : bool = True

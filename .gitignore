@@ -1,2 +1,4 @@
 results/*
 venv/*
+evecs
+pfm_py/__pycache__/*
