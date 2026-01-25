@@ -609,6 +609,26 @@ def main():
         help='Optional path to ground-truth correspondences (.vts). If omitted, GT-based metrics/visualizations are skipped'
     )
 
+    # Optional optimization/iteration overrides
+    parser.add_argument(
+        '--v-max-iter',
+        dest='v_max_iter',
+        type=int,
+        help='Override Options.v_max_iter (default: 2000)'
+    )
+    parser.add_argument(
+        '--C-max-iter',
+        dest='C_max_iter',
+        type=int,
+        help='Override Options.C_max_iter (default: 2000)'
+    )
+    parser.add_argument(
+        '--max-outer-iter',
+        dest='max_outer_iter',
+        type=int,
+        help='Override Options.max_outer_iter (default: 7)'
+    )
+
     # Dataset mode uses internal defaults, no CLI args needed
 
     args = parser.parse_args()
@@ -640,6 +660,13 @@ def main():
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device}")
     opts = Options(device)
+    # Apply user-provided iteration overrides if any
+    if getattr(args, 'v_max_iter', None) is not None:
+        opts.v_max_iter = args.v_max_iter
+    if getattr(args, 'C_max_iter', None) is not None:
+        opts.C_max_iter = args.C_max_iter
+    if getattr(args, 'max_outer_iter', None) is not None:
+        opts.max_outer_iter = args.max_outer_iter
     
     # load persisted state (processed samples) and initialize summary_results from it
     state = load_state(state_path)

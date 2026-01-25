@@ -156,6 +156,55 @@ source .venv/bin/activate
 
 **See [SETUP_ALTERNATIVE.md](SETUP_ALTERNATIVE.md) for venv installation options.**
 
+## CLI Usage
+
+PFM provides a simple CLI for single runs and dataset processing. The entry point is [pfm_py/main.py](pfm_py/main.py).
+
+- Descriptors: `--fpfh` (default), `--shot`, `--dino`, `--dinov3`
+- Inputs: `--full-mesh` (.off file or directory), `--partial-mesh` (.off file), `--gt-path` (optional .vts)
+- Output: `--target-path` (results directory; default: `results`)
+- Benchmark: `--benchmark` runs DINO, DINOv3, SHOT, FPFH and writes a comparative summary
+- Iteration overrides: `--v-max-iter`, `--C-max-iter`, `--max-outer-iter`
+
+Examples:
+
+```bash
+# Single run (SHOT)
+python3 -m pfm_py.main \
+   --full-mesh /path/to/full.off \
+   --partial-mesh /path/to/partial.off \
+   --shot \
+   --target-path results/shot_single
+
+# Single run (DINOv3) + GT + benchmark
+python3 -m pfm_py.main \
+   --full-mesh /path/to/full.off \
+   --partial-mesh /path/to/partial.off \
+   --gt-path /path/to/corres.vts \
+   --dinov3 --benchmark \
+   --target-path results/dinov3_benchmark
+
+# Provide a full directory; auto-resolve the full mesh from the partial name
+python3 -m pfm_py.main \
+   --full-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/null/off \
+   --partial-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/cuts/off/cuts_horse_shape_14.off \
+   --dinov3 \
+   --target-path results/dinov3
+
+# Override iteration parameters (keep other defaults)
+python3 -m pfm_py.main \
+   --full-mesh /path/to/full.off \
+   --partial-mesh /path/to/partial.off \
+   --dino \
+   --v-max-iter 3000 --C-max-iter 2500 --max-outer-iter 10 \
+   --target-path results/dino_custom_iters
+```
+
+Notes:
+- When `--full-mesh` is a directory, the CLI tries candidates derived from the partial name, e.g., `horse_shape_14.off → horse.off → partial_basename.off`.
+- If single-run paths are omitted, the CLI uses internal SHREC16 defaults and iterates `cuts/holes`; with `--benchmark` it produces a summary page.
+- To override the DINO model id, set env `PFM_DINO_MODEL`; for gated repos, set `HF_TOKEN`.
+
 ## Key Features
 
 - **Spectral Methods**: Laplace-Beltrami eigenbasis computation with cotangent weights
