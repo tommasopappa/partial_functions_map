@@ -70,15 +70,18 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     source_fun = v_N_norm[:, 0]
 
     # Colors transferred via ground truth + method
-    colors_gt = np.zeros(vert_M.shape[0])
-    colors_gt[gt_matches] = source_fun
+    has_gt = gt_matches is not None and len(gt_matches) == vert_N.shape[0]
+    colors_gt = None
+    if has_gt:
+        colors_gt = np.zeros(vert_M.shape[0])
+        colors_gt[gt_matches] = source_fun
 
     colors_method = np.zeros(vert_M.shape[0])
     colors_method = N.evecs.T.numpy(force=True) @ (N.S.numpy(force=True) * source_fun)
     colors_method = C @ colors_method
     colors_method = M.evecs.numpy(force=True) @ colors_method
 
-    dist_gt_geo = np.zeros_like(dist_method_geo)
+    dist_gt_geo = np.zeros_like(dist_method_geo) if dist_method_geo is not None else None
     
     # Prepare mesh polygons and face colors
     poly_N = [v_N_vis[f] for f in triv_N]
@@ -91,21 +94,28 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     source_fun_colors = cmap_viridis((source_fun - source_fun.min()) / (source_fun.max() - source_fun.min()))[:, :3]
     facecols_source = source_fun_colors[triv_N].mean(axis=1)
     
-    colors_gt_norm = (colors_gt - colors_gt.min()) / (colors_gt.max() - colors_gt.min() + 1e-10)
-    colors_gt_rgb = cmap_viridis(colors_gt_norm)[:, :3]
-    facecols_gt = colors_gt_rgb[triv_M].mean(axis=1)
+    facecols_gt = None
+    if has_gt and colors_gt is not None:
+        colors_gt_norm = (colors_gt - colors_gt.min()) / (colors_gt.max() - colors_gt.min() + 1e-10)
+        colors_gt_rgb = cmap_viridis(colors_gt_norm)[:, :3]
+        facecols_gt = colors_gt_rgb[triv_M].mean(axis=1)
     
     colors_method_norm = (colors_method - colors_method.min()) / (colors_method.max() - colors_method.min() + 1e-10)
     colors_method_rgb = cmap_viridis(colors_method_norm)[:, :3]
     facecols_method = colors_method_rgb[triv_M].mean(axis=1)
     
-    dist_gt_geo_colors = cmap_coolwarm(dist_gt_geo / 0.1)[:, :3]
-    facecols_gt_error = dist_gt_geo_colors[triv_N].mean(axis=1)
+    facecols_gt_error = None
+    if dist_gt_geo is not None:
+        dist_gt_geo_colors = cmap_coolwarm(dist_gt_geo / 0.1)[:, :3]
+        facecols_gt_error = dist_gt_geo_colors[triv_N].mean(axis=1)
     
-    vmax_error = np.percentile(dist_method_geo, 95)
-    dist_method_geo_norm = np.clip(dist_method_geo / vmax_error, 0, 1)
-    dist_method_geo_colors = cmap_coolwarm(dist_method_geo_norm)[:, :3]
-    facecols_method_error = dist_method_geo_colors[triv_N].mean(axis=1)
+    facecols_method_error = None
+    vmax_error = None
+    if dist_method_geo is not None and dist_method_geo.size > 0:
+        vmax_error = np.percentile(dist_method_geo, 95)
+        dist_method_geo_norm = np.clip(dist_method_geo / vmax_error, 0, 1)
+        dist_method_geo_colors = cmap_coolwarm(dist_method_geo_norm)[:, :3]
+        facecols_method_error = dist_method_geo_colors[triv_N].mean(axis=1)
 
     # --- Make figure (2 rows) ---
 
@@ -128,32 +138,34 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     ax1.grid(False)
 
     # GT transfer onto M
-    ax2 = fig.add_subplot(2, 3, 2, projection='3d')
-    pc2 = Poly3DCollection(poly_M, facecolors=facecols_gt, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-    ax2.add_collection3d(pc2)
-    for edge in boundary_edges_M:
-        pts = v_M_vis[list(edge)]
-        ax2.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax2.set_title("GROUND TRUTH Transfer")
-    set_axes_equal(ax2)
-    ax2.view_init(elev=20, azim=45)
-    ax2.grid(False)
+    if has_gt and facecols_gt is not None:
+        ax2 = fig.add_subplot(2, 3, 2, projection='3d')
+        pc2 = Poly3DCollection(poly_M, facecolors=facecols_gt, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+        ax2.add_collection3d(pc2)
+        for edge in boundary_edges_M:
+            pts = v_M_vis[list(edge)]
+            ax2.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
+        ax2.set_title("GROUND TRUTH Transfer")
+        set_axes_equal(ax2)
+        ax2.view_init(elev=20, azim=45)
+        ax2.grid(False)
 
     # GT error (always 0)
-    ax3 = fig.add_subplot(2, 3, 3, projection='3d')
-    pc3 = Poly3DCollection(poly_N, facecolors=facecols_gt_error, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-    ax3.add_collection3d(pc3)
-    for edge in boundary_edges_N:
-        pts = v_N_vis[list(edge)]
-        ax3.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax3.set_title(f"GT Error (mean = {dist_gt_geo.mean():.4f})")
-    set_axes_equal(ax3)
-    ax3.view_init(elev=20, azim=45)
-    ax3.grid(False)
-    # Add colorbar
-    sm3 = plt.cm.ScalarMappable(cmap=cmap_coolwarm, norm=plt.Normalize(vmin=0, vmax=0.1))
-    sm3.set_array([])
-    plt.colorbar(sm3, ax=ax3, shrink=0.6)
+    if facecols_gt_error is not None:
+        ax3 = fig.add_subplot(2, 3, 3, projection='3d')
+        pc3 = Poly3DCollection(poly_N, facecolors=facecols_gt_error, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+        ax3.add_collection3d(pc3)
+        for edge in boundary_edges_N:
+            pts = v_N_vis[list(edge)]
+            ax3.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
+        ax3.set_title(f"GT Error (mean = {dist_gt_geo.mean():.4f})")
+        set_axes_equal(ax3)
+        ax3.view_init(elev=20, azim=45)
+        ax3.grid(False)
+        # Add colorbar
+        sm3 = plt.cm.ScalarMappable(cmap=cmap_coolwarm, norm=plt.Normalize(vmin=0, vmax=0.1))
+        sm3.set_array([])
+        plt.colorbar(sm3, ax=ax3, shrink=0.6)
 
     # ============== ROW 2: Method Transfer + Errors ==============
 
@@ -170,20 +182,21 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     ax4.grid(False)
 
     # Error heatmap on N
-    ax5 = fig.add_subplot(2, 3, 5, projection='3d')
-    pc5 = Poly3DCollection(poly_N, facecolors=facecols_method_error, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-    ax5.add_collection3d(pc5)
-    for edge in boundary_edges_N:
-        pts = v_N_vis[list(edge)]
-        ax5.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax5.set_title(f"Method Error (mean = {dist_method_geo.mean():.4f})")
-    set_axes_equal(ax5)
-    ax5.view_init(elev=20, azim=45)
-    ax5.grid(False)
-    # Add colorbar
-    sm5 = plt.cm.ScalarMappable(cmap=cmap_coolwarm, norm=plt.Normalize(vmin=0, vmax=vmax_error))
-    sm5.set_array([])
-    plt.colorbar(sm5, ax=ax5, shrink=0.6)
+    if facecols_method_error is not None and vmax_error is not None:
+        ax5 = fig.add_subplot(2, 3, 5, projection='3d')
+        pc5 = Poly3DCollection(poly_N, facecolors=facecols_method_error, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+        ax5.add_collection3d(pc5)
+        for edge in boundary_edges_N:
+            pts = v_N_vis[list(edge)]
+            ax5.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
+        ax5.set_title(f"Method Error (mean = {dist_method_geo.mean():.4f})")
+        set_axes_equal(ax5)
+        ax5.view_init(elev=20, azim=45)
+        ax5.grid(False)
+        # Add colorbar
+        sm5 = plt.cm.ScalarMappable(cmap=cmap_coolwarm, norm=plt.Normalize(vmin=0, vmax=vmax_error))
+        sm5.set_array([])
+        plt.colorbar(sm5, ax=ax5, shrink=0.6)
 
     plt.tight_layout()
     functional_map_fname = f"functional_map_visualization_{opts.descriptor_type}.png"
@@ -219,7 +232,10 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     # create vertex colormap on M and transfer to N by indexing (pullback)
     colors_M = create_full_colormap(vert_M.shape[0])   # (n_M,3)
     colors_N_method = colors_M[matches]                # (n_N,3) method pullback
-    colors_N_gt = colors_M[gt_matches]                 # (n_N,3) ground truth pullback
+    has_gt = gt_matches is not None and len(gt_matches) == vert_N.shape[0]
+    colors_N_gt = None
+    if has_gt:
+        colors_N_gt = colors_M[gt_matches]                 # (n_N,3) ground truth pullback
 
     # prepare centered geometry (use same centering as first block)
     v_M_vis = vert_M - vert_N.mean(0)   # center both shapes on partial-shape center (keeps views consistent)
@@ -235,7 +251,9 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
 
     poly_N = [v_N_vis[f] for f in triv_N]
     facecols_N_method = colors_N_method[triv_N].mean(axis=1)
-    facecols_N_gt = colors_N_gt[triv_N].mean(axis=1)
+    facecols_N_gt = None
+    if has_gt and colors_N_gt is not None:
+        facecols_N_gt = colors_N_gt[triv_N].mean(axis=1)
 
     # ensure bounding box and aspect come from the same bbox used in first block (recompute if needed)
     bbox_min = v_N_vis.min(0)
@@ -274,18 +292,19 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     ax1.grid(False)
 
     # Partial mesh with ground truth pullback
-    ax2 = fig.add_subplot(1, 3, 2, projection='3d')
-    pc2 = Poly3DCollection(poly_N, facecolors=facecols_N_gt, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-    ax2.add_collection3d(pc2)
-    # Plot boundary edges in black
-    for edge in boundary_edges_N:
-        pts = v_N_vis[list(edge)]
-        ax2.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax2.set_title("Partial Mesh (N)\nGround Truth Pullback", pad=20)
-    set_axes_equal_local(ax2)
-    ax2.view_init(elev=20, azim=45)
-    ax2.set_xlabel("X"); ax2.set_ylabel("Y"); ax2.set_zlabel("Z")
-    ax2.grid(False)
+    if facecols_N_gt is not None:
+        ax2 = fig.add_subplot(1, 3, 2, projection='3d')
+        pc2 = Poly3DCollection(poly_N, facecolors=facecols_N_gt, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+        ax2.add_collection3d(pc2)
+        # Plot boundary edges in black
+        for edge in boundary_edges_N:
+            pts = v_N_vis[list(edge)]
+            ax2.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
+        ax2.set_title("Partial Mesh (N)\nGround Truth Pullback", pad=20)
+        set_axes_equal_local(ax2)
+        ax2.view_init(elev=20, azim=45)
+        ax2.set_xlabel("X"); ax2.set_ylabel("Y"); ax2.set_zlabel("Z")
+        ax2.grid(False)
 
     # Partial mesh with method pullback
     ax3 = fig.add_subplot(1, 3, 3, projection='3d')
@@ -326,13 +345,23 @@ def run(mesh_data, output_folder, opts: Options):
     C, v, matches = match_and_refine(M, N, opts)
     C, v, matches = C.numpy(force=True), v.numpy(force=True), matches.numpy(force=True)
 
-    gt_matches = np.loadtxt(mesh_data.ground_truth, dtype=float).astype(int) - 1
+    gt_matches = None
+    if mesh_data.ground_truth and os.path.exists(mesh_data.ground_truth):
+        try:
+            gt_matches = np.loadtxt(mesh_data.ground_truth, dtype=float).astype(int) - 1
+        except Exception as e:
+            print(f"Warning: could not read ground truth at {mesh_data.ground_truth}: {e}")
 
     geodesics_M = M.compute_geodesic_matrix()
-    dist_method_geo = np.array([geodesics_M[gt_matches[i], matches[i]] for i in range(len(matches))])
-    dist_method_geo = dist_method_geo / np.sqrt(M.area)
-    mean_geodesic_error = dist_method_geo.mean()
-    print(f"Mean geodesic error: {mean_geodesic_error:.6f}")
+    dist_method_geo = None
+    mean_geodesic_error = float('nan')
+    if gt_matches is not None:
+        dist_method_geo = np.array([geodesics_M[gt_matches[i], matches[i]] for i in range(len(matches))])
+        dist_method_geo = dist_method_geo / np.sqrt(M.area)
+        mean_geodesic_error = dist_method_geo.mean()
+        print(f"Mean geodesic error: {mean_geodesic_error:.6f}")
+    else:
+        print("No ground truth provided; skipping geodesic error computation.")
 
     if output_folder is None:
         return mean_geodesic_error
@@ -518,10 +547,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
     Examples:
-    python main.py --fpfh                                    # Use FPFH descriptors (default)
-    python main.py --shot                                    # Use SHOT descriptors
-    python main.py --data-path /path/to/data --shot         # Specify custom data path
-    python main.py --fpfh --data-path ~/data/shapes         # FPFH with custom path
+    # Single-run with user-provided meshes
+    python main.py --full-mesh /path/to/full.off --partial-mesh /path/to/partial.off --shot --target-path results
+
+    # Single-run with GT and benchmark all descriptors
+    python main.py --full-mesh /path/to/full.off --partial-mesh /path/to/partial.off --gt-path /path/to/corres.vts --benchmark --target-path results
+
+    # Dataset mode (uses defaults for SHREC16 directory layout)
+    python main.py --fpfh --target-path results
         """
     )
     parser.add_argument(
@@ -546,17 +579,37 @@ def main():
         help='Use DINOv3 descriptors (requires pytorch3d, transformers and internet to download model)'
     )
     parser.add_argument(
-        '--data-path',
-        type=str,
-        default='/usr/prakt/w0010/SAVHA/shape_data',
-        help='Path to the shape data directory (default: /usr/prakt/w0010/SAVHA/shape_data)'
-    )
-    parser.add_argument(
         '--target-path',
         type=str,
         default='results',
         help='Path to the output results directory (default: results)'
     )
+
+    # Benchmark mode: run all descriptors for comparison
+    parser.add_argument(
+        '--benchmark',
+        action='store_true',
+        help='Run all descriptors (DINO, DINOv3, SHOT, FPFH) and write comparative summary'
+    )
+
+    # Single-run paths: user-provided full/partial mesh (optional GT)
+    parser.add_argument(
+        '--full-mesh',
+        type=str,
+        help='Path to the full mesh (.off) or a directory containing full meshes (auto-resolved from partial name)'
+    )
+    parser.add_argument(
+        '--partial-mesh',
+        type=str,
+        help='Path to the partial mesh (.off) to match from'
+    )
+    parser.add_argument(
+        '--gt-path',
+        type=str,
+        help='Optional path to ground-truth correspondences (.vts). If omitted, GT-based metrics/visualizations are skipped'
+    )
+
+    # Dataset mode uses internal defaults, no CLI args needed
 
     args = parser.parse_args()
 
@@ -571,13 +624,18 @@ def main():
     elif getattr(args, 'dinov3', False):
         descriptor_type = "dinov3"
 
-    # Data path
-    data_path = args.data_path
     target_path = args.target_path
     state_path = os.path.join(target_path, 'state.txt')
 
     print(f"Using descriptor: {descriptor_type.upper()}")
-    print(f"Data path: {data_path}")
+    # Defaults for dataset mode (used when single-run paths are not provided)
+    FULL_MESH_DIR_DEFAULT = '/usr/prakt/w0010/SAVHA/shape_data/SHREC16/null/off'
+    PARTIAL_ROOT_DIR_DEFAULT = '/usr/prakt/w0010/SAVHA/shape_data/SHREC16'
+
+    if args.full_mesh and args.partial_mesh:
+        print(f"Single-run: full={args.full_mesh}, partial={args.partial_mesh}, gt={args.gt_path or 'None'}")
+    else:
+        print(f"Dataset defaults in use: full_dir={FULL_MESH_DIR_DEFAULT}, partial_root={PARTIAL_ROOT_DIR_DEFAULT}")
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device}")
@@ -588,77 +646,139 @@ def main():
     processed_samples = state.get('processed_samples', {})
     summary_results = list(processed_samples.values())
 
-    partial_folders = ["cuts", "holes"]
-    for folder in partial_folders:
-        partial_files = os.listdir(data_path + "/SHREC16/" + folder + "/off")
-        i = 0
-        for partial_file in partial_files:
-            # remove extension safely
-            partial_mesh_name = os.path.splitext(partial_file)[0]
-
-            # safe extraction of the full mesh name from the partial's filename
-            parts = partial_mesh_name.split('_')
+    # If user provided explicit meshes, run a single job; otherwise iterate dataset
+    if args.full_mesh and args.partial_mesh:
+        single_name = os.path.splitext(os.path.basename(args.partial_mesh))[0]
+        # Resolve full mesh: allow file or directory input
+        _full_path = args.full_mesh
+        if os.path.isdir(_full_path):
+            parts = single_name.split('_')
+            candidates = []
             if len(parts) >= 2:
-                full_mesh_name = parts[1]
+                candidates.append('_'.join(parts[1:]) + '.off')  # e.g., horse_shape_14.off
+                candidates.append(parts[1] + '.off')              # e.g., horse.off
+            candidates.append(single_name + '.off')               # fallback: full same as partial basename
+            found = None
+            for c in candidates:
+                cp = os.path.join(_full_path, c)
+                if os.path.exists(cp):
+                    found = cp
+                    break
+            if not found:
+                raise FileNotFoundError(f"Could not resolve full mesh file under directory {_full_path} for partial {single_name} (tried: {', '.join(candidates)})")
+            _full_path = found
+
+        mesh_data = TestMeshData(
+            name=single_name,
+            full_mesh=_full_path,
+            partial_mesh=args.partial_mesh,
+            ground_truth=(args.gt_path if args.gt_path else None)
+        )
+        result_path = os.path.join(target_path, single_name)
+
+        if single_name in processed_samples:
+            print(f"Skipping {single_name}: already processed (state)")
+        else:
+            if args.benchmark:
+                _types_to_run = ['dino', 'dinov3', 'shot', 'fpfh']
             else:
-                full_mesh_name = partial_mesh_name
-            mesh_data = TestMeshData(
-                name=partial_mesh_name,
-                full_mesh=data_path + f"/SHREC16/null/off/{full_mesh_name}.off",
-                partial_mesh=data_path + f"/SHREC16/{folder}/off/{partial_file}",
-                ground_truth=data_path + f"/SHREC16/{folder}/corres/{partial_mesh_name}.vts"
-            )
-            result_path = f"{target_path}/{folder}/{partial_mesh_name}"
+                _types_to_run = [descriptor_type]
 
-            # skip if already processed (from persisted state)
-            if partial_mesh_name in processed_samples:
-                continue
-            # if partial_mesh_name != "holes_cat_shape_10" and partial_mesh_name != "cuts_cat_shape_10":
-            #     continue
-            if partial_mesh_name != "cuts_horse_shape_14":
-                continue
+            _results = {}
+            for _dt in _types_to_run:
+                opts.descriptor_type = _dt
+                _results[_dt] = run(mesh_data, result_path, opts)
 
-            # run with DINO, DINOv3, SHOT, and FPFH
-            opts.descriptor_type = 'shot_fpfh'
-            res_dino = run(mesh_data, result_path, opts)
-
-            opts.descriptor_type = 'dinov3'
-            res_dinov3 = run(mesh_data, result_path, opts)
-
-            opts.descriptor_type = 'shot'
-            res_shot = run(mesh_data, result_path, opts)
-
-            opts.descriptor_type = 'fpfh'
-            res_fpfh = run(mesh_data, result_path, opts)
-
-            # aggregate into one summary entry
             entry = {
-                'name': partial_mesh_name,
-                'mean_dino': res_dino.get('mean'),
-                'mean_dinov3': res_dinov3.get('mean'),
-                'mean_shot': res_shot.get('mean'),
-                'mean_fpfh': res_fpfh.get('mean'),
-                'functional_map_dino': res_dino.get('functional_map'),
-                'color_pullback_dino': res_dino.get('color_pullback'),
-                'functional_map_dinov3': res_dinov3.get('functional_map'),
-                'color_pullback_dinov3': res_dinov3.get('color_pullback'),
-                'functional_map_shot': res_shot.get('functional_map'),
-                'color_pullback_shot': res_shot.get('color_pullback'),
-                'functional_map_fpfh': res_fpfh.get('functional_map'),
-                'color_pullback_fpfh': res_fpfh.get('color_pullback'),
+                'name': single_name,
+                'mean_dino': (_results.get('dino') or {}).get('mean'),
+                'mean_dinov3': (_results.get('dinov3') or {}).get('mean'),
+                'mean_shot': (_results.get('shot') or {}).get('mean'),
+                'mean_fpfh': (_results.get('fpfh') or {}).get('mean'),
+                'functional_map_dino': (_results.get('dino') or {}).get('functional_map'),
+                'color_pullback_dino': (_results.get('dino') or {}).get('color_pullback'),
+                'functional_map_dinov3': (_results.get('dinov3') or {}).get('functional_map'),
+                'color_pullback_dinov3': (_results.get('dinov3') or {}).get('color_pullback'),
+                'functional_map_shot': (_results.get('shot') or {}).get('functional_map'),
+                'color_pullback_shot': (_results.get('shot') or {}).get('color_pullback'),
+                'functional_map_fpfh': (_results.get('fpfh') or {}).get('functional_map'),
+                'color_pullback_fpfh': (_results.get('fpfh') or {}).get('color_pullback'),
                 'output_folder': result_path,
-                'folder': folder,
+                'folder': 'single',
             }
             summary_results.append(entry)
-            processed_samples[partial_mesh_name] = entry
+            processed_samples[single_name] = entry
             state['processed_samples'] = processed_samples
-            # write incremental HTML summary after each processed mesh
             save_state(state, state_path)
             write_summary_html(summary_results, target_path)
-            
-            i += 1
-            if i == 50:
-                break
+    else:
+        partial_folders = ["cuts", "holes"]
+        for folder in partial_folders:
+            partial_off_dir = os.path.join(PARTIAL_ROOT_DIR_DEFAULT, folder, 'off')
+            partial_files = os.listdir(partial_off_dir)
+            i = 0
+            for partial_file in partial_files:
+                # remove extension safely
+                partial_mesh_name = os.path.splitext(partial_file)[0]
+
+                # safe extraction of the full mesh name from the partial's filename
+                parts = partial_mesh_name.split('_')
+                if len(parts) >= 2:
+                    full_mesh_name = parts[1]
+                else:
+                    full_mesh_name = partial_mesh_name
+                mesh_data = TestMeshData(
+                    name=partial_mesh_name,
+                    full_mesh=os.path.join(FULL_MESH_DIR_DEFAULT, f"{full_mesh_name}.off"),
+                    partial_mesh=os.path.join(PARTIAL_ROOT_DIR_DEFAULT, folder, 'off', partial_file),
+                    ground_truth=os.path.join(PARTIAL_ROOT_DIR_DEFAULT, folder, 'corres', f"{partial_mesh_name}.vts")
+                )
+                result_path = os.path.join(target_path, folder, partial_mesh_name)
+
+                # skip if already processed (from persisted state)
+                if partial_mesh_name in processed_samples:
+                    continue
+                # Process all samples
+
+                # Decide descriptors to run
+                if args.benchmark:
+                    _types_to_run = ['dino', 'dinov3', 'shot', 'fpfh']
+                else:
+                    _types_to_run = [descriptor_type]
+
+                _results = {}
+                for _dt in _types_to_run:
+                    opts.descriptor_type = _dt
+                    _results[_dt] = run(mesh_data, result_path, opts)
+
+                # aggregate into one summary entry (only fill those run)
+                entry = {
+                    'name': partial_mesh_name,
+                    'mean_dino': (_results.get('dino') or {}).get('mean'),
+                    'mean_dinov3': (_results.get('dinov3') or {}).get('mean'),
+                    'mean_shot': (_results.get('shot') or {}).get('mean'),
+                    'mean_fpfh': (_results.get('fpfh') or {}).get('mean'),
+                    'functional_map_dino': (_results.get('dino') or {}).get('functional_map'),
+                    'color_pullback_dino': (_results.get('dino') or {}).get('color_pullback'),
+                    'functional_map_dinov3': (_results.get('dinov3') or {}).get('functional_map'),
+                    'color_pullback_dinov3': (_results.get('dinov3') or {}).get('color_pullback'),
+                    'functional_map_shot': (_results.get('shot') or {}).get('functional_map'),
+                    'color_pullback_shot': (_results.get('shot') or {}).get('color_pullback'),
+                    'functional_map_fpfh': (_results.get('fpfh') or {}).get('functional_map'),
+                    'color_pullback_fpfh': (_results.get('fpfh') or {}).get('color_pullback'),
+                    'output_folder': result_path,
+                    'folder': folder,
+                }
+                summary_results.append(entry)
+                processed_samples[partial_mesh_name] = entry
+                state['processed_samples'] = processed_samples
+                # write incremental HTML summary after each processed mesh
+                save_state(state, state_path)
+                write_summary_html(summary_results, target_path)
+                
+                i += 1
+                if i == 50:
+                    break
 
 if __name__ == "__main__":
     main()
