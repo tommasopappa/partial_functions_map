@@ -1,6 +1,7 @@
 import torch
 import robust_laplacian
 import scipy.sparse.linalg as sla
+import scipy.linalg
 import numpy as np
 import open3d as o3d
 from scipy.sparse.csgraph import dijkstra
@@ -30,9 +31,7 @@ class ManifoldMesh:
 
         L, S = robust_laplacian.mesh_laplacian(vertices, triangles, mollify_factor=1e-5)
         L, S = L.tocsr(), S.tocsr() # CSR for efficiency
-        evals, evecs = sla.eigsh(L, k=opts.n_eigen, M=S, sigma=0.0, which='LM', maxiter=1e9, tol=1.e-15) # type: ignore
-        for i in range(opts.n_eigen): # Normalize eigenvectors w.r.t mass matrix
-            evecs[:, i] = evecs[:, i] / np.sqrt(evecs[:, i].T @ S @ evecs[:, i])
+        evals, evecs = self._eigen_decomp(L, S, opts)
         self.evals = torch.tensor(evals, dtype=torch.float32, device=opts.device)
         self.evecs = torch.tensor(evecs, dtype=torch.float32, device=opts.device)
         self.S = torch.tensor(S.diagonal(), dtype=torch.float32, device=opts.device)
@@ -40,6 +39,34 @@ class ManifoldMesh:
 
         if compute_geo:
             self._compute_geometry()
+
+    def _eigen_decomp(self, L, S, opts):
+        k = opts.n_eigen
+        method = getattr(opts, 'eig_method', 'sparse')
+        
+        if method == 'sparse':
+            try:
+                evals, evecs = sla.eigsh(L, k=k, M=S, sigma=0.0, which='LM', maxiter=1e9, tol=1.e-15)
+            except:
+                import scipy.sparse
+                evals, evecs = sla.eigsh(L - 1e-8 * scipy.sparse.identity(L.shape[0]), k=k, M=S, sigma=0.0, which='LM', maxiter=1e9, tol=1.e-15)
+        elif method == 'numpy':
+            L_dense, S_dense = L.toarray(), S.toarray()
+            S_inv_sqrt = np.diag(1.0 / np.sqrt(np.diag(S_dense) + 1e-10))
+            A = S_inv_sqrt @ L_dense @ S_inv_sqrt
+            all_evals, all_evecs = np.linalg.eigh(A)
+            evecs = S_inv_sqrt @ all_evecs[:, :k]
+            evals = all_evals[:k]
+        elif method == 'scipy':
+            L_dense, S_dense = L.toarray(), S.toarray()
+            all_evals, all_evecs = scipy.linalg.eigh(L_dense, S_dense, subset_by_index=[0, k-1])
+            evals, evecs = all_evals, all_evecs
+        else:
+            raise ValueError(f"Unknown eig_method: {method}")
+        
+        for i in range(k):
+            evecs[:, i] = evecs[:, i] / np.sqrt(evecs[:, i].T @ S @ evecs[:, i])
+        return evals, evecs
 
     def compute_fpfh_features(self, opts: Options):
         radius = 0.04 * self.area

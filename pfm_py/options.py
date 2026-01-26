@@ -24,5 +24,7 @@ class Options:
     refine_iters = 3
     fps_variance = 0.7 * 4e-4
     C_patience_iters : int = 100
-    v_patience_iters : int = 200
+    v_patience_iters : int = 2000
     early_stopping : bool = False
+    cache_evecs : bool = True
+    eig_method : str = "sparse"  # "sparse", "numpy", "scipy"

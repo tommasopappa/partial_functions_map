@@ -488,136 +488,97 @@ def save_state(state, state_path):
         print(f"Warning: could not write state file {state_path}: {e}")
 
 # Command-line argument parsing
-parser = argparse.ArgumentParser(
-    description='Partial Functions Map - 3D shape matching',
-    formatter_class=argparse.RawDescriptionHelpFormatter,
-    epilog="""
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Partial Functions Map - 3D shape matching',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
 Examples:
   python main.py --fpfh                                    # Use FPFH descriptors (default)
   python main.py --shot                                    # Use SHOT descriptors
   python main.py --data-path /path/to/data --shot         # Specify custom data path
   python main.py --fpfh --data-path ~/data/shapes         # FPFH with custom path
-    """
-)
-parser.add_argument(
-    '--fpfh',
-    action='store_true',
-    help='Use FPFH descriptors (default)'
-)
-parser.add_argument(
-    '--shot',
-    action='store_true',
-    help='Use SHOT descriptors'
-)
-parser.add_argument(
-    '--dino',
-    action='store_true',
-    help='Use DINO descriptors (requires pytorch3d and internet to download model)'
-)
-parser.add_argument(
-    '--dinov3', '--dino3',
-    dest='dinov3',
-    action='store_true',
-    help='Use DINOv3 descriptors (requires pytorch3d, transformers and internet to download model)'
-)
-parser.add_argument(
-    '--data-path',
-    type=str,
-    default='/usr/prakt/w0010/SAVHA/shape_data',
-    help='Path to the shape data directory (default: /usr/prakt/w0010/SAVHA/shape_data)'
-)
-parser.add_argument(
-    '--target-path',
-    type=str,
-    default='results',
-    help='Path to the output results directory (default: results)'
-)
+        """
+    )
+    parser.add_argument('--fpfh', action='store_true', help='Use FPFH descriptors (default)')
+    parser.add_argument('--shot', action='store_true', help='Use SHOT descriptors')
+    parser.add_argument('--dino', action='store_true', help='Use DINO descriptors')
+    parser.add_argument('--dinov3', '--dino3', dest='dinov3', action='store_true', help='Use DINOv3 descriptors')
+    parser.add_argument('--data-path', type=str, default='/usr/prakt/w0010/SAVHA/shape_data', help='Path to shape data')
+    parser.add_argument('--target-path', type=str, default='results', help='Path to output results')
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-# Determine the descriptor type to use
-descriptor_type = "fpfh"  # Default value
-if args.shot:
-    descriptor_type = "shot"
-elif args.fpfh:
     descriptor_type = "fpfh"
-elif args.dino:
-    descriptor_type = "dino"
-elif getattr(args, 'dinov3', False):
-    descriptor_type = "dinov3"
+    if args.shot:
+        descriptor_type = "shot"
+    elif args.fpfh:
+        descriptor_type = "fpfh"
+    elif args.dino:
+        descriptor_type = "dino"
+    elif getattr(args, 'dinov3', False):
+        descriptor_type = "dinov3"
 
-# Data path
-data_path = args.data_path
-target_path = args.target_path
-state_path = os.path.join(target_path, 'state.txt')
+    data_path = args.data_path
+    target_path = args.target_path
+    state_path = os.path.join(target_path, 'state.txt')
 
-print(f"Using descriptor: {descriptor_type.upper()}")
-print(f"Data path: {data_path}")
+    print(f"Using descriptor: {descriptor_type.upper()}")
+    print(f"Data path: {data_path}")
 
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-print(f"Device: {device}")
-opts = Options(device)
- 
-# load persisted state (processed samples) and initialize summary_results from it
-state = load_state(state_path)
-processed_samples = state.get('processed_samples', {})
-summary_results = list(processed_samples.values())
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    print(f"Device: {device}")
+    opts = Options(device)
 
-partial_folders = ["cuts", "holes"]
-for folder in partial_folders:
-    partial_files = os.listdir(data_path + "/SHREC16/" + folder + "/off")
-    for partial_file in partial_files:
-        # remove extension safely
-        partial_mesh_name = os.path.splitext(partial_file)[0]
+    state = load_state(state_path)
+    processed_samples = state.get('processed_samples', {})
+    summary_results = list(processed_samples.values())
 
-        # safe extraction of the full mesh name from the partial's filename
-        parts = partial_mesh_name.split('_')
-        if len(parts) >= 2:
-            full_mesh_name = parts[1]
-        else:
-            full_mesh_name = partial_mesh_name
-        mesh_data = TestMeshData(
-            name=partial_mesh_name,
-            full_mesh=data_path + f"/SHREC16/null/off/{full_mesh_name}.off",
-            partial_mesh=data_path + f"/SHREC16/{folder}/off/{partial_file}",
-            ground_truth=data_path + f"/SHREC16/{folder}/corres/{partial_mesh_name}.vts"
-        )
-        result_path = f"{target_path}/{folder}/{partial_mesh_name}"
+    partial_folders = ["cuts", "holes"]
+    for folder in partial_folders:
+        partial_files = os.listdir(data_path + "/SHREC16/" + folder + "/off")
+        for partial_file in partial_files:
+            partial_mesh_name = os.path.splitext(partial_file)[0]
+            parts = partial_mesh_name.split('_')
+            full_mesh_name = parts[1] if len(parts) >= 2 else partial_mesh_name
+            mesh_data = TestMeshData(
+                name=partial_mesh_name,
+                full_mesh=data_path + f"/SHREC16/null/off/{full_mesh_name}.off",
+                partial_mesh=data_path + f"/SHREC16/{folder}/off/{partial_file}",
+                ground_truth=data_path + f"/SHREC16/{folder}/corres/{partial_mesh_name}.vts"
+            )
+            result_path = f"{target_path}/{folder}/{partial_mesh_name}"
 
-        # skip if already processed (from persisted state)
-        if partial_mesh_name in processed_samples:
-            continue
-        if partial_mesh_name != "holes_cat_shape_10" and partial_mesh_name != "cuts_cat_shape_10":
-            continue
+            if partial_mesh_name in processed_samples:
+                continue
+            if partial_mesh_name != "holes_cat_shape_10" and partial_mesh_name != "cuts_cat_shape_10":
+                continue
 
-        # run with DINO, SHOT, and FPFH
-        opts.descriptor_type = 'dino'
-        res_dino = run(mesh_data, result_path, opts)
+            opts.descriptor_type = 'dino'
+            res_dino = run(mesh_data, result_path, opts)
 
-        opts.descriptor_type = 'shot'
-        res_shot = run(mesh_data, result_path, opts)
+            opts.descriptor_type = 'shot'
+            res_shot = run(mesh_data, result_path, opts)
 
-        opts.descriptor_type = 'dinov3'
-        res_fpfh = run(mesh_data, result_path, opts)
+            opts.descriptor_type = 'dinov3'
+            res_fpfh = run(mesh_data, result_path, opts)
 
-        # aggregate into one summary entry
-        entry = {
-            'name': partial_mesh_name,
-            'mean_dino': res_dino.get('mean'),
-            'mean_shot': res_shot.get('mean'),
-            'mean_fpfh': res_fpfh.get('mean'),
-            'functional_map_dino': res_dino.get('functional_map'),
-            'color_pullback_dino': res_dino.get('color_pullback'),
-            'functional_map_shot': res_shot.get('functional_map'),
-            'color_pullback_shot': res_shot.get('color_pullback'),
-            'functional_map_fpfh': res_fpfh.get('functional_map'),
-            'color_pullback_fpfh': res_fpfh.get('color_pullback'),
-            'output_folder': result_path,
-            'folder': folder,
-        }
-        summary_results.append(entry)
-        processed_samples[partial_mesh_name] = entry
-        state['processed_samples'] = processed_samples
-        # write incremental HTML summary after each processed mesh
-        save_state(state, state_path)
-        write_summary_html(summary_results, target_path)
+            entry = {
+                'name': partial_mesh_name,
+                'mean_dino': res_dino.get('mean'),
+                'mean_shot': res_shot.get('mean'),
+                'mean_fpfh': res_fpfh.get('mean'),
+                'functional_map_dino': res_dino.get('functional_map'),
+                'color_pullback_dino': res_dino.get('color_pullback'),
+                'functional_map_shot': res_shot.get('functional_map'),
+                'color_pullback_shot': res_shot.get('color_pullback'),
+                'functional_map_fpfh': res_fpfh.get('functional_map'),
+                'color_pullback_fpfh': res_fpfh.get('color_pullback'),
+                'output_folder': result_path,
+                'folder': folder,
+            }
+            summary_results.append(entry)
+            processed_samples[partial_mesh_name] = entry
+            state['processed_samples'] = processed_samples
+            save_state(state, state_path)
+            write_summary_html(summary_results, target_path)
