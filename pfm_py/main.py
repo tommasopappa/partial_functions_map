@@ -1,6 +1,7 @@
 from pfm_py.manifold_mesh import ManifoldMesh
 from pfm_py.match_part_to_whole import match_and_refine
 from pfm_py.options import Options
+from pfm_py.web_viewer import generate_interactive_view
 
 import torch
 import open3d as o3d
@@ -482,10 +483,18 @@ def write_summary_html(summary_results, target_path):
             shot_links.append(f'<a href="{r["functional_map_shot"]}" target="_blank">functional_map_visualization_shot</a>')
         if r.get('color_pullback_shot'):
             shot_links.append(f'<a href="{r["color_pullback_shot"]}" target="_blank">color_pullback_shot</a>')
+        if r.get('interactive_view_shot'):
+            shot_links.append(f'<a href="{r["interactive_view_shot"]}" target="_blank">interactive_view_shot</a>')
         if r.get('functional_map_fpfh'):
             fpfh_links.append(f'<a href="{r["functional_map_fpfh"]}" target="_blank">functional_map_visualization_fpfh</a>')
         if r.get('color_pullback_fpfh'):
             fpfh_links.append(f'<a href="{r["color_pullback_fpfh"]}" target="_blank">color_pullback_fpfh</a>')
+        if r.get('interactive_view_fpfh'):
+            fpfh_links.append(f'<a href="{r["interactive_view_fpfh"]}" target="_blank">interactive_view_fpfh</a>')
+        if r.get('interactive_view_dino'):
+            dino_links.append(f'<a href="{r["interactive_view_dino"]}" target="_blank">interactive_view_dino</a>')
+        if r.get('interactive_view_dinov3'):
+            dinov3_links.append(f'<a href="{r["interactive_view_dinov3"]}" target="_blank">interactive_view_dinov3</a>')
 
         dino_html = ' | '.join(dino_links) if dino_links else ''
         dinov3_html = ' | '.join(dinov3_links) if dinov3_links else ''
@@ -585,6 +594,15 @@ def main():
         help='Path to the output results directory (default: results)'
     )
 
+    # (Removed) Popup viewer flag was deprecated in favor of web-based viewer
+
+    # Web viewer: generate HTML + JSON assets and link in summary
+    parser.add_argument(
+        '--web-view',
+        action='store_true',
+        help='Generate a web-based interactive viewer (HTML + JSON) in the result folder and link it in the summary'
+    )
+
     # Benchmark mode: run all descriptors for comparison
     parser.add_argument(
         '--benchmark',
@@ -632,6 +650,8 @@ def main():
     # Dataset mode uses internal defaults, no CLI args needed
 
     args = parser.parse_args()
+
+    # Viewer mode will be handled after matching to show post-match colors
 
     # Determine the descriptor type to use
     descriptor_type = "fpfh"  # Default value
@@ -738,6 +758,40 @@ def main():
             state['processed_samples'] = processed_samples
             save_state(state, state_path)
             write_summary_html(summary_results, target_path)
+
+            # If web viewer requested, generate HTML + JSON assets and add link to summary
+            if args.web_view:
+                try:
+                    mesh_M = o3d.io.read_triangle_mesh(mesh_data.full_mesh)
+                    mesh_N = o3d.io.read_triangle_mesh(mesh_data.partial_mesh)
+                    vert_M, triv_M = np.asarray(mesh_M.vertices), np.asarray(mesh_M.triangles)
+                    vert_N, triv_N = np.asarray(mesh_N.vertices), np.asarray(mesh_N.triangles)
+                    M = ManifoldMesh(vert_M, triv_M, opts, compute_geo=True)
+                    N = ManifoldMesh(vert_N, triv_N, opts, compute_geo=False)
+                    C, v, matches = match_and_refine(M, N, opts)
+                    matches = matches.numpy(force=True)
+                    gt_matches = None
+                    if mesh_data.ground_truth and os.path.exists(mesh_data.ground_truth):
+                        try:
+                            gt_matches = np.loadtxt(mesh_data.ground_truth, dtype=float).astype(int) - 1
+                        except Exception:
+                            gt_matches = None
+                    html_path = generate_interactive_view(mesh_data.full_mesh, mesh_data.partial_mesh, matches, gt_matches, result_path)
+                    try:
+                        html_rel = os.path.relpath(html_path, start=target_path)
+                    except Exception:
+                        html_rel = html_path
+                    key_name = f'interactive_view_{descriptor_type}'
+                    entry[key_name] = html_rel
+                    processed_samples[single_name] = entry
+                    state['processed_samples'] = processed_samples
+                    save_state(state, state_path)
+                    write_summary_html(summary_results, target_path)
+                    print(f"Web viewer generated: {html_path}")
+                except Exception as e:
+                    print(f"Web viewer generation failed: {e}")
+
+            # Popup viewer deprecated; web-based viewer available via --web-view
     else:
         partial_folders = ["cuts", "holes"]
         for folder in partial_folders:
@@ -806,6 +860,8 @@ def main():
                 i += 1
                 if i == 50:
                     break
+
+            # In dataset mode, viewer is less defined; skipping popup to avoid repeated openings
 
 if __name__ == "__main__":
     main()
