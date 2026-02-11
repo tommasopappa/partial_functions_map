@@ -1,3 +1,27 @@
+"""
+SHOT (Signature of Histograms of Orientations) descriptor implementation.
+
+This module computes SHOT descriptors for 3D point clouds:
+- Builds neighborhoods using either KD-tree (radius search) or mesh adjacency (BFS).
+- Computes a robust local reference frame (LRF) from a weighted covariance of neighbor offsets,
+    with axis sign disambiguation for stability.
+- Quantizes spatial sectors and normal orientations into per-volume histograms, with optional
+    interpolation across normal bins, radial layers, inclination, and azimuth.
+- Returns L2-normalized, fixed-length descriptors per point for matching/recognition.
+
+Public API:
+- SHOTParams: configuration (e.g., `radius`, `localRFradius`, `bins`, `doubleVolumes`,
+    `useInterpolation`, `useNormalization`, `minNeighbors`).
+- SHOTDescriptor.set_data(vertices, normals, faces=None): bind data and build KD-tree or adjacency.
+- SHOTDescriptor.describe_point(index): compute the descriptor for a single point.
+- SHOTDescriptor.describe_all(indices=None): compute descriptors for multiple points.
+- SHOTDescriptor.get_descriptor_length(): return descriptor dimensionality.
+
+Notes:
+- If `faces` are provided, mesh BFS respects surface topology; otherwise a KD-tree radius search is used.
+- LRF requires sufficient neighbors; if unavailable or unstable, a zero descriptor is returned.
+"""
+
 import numpy as np
 from dataclasses import dataclass
 from numpy.linalg import norm

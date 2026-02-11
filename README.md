@@ -156,6 +156,107 @@ source .venv/bin/activate
 
 **See [SETUP_ALTERNATIVE.md](SETUP_ALTERNATIVE.md) for venv installation options.**
 
+## CLI Usage
+
+PFM provides a simple CLI for single runs and dataset processing. The entry point is [pfm_py/main.py](pfm_py/main.py).
+
+- Descriptors: `--fpfh` (default), `--shot`, `--dino`, `--dinov3`
+- Inputs: `--full-mesh` (.off file or directory), `--partial-mesh` (.off file), `--gt-path` (optional .vts)
+- Output: `--target-path` (results directory; default: `results`)
+- Benchmark: `--benchmark` runs DINO, DINOv3, SHOT, FPFH and writes a comparative summary
+- Iteration overrides: `--v-max-iter`, `--C-max-iter`, `--max-outer-iter`
+
+Examples:
+
+```bash
+# Single run (SHOT)
+python3 -m pfm_py.main \
+   --full-mesh /path/to/full.off \
+   --partial-mesh /path/to/partial.off \
+   --shot \
+   --target-path results/shot_single
+
+# Single run (DINOv3) + GT + benchmark
+python3 -m pfm_py.main \
+   --full-mesh /path/to/full.off \
+   --partial-mesh /path/to/partial.off \
+   --gt-path /path/to/corres.vts \
+   --dinov3 --benchmark \
+   --target-path results/dinov3_benchmark
+
+# Provide a full directory; auto-resolve the full mesh from the partial name
+python3 -m pfm_py.main \
+   --full-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/null/off \
+   --partial-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/cuts/off/cuts_horse_shape_14.off \
+   --dinov3 \
+   --target-path results/dinov3
+
+# Override iteration parameters (keep other defaults)
+python3 -m pfm_py.main \
+   --full-mesh /path/to/full.off \
+   --partial-mesh /path/to/partial.off \
+   --dino \
+   --v-max-iter 3000 --C-max-iter 2500 --max-outer-iter 10 \
+   --target-path results/dino_custom_iters
+```
+
+Notes:
+- When `--full-mesh` is a directory, the CLI tries candidates derived from the partial name, e.g., `horse_shape_14.off → horse.off → partial_basename.off`.
+- If single-run paths are omitted, the CLI uses internal SHREC16 defaults and iterates `cuts/holes`; with `--benchmark` it produces a summary page.
+- To override the DINO model id, set env `PFM_DINO_MODEL`; for gated repos, set `HF_TOKEN`.
+
+## Web Viewer (Interactive HTML)
+
+- Purpose: Generate an interactive 3D page. Left panel shows the full mesh (continuous colors), right panel shows the partial mesh (method/GT colors), with rotate, zoom, pan and optional Method/GT toggle.
+- Enable: Add `--web-view` to the CLI; an `interactive_view.html` is created per sample inside the result folder.
+
+### Quick Example
+
+```bash
+python3 -m pfm_py.main \
+   --full-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/null/off \
+   --partial-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/cuts/off/cuts_horse_shape_14.off \
+   --shot --web-view \
+   --target-path results/webview \
+   --v-max-iter 1 --C-max-iter 1 --max-outer-iter 1
+```
+
+Outputs in the sample folder:
+- `interactive_view.html`
+- `three.min.js` (bundled automatically by the generator)
+- Optional: `full.json`, `partial_method.json`, `partial_gt.json` (non-embedded mode)
+
+### Open in VS Code (recommended)
+
+- Simple Browser:
+   - Ctrl+Shift+P (Cmd+Shift+P on macOS) → “Simple Browser: Show”
+   - Paste: `http://127.0.0.1:8001/interactive_view.html`
+- Local server:
+   ```bash
+   cd <sample_dir>
+   python3 -m http.server 8001 --bind 127.0.0.1
+   # Then open http://127.0.0.1:8001/interactive_view.html in a browser or Simple Browser
+   ```
+   - If the port is busy (EADDRINUSE), pick another port (e.g., 8010) or kill the old process:
+   ```bash
+   pkill -f "http.server 8001" || true
+   python3 -m http.server 8010 --bind 127.0.0.1
+   ```
+
+### Offline and Compatibility
+
+- The generator bundles a local `three.min.js` into the output folder and the HTML references local scripts, so the page works without internet.
+- A lightweight inline OrbitControls fallback is embedded; rotation (left mouse), zoom (wheel), and pan (right/middle mouse) work even without `OrbitControls.js`.
+- Embedded mode (default) writes JSON data directly into the HTML so `file://` or local server both work; non-embedded mode fetches `.json` files next to the page.
+
+### Troubleshooting
+
+- Blank page: Hard refresh (Ctrl/Cmd+Shift+R) or check DevTools that the `<canvas>` has a non-zero size; prefer VS Code Simple Browser or a local server over `file://` if scripts aren’t running.
+- Port in use: Change port or terminate the old server (see above).
+- No interaction: Ensure `three.min.js` exists in the output folder; the inline fallback still enables basic controls if external `OrbitControls.js` is missing.
+
+See the generator for details: [pfm_py/web_viewer.py](pfm_py/web_viewer.py).
+
 ## Key Features
 
 - **Spectral Methods**: Laplace-Beltrami eigenbasis computation with cotangent weights
