@@ -395,6 +395,8 @@ def run(mesh_data, output_folder, opts: Options):
         'color_pullback': color_pullback_rel,
         'output_folder': output_folder,
         'descriptor': opts.descriptor_type,
+        'matches': matches,
+        'gt_matches': gt_matches,
     }
 
 def write_summary_html(summary_results, target_path):
@@ -759,24 +761,23 @@ def main():
             save_state(state, state_path)
             write_summary_html(summary_results, target_path)
 
-            # If web viewer requested, generate HTML + JSON assets and add link to summary
+            # If web viewer requested, generate HTML using the already-computed matches
             if args.web_view:
                 try:
-                    mesh_M = o3d.io.read_triangle_mesh(mesh_data.full_mesh)
-                    mesh_N = o3d.io.read_triangle_mesh(mesh_data.partial_mesh)
-                    vert_M, triv_M = np.asarray(mesh_M.vertices), np.asarray(mesh_M.triangles)
-                    vert_N, triv_N = np.asarray(mesh_N.vertices), np.asarray(mesh_N.triangles)
-                    M = ManifoldMesh(vert_M, triv_M, opts, compute_geo=True)
-                    N = ManifoldMesh(vert_N, triv_N, opts, compute_geo=False)
-                    C, v, matches = match_and_refine(M, N, opts)
-                    matches = matches.numpy(force=True)
-                    gt_matches = None
-                    if mesh_data.ground_truth and os.path.exists(mesh_data.ground_truth):
-                        try:
-                            gt_matches = np.loadtxt(mesh_data.ground_truth, dtype=float).astype(int) - 1
-                        except Exception:
-                            gt_matches = None
-                    html_path = generate_interactive_view(mesh_data.full_mesh, mesh_data.partial_mesh, matches, gt_matches, result_path)
+                    viewer_res = _results.get(descriptor_type)
+                    if viewer_res is None:
+                        raise RuntimeError(f"No results found for descriptor '{descriptor_type}' to generate web view.")
+                    matches_arr = viewer_res.get('matches')
+                    gt_matches_arr = viewer_res.get('gt_matches')
+                    if matches_arr is None:
+                        raise RuntimeError("Matches are missing from run() results; cannot generate web view.")
+                    html_path = generate_interactive_view(
+                        mesh_data.full_mesh,
+                        mesh_data.partial_mesh,
+                        matches_arr,
+                        gt_matches_arr,
+                        result_path
+                    )
                     try:
                         html_rel = os.path.relpath(html_path, start=target_path)
                     except Exception:
@@ -789,7 +790,7 @@ def main():
                     write_summary_html(summary_results, target_path)
                     print(f"Web viewer generated: {html_path}")
                 except Exception as e:
-                    print(f"Web viewer generation failed: {e}")
+                    print(f"Web viewer generation failed (no recompute): {e}")
 
             # Popup viewer deprecated; web-based viewer available via --web-view
     else:
