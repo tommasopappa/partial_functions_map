@@ -310,7 +310,7 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     return color_pullback_path
 
 
-def run(mesh_data, output_folder, opts: Options):
+def run(mesh_data, output_folder, opts: Options, target_path):
     print('#'*60)
     print(f"Running `{mesh_data.name}` ...")
     print('#'*60)
@@ -510,7 +510,7 @@ def save_state(state, state_path):
     except Exception as e:
         print(f"Warning: could not write state file {state_path}: {e}")
 
-def main():
+def run_shrec_16():
         
     # Command-line argument parsing
     parser = argparse.ArgumentParser(
@@ -606,16 +606,16 @@ def main():
 
             # run with DINO, DINOv3, SHOT, and FPFH
             opts.descriptor_type = 'shot'
-            res_dino = run(mesh_data, result_path, opts)
+            res_dino = run(mesh_data, result_path, opts, target_path=target_path)
 
             opts.descriptor_type = 'dinov3'
-            res_dinov3 = run(mesh_data, result_path, opts)
+            res_dinov3 = run(mesh_data, result_path, opts, target_path=target_path)
 
             opts.descriptor_type = 'dino'
-            res_shot = run(mesh_data, result_path, opts)
+            res_shot = run(mesh_data, result_path, opts, target_path=target_path)
 
             opts.descriptor_type = 'fpfh'
-            res_fpfh = run(mesh_data, result_path, opts)
+            res_fpfh = run(mesh_data, result_path, opts, target_path=target_path)
 
             # aggregate into one summary entry
             entry = {
@@ -646,5 +646,5 @@ def main():
             if i == 50:
                 break
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__run_shrec_16__":
+    run_shrec_16()
