@@ -194,6 +194,13 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     import matplotlib as mpl
+    # We will try to use Open3D's OffscreenRenderer for smooth per-pixel shading.
+    # If unavailable (older Open3D), we fall back to matplotlib Poly3DCollection.
+    try:
+        from open3d.visualization import rendering as o3dr
+        _HAS_O3D_RENDER = True
+    except Exception:
+        _HAS_O3D_RENDER = False
 
     def find_boundary_edges(triangles):
         """Find boundary edges (edges that appear only once in the mesh). Kept for optional outlines (not used)."""
@@ -237,6 +244,75 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
             cur = np.clip(nxt, 0.0, 1.0)
         return cur
 
+    def build_vertex_adjacency(num_verts, faces):
+        neighbors = [set() for _ in range(int(num_verts))]
+        f_int = np.asarray(faces, dtype=int)
+        for f in f_int:
+            i, j, k = int(f[0]), int(f[1]), int(f[2])
+            neighbors[i].update((j, k))
+            neighbors[j].update((i, k))
+            neighbors[k].update((i, j))
+        return [list(s) for s in neighbors]
+
+    def smooth_vertex_colors(faces, colors, iters=2, alpha=0.5):
+        """Laplacian-like neighbor averaging to soften vertex color gradients."""
+        n = int(colors.shape[0])
+        adj = build_vertex_adjacency(n, faces)
+        cur = colors.astype(float).copy()
+        for _ in range(max(0, int(iters))):
+            nxt = cur.copy()
+            for i, nbrs in enumerate(adj):
+                if not nbrs:
+                    continue
+                avg = cur[nbrs].mean(axis=0)
+                nxt[i] = (1.0 - alpha) * cur[i] + alpha * avg
+            cur = np.clip(nxt, 0.0, 1.0)
+        return cur
+
+    def _render_image_o3d(verts_vis, tris, vcolors, size=(1024, 1024)):
+        """Render a single mesh with per-vertex colors using Open3D OffscreenRenderer.
+        Returns a BGRA/ARGB image as numpy array (uint8)."""
+        mesh = o3d.geometry.TriangleMesh()
+        mesh.vertices = o3d.utility.Vector3dVector(np.asarray(verts_vis))
+        mesh.triangles = o3d.utility.Vector3iVector(np.asarray(tris, dtype=int))
+        mesh.vertex_colors = o3d.utility.Vector3dVector(np.asarray(vcolors))
+        mesh.compute_vertex_normals()
+
+        mat = o3dr.MaterialRecord()
+        mat.shader = "defaultLit"
+        mat.base_color = (1.0, 1.0, 1.0, 1.0)
+        mat.point_size = 5
+
+        W, H = int(size[0]), int(size[1])
+        renderer = o3dr.OffscreenRenderer(W, H)
+        # White background; skip optional lighting calls for broad Open3D compatibility
+        try:
+            renderer.scene.set_background([1.0, 1.0, 1.0, 1.0])
+        except Exception:
+            pass
+        # Some Open3D versions expose set_lighting; use if available, else rely on defaults
+        try:
+            if hasattr(renderer.scene, 'set_lighting'):
+                # NO_SHADOWS profile tends to look clean for color previews
+                renderer.scene.set_lighting(renderer.scene.LightingProfile.NO_SHADOWS, np.array([0.0, 0.0, 0.0]))
+        except Exception:
+            pass
+        renderer.scene.add_geometry("mesh", mesh, mat)
+
+        aabb = mesh.get_axis_aligned_bounding_box()
+        center = aabb.get_center()
+        extent = max(aabb.get_max_extent(), 1e-6)
+        eye = center + np.array([2.0, 2.0, 2.0]) * extent
+        up = np.array([0.0, 0.0, 1.0])
+        renderer.setup_camera(50.0, center, eye, up)
+
+        img = renderer.render_to_image()
+        arr = np.asarray(img)
+        # Open3D may return RGB or BGRA depending on build; ensure RGB
+        if arr.ndim == 3 and arr.shape[2] == 4:
+            arr = arr[:, :, :3]
+        return arr
+
     # Shared centering and uniform scaling so both meshes fit neatly
     all_verts = np.vstack([vert_M, vert_N])
     shared_center = all_verts.mean(0)
@@ -246,26 +322,70 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     v_M_vis = (vert_M - shared_center) * scale
     v_N_vis = (vert_N - shared_center) * scale
 
-    # Paper colormap: per-vertex RGB = normalized XYZ of M using joint min/max over M and N
-    def create_paper_colormap(vert_M_arr, vert_N_arr):
-        mins = np.minimum(vert_M_arr.min(axis=0), vert_N_arr.min(axis=0))
-        maxs = np.maximum(vert_M_arr.max(axis=0), vert_N_arr.max(axis=0))
-        denom = maxs - mins
-        denom = np.where(denom > 1e-12, denom, 1.0)
-        return (vert_M_arr - mins) / denom
-    colors_M = create_paper_colormap(vert_M, vert_N)
+    # Coordinate-based colormap (normalized XYZ over joint M+N bounds), then soften
+    mins = np.minimum(vert_M.min(axis=0), vert_N.min(axis=0))
+    maxs = np.maximum(vert_M.max(axis=0), vert_N.max(axis=0))
+    denom = np.where((maxs - mins) > 1e-12, (maxs - mins), 1.0)
+    colors_M = (vert_M - mins) / denom
+    colors_M = smooth_vertex_colors(triv_M, colors_M, iters=3, alpha=0.45)
     # Slightly dim base colors to improve specular visibility
     colors_M = np.clip(colors_M * 0.90, 0.0, 1.0)
     # Transfer to N via matches (method pullback)
     colors_N_method = colors_M[matches]
+    colors_N_method = smooth_vertex_colors(triv_N, colors_N_method, iters=2, alpha=0.5)
     has_gt = gt_matches is not None and len(gt_matches) == vert_N.shape[0]
     colors_N_gt = None
     if has_gt:
         colors_N_gt = colors_M[gt_matches]
+        colors_N_gt = smooth_vertex_colors(triv_N, colors_N_gt, iters=2, alpha=0.5)
 
-    # Smooth vertex colors (no triangle subdivision) for M and N
-    colors_M_s = _smooth_vertex_colors(triv_M, colors_M, iters=2, alpha=0.5)
-    colors_N_method_s = _smooth_vertex_colors(triv_N, colors_N_method, iters=2, alpha=0.5)
+    # Prefer Open3D per-pixel renderer if available
+    if _HAS_O3D_RENDER:
+        try:
+            img_M = _render_image_o3d(v_M_vis, triv_M, colors_M, size=(1200, 900))
+            img_N_method = _render_image_o3d(v_N_vis, triv_N, colors_N_method, size=(1200, 900))
+            img_N_gt = _render_image_o3d(v_N_vis, triv_N, colors_N_gt, size=(1200, 900)) if (has_gt and colors_N_gt is not None) else None
+
+            # Compose with matplotlib to add titles consistently
+            fig, axes = plt.subplots(1, 3 if img_N_gt is not None else 2, figsize=(24, 9))
+            ax_idx = 0
+            axes[ax_idx].imshow(img_M)
+            axes[ax_idx].set_title("Full Mesh (M)\nsmooth colors", pad=20)
+            axes[ax_idx].axis('off')
+            if img_N_gt is not None:
+                ax_idx += 1
+                axes[ax_idx].imshow(img_N_gt)
+                axes[ax_idx].set_title("Partial Mesh (N)\nGround Truth Pullback", pad=20)
+                axes[ax_idx].axis('off')
+            ax_idx += 1
+            axes[ax_idx].imshow(img_N_method)
+            axes[ax_idx].set_title("Partial Mesh (N)\nMethod Pullback", pad=20)
+            axes[ax_idx].axis('off')
+
+            plt.tight_layout(pad=2.0)
+            color_pullback_fname = f"color_pullback_{opts.descriptor_type}.png"
+            color_pullback_path = os.path.join(output_folder, color_pullback_fname)
+            plt.savefig(color_pullback_path, dpi=300)
+            print(f"Saved: {color_pullback_path} (Open3D renderer)")
+            return color_pullback_path
+        except Exception as e:
+            print(f"Open3D renderer failed, falling back to matplotlib: {e}")
+
+    def set_axes_clean(ax):
+        ax.set_xlim([-0.5, 0.5])
+        ax.set_ylim([-0.5, 0.5])
+        ax.set_zlim([-0.5, 0.5])
+        try:
+            ax.set_box_aspect([1, 1, 1])
+        except Exception:
+            pass
+        ax.set_axis_off()
+
+    # Matplotlib fallback: subdivide and per-face shading (may show triangles)
+    # Subdivide meshes once to approximate per-vertex color interpolation on faces
+    subdiv_levels = 1
+    v_M_sub, t_M_sub, c_M_sub = subdivide_mesh_for_colors(v_M_vis, triv_M, colors_M, levels=subdiv_levels)
+    v_Nm_sub, t_Nm_sub, c_Nm_sub = subdivide_mesh_for_colors(v_N_vis, triv_N, colors_N_method, levels=subdiv_levels)
 
     # compute face polygons and per-face colors (average vertex colors per face) on original meshes
     poly_M = [v_M_vis[f] for f in triv_M]
@@ -325,16 +445,6 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
         spec_Ng = np.maximum(normals_Ng @ half_vec, 0.0) ** shininess
         shading_Ng = ambient + kd * diffuse_Ng[:, None]
         facecols_N_gt_shaded = np.clip(facecols_N_gt * shading_Ng + ks * spec_Ng[:, None], 0.0, 1.0)
-
-    def set_axes_clean(ax):
-        ax.set_xlim([-0.5, 0.5])
-        ax.set_ylim([-0.5, 0.5])
-        ax.set_zlim([-0.5, 0.5])
-        try:
-            ax.set_box_aspect([1, 1, 1])
-        except Exception:
-            pass
-        ax.set_axis_off()
 
     # create figure: left = full mesh, middle = GT pullback, right = method pullback
     fig = plt.figure(figsize=(24, 9))
