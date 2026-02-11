@@ -16,11 +16,118 @@ import numpy as np
 import open3d as o3d
 
 
-def _hsv_colormap(n: int) -> np.ndarray:
-    colors = np.zeros((n, 3), dtype=float)
-    for i in range(n):
-        h = i / max(1, n)
-        colors[i] = [abs(1 - 2*abs(h - 0.0)), abs(1 - 2*abs(h - 0.33)), abs(1 - 2*abs(h - 0.66))]
+# Single inline fallback script for OrbitControls (used when external OrbitControls.js is unavailable)
+FALLBACK_ORBITCONTROLS = """
+  <script>
+    // Inline fallback OrbitControls for offline usage
+    if (!window.THREE || !THREE.OrbitControls) {
+      (function(){
+        if (!window.THREE) return;
+        THREE.OrbitControls = function(camera, dom) {
+          const target = new THREE.Vector3();
+          const spherical = new THREE.Spherical();
+          const tmp = new THREE.Vector3();
+          function sync(){ tmp.copy(camera.position).sub(target); spherical.setFromVector3(tmp); }
+          sync();
+          let dragging=false, panning=false, lastX=0, lastY=0;
+          dom.addEventListener('contextmenu', e=>e.preventDefault());
+          dom.addEventListener('mousedown', e=>{ if(e.button===0) dragging=true; else panning=true; lastX=e.clientX; lastY=e.clientY; });
+          window.addEventListener('mouseup', ()=>{ dragging=false; panning=false; });
+          dom.addEventListener('mousemove', e=>{
+            const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
+            if(dragging){
+              spherical.theta -= dx*0.005; spherical.phi -= dy*0.005; spherical.phi=Math.max(0.001,Math.min(Math.PI-0.001,spherical.phi));
+              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
+            } else if(panning){
+              const panSpeed = spherical.radius*0.001; const forward=camera.getWorldDirection(new THREE.Vector3());
+              const right=new THREE.Vector3().crossVectors(forward,camera.up).normalize(); const up=camera.up.clone().normalize();
+              target.add(right.multiplyScalar(-dx*panSpeed)).add(up.multiplyScalar(dy*panSpeed));
+              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
+            }
+          });
+          dom.addEventListener('wheel', e=>{ e.preventDefault(); const s=Math.pow(1.1, Math.sign(e.deltaY)); spherical.radius=Math.max(0.001, spherical.radius*s);
+            tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
+          }, { passive:false });
+          this.target = target; this.update = function(){};
+        };
+      })();
+    }
+  </script>
+"""
+
+
+def _spectral_colormap(n: int) -> np.ndarray:
+  """Approximate Matplotlib 'Spectral' (ColorBrewer) diverging colormap.
+  Uses 11 canonical stops and linear interpolation.
+  """
+  def hex_to_rgb01(h: str) -> np.ndarray:
+    h = h.lstrip('#')
+    return np.array([int(h[i:i+2], 16) / 255.0 for i in (0, 2, 4)], dtype=float)
+
+  # 11-color Spectral palette (ColorBrewer)
+  stops_hex = [
+    '#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b', '#ffffbf',
+    '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'
+  ]
+  stops = np.stack([hex_to_rgb01(h) for h in stops_hex], axis=0)
+
+  n_safe = max(1, int(n))
+  if n_safe == 1:
+    return stops[[len(stops) // 2], :]
+  m = len(stops)
+  pos = np.linspace(0.0, m - 1, n_safe, dtype=float)
+  colors = np.zeros((n_safe, 3), dtype=float)
+  for k, p in enumerate(pos):
+    i0 = int(np.floor(p))
+    i1 = min(i0 + 1, m - 1)
+    w = p - i0
+    colors[k] = (1.0 - w) * stops[i0] + w * stops[i1]
+  return colors
+
+
+def _build_vertex_adjacency(num_verts: int, faces: np.ndarray):
+  """Build vertex adjacency list from triangle faces."""
+  neighbors = [set() for _ in range(num_verts)]
+  f_int = faces.astype(int)
+  for f in f_int:
+    a, b, c = int(f[0]), int(f[1]), int(f[2])
+    neighbors[a].update((b, c))
+    neighbors[b].update((a, c))
+    neighbors[c].update((a, b))
+  return [list(s) for s in neighbors]
+
+
+def _smooth_vertex_colors(faces: np.ndarray, colors: np.ndarray, iters: int = 2, alpha: float = 0.5) -> np.ndarray:
+  """Laplacian-like smoothing for vertex colors using neighbor averaging.
+  - faces: (m,3) triangle indices
+  - colors: (n,3) RGB in [0,1]
+  - iters: number of smoothing iterations
+  - alpha: blend factor toward neighbor mean (0=no change, 1=replace)
+  """
+  n = int(colors.shape[0])
+  adj = _build_vertex_adjacency(n, faces)
+  cur = colors.astype(float).copy()
+  for _ in range(max(0, int(iters))):
+    nxt = cur.copy()
+    for i, nbrs in enumerate(adj):
+      if not nbrs:
+        continue
+      avg = cur[nbrs].mean(axis=0)
+      nxt[i] = (1.0 - alpha) * cur[i] + alpha * avg
+    cur = np.clip(nxt, 0.0, 1.0)
+  return cur
+
+
+def _xyz_normalized_colormap(verts_M: np.ndarray, verts_N: np.ndarray) -> np.ndarray:
+    """Coordinate-based colormap: normalize XYZ of M using joint bounds from M and N.
+    Equivalent to the MATLAB snippet:
+      colors = [(Mx-minx)/(maxx-minx), (My-miny)/(maxy-miny), (Mz-minz)/(maxz-minz)]
+    where min/max are computed over both M and N.
+    """
+    all_min = np.minimum(verts_M.min(axis=0), verts_N.min(axis=0))
+    all_max = np.maximum(verts_M.max(axis=0), verts_N.max(axis=0))
+    span = np.clip(all_max - all_min, 1e-12, None)
+    colors = (verts_M - all_min) / span
     return np.clip(colors, 0.0, 1.0)
 
 
@@ -106,76 +213,7 @@ def _write_html(path: str, has_gt: bool):
   </style>
   <script src="./three.min.js"></script>
   <script src="./OrbitControls.js"></script>
-  <script>
-    // Inline fallback OrbitControls for offline usage
-    if (!window.THREE || !THREE.OrbitControls) {
-      (function(){
-        if (!window.THREE) return;
-        THREE.OrbitControls = function(camera, dom) {
-          const target = new THREE.Vector3();
-          const spherical = new THREE.Spherical();
-          const tmp = new THREE.Vector3();
-          function sync(){ tmp.copy(camera.position).sub(target); spherical.setFromVector3(tmp); }
-          sync();
-          let dragging=false, panning=false, lastX=0, lastY=0;
-          dom.addEventListener('contextmenu', e=>e.preventDefault());
-          dom.addEventListener('mousedown', e=>{ if(e.button===0) dragging=true; else panning=true; lastX=e.clientX; lastY=e.clientY; });
-          window.addEventListener('mouseup', ()=>{ dragging=false; panning=false; });
-          dom.addEventListener('mousemove', e=>{
-            const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
-            if(dragging){
-              spherical.theta -= dx*0.005; spherical.phi -= dy*0.005; spherical.phi=Math.max(0.001,Math.min(Math.PI-0.001,spherical.phi));
-              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-            } else if(panning){
-              const panSpeed = spherical.radius*0.001; const forward=camera.getWorldDirection(new THREE.Vector3());
-              const right=new THREE.Vector3().crossVectors(forward,camera.up).normalize(); const up=camera.up.clone().normalize();
-              target.add(right.multiplyScalar(-dx*panSpeed)).add(up.multiplyScalar(dy*panSpeed));
-              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-            }
-          });
-          dom.addEventListener('wheel', e=>{ e.preventDefault(); const s=Math.pow(1.1, Math.sign(e.deltaY)); spherical.radius=Math.max(0.001, spherical.radius*s);
-            tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-          }, { passive:false });
-          this.target = target; this.update = function(){};
-        };
-      })();
-    }
-  </script>
-  <script>
-    // Inline fallback OrbitControls for offline usage
-    if (!window.THREE || !THREE.OrbitControls) {
-      (function(){
-        if (!window.THREE) return;
-        THREE.OrbitControls = function(camera, dom) {
-          const target = new THREE.Vector3();
-          const spherical = new THREE.Spherical();
-          const tmp = new THREE.Vector3();
-          function sync(){ tmp.copy(camera.position).sub(target); spherical.setFromVector3(tmp); }
-          sync();
-          let dragging=false, panning=false, lastX=0, lastY=0;
-          dom.addEventListener('contextmenu', e=>e.preventDefault());
-          dom.addEventListener('mousedown', e=>{ if(e.button===0) dragging=true; else panning=true; lastX=e.clientX; lastY=e.clientY; });
-          window.addEventListener('mouseup', ()=>{ dragging=false; panning=false; });
-          dom.addEventListener('mousemove', e=>{
-            const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
-            if(dragging){
-              spherical.theta -= dx*0.005; spherical.phi -= dy*0.005; spherical.phi=Math.max(0.001,Math.min(Math.PI-0.001,spherical.phi));
-              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-            } else if(panning){
-              const panSpeed = spherical.radius*0.001; const forward=camera.getWorldDirection(new THREE.Vector3());
-              const right=new THREE.Vector3().crossVectors(forward,camera.up).normalize(); const up=camera.up.clone().normalize();
-              target.add(right.multiplyScalar(-dx*panSpeed)).add(up.multiplyScalar(dy*panSpeed));
-              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-            }
-          });
-          dom.addEventListener('wheel', e=>{ e.preventDefault(); const s=Math.pow(1.1, Math.sign(e.deltaY)); spherical.radius=Math.max(0.001, spherical.radius*s);
-            tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-          }, { passive:false });
-          this.target = target; this.update = function(){};
-        };
-      })();
-    }
-  </script>
+  __FALLBACK_CONTROLS__
 </head>
 <body>
   <div id="toolbar">
@@ -304,6 +342,7 @@ def _write_html(path: str, has_gt: bool):
     html = html.replace('__PARTIAL_GT_LOADER__', partial_gt_loader)
     html = html.replace('__GT_INIT_BLOCK__', gt_init_block)
     html = html.replace('__TOGGLE_HANDLER__', toggle_handler)
+    html = html.replace('__FALLBACK_CONTROLS__', FALLBACK_ORBITCONTROLS)
 
     with open(path, 'w', encoding='utf-8') as f:
         f.write(html)
@@ -343,74 +382,7 @@ def _write_html_embedded(path: str, has_gt: bool, full_dict: dict, method_dict: 
   </style>
   <script src=\"./three.min.js\"></script>
   <script src=\"./OrbitControls.js\"></script>
-  <script>
-    if (!window.THREE || !THREE.OrbitControls) {
-      (function(){
-        if (!window.THREE) return;
-        THREE.OrbitControls = function(camera, dom) {
-          const target = new THREE.Vector3();
-          const spherical = new THREE.Spherical();
-          const tmp = new THREE.Vector3();
-          function sync(){ tmp.copy(camera.position).sub(target); spherical.setFromVector3(tmp); }
-          sync();
-          let dragging=false, panning=false, lastX=0, lastY=0;
-          dom.addEventListener('contextmenu', e=>e.preventDefault());
-          dom.addEventListener('mousedown', e=>{ if(e.button===0) dragging=true; else panning=true; lastX=e.clientX; lastY=e.clientY; });
-          window.addEventListener('mouseup', ()=>{ dragging=false; panning=false; });
-          dom.addEventListener('mousemove', e=>{
-            const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
-            if(dragging){
-              spherical.theta -= dx*0.005; spherical.phi -= dy*0.005; spherical.phi=Math.max(0.001,Math.min(Math.PI-0.001,spherical.phi));
-              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-            } else if(panning){
-              const panSpeed = spherical.radius*0.001; const forward=camera.getWorldDirection(new THREE.Vector3());
-              const right=new THREE.Vector3().crossVectors(forward,camera.up).normalize(); const up=camera.up.clone().normalize();
-              target.add(right.multiplyScalar(-dx*panSpeed)).add(up.multiplyScalar(dy*panSpeed));
-              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-            }
-          });
-          dom.addEventListener('wheel', e=>{ e.preventDefault(); const s=Math.pow(1.1, Math.sign(e.deltaY)); spherical.radius=Math.max(0.001, spherical.radius*s);
-            tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-          }, { passive:false });
-          this.target = target; this.update = function(){};
-        };
-      })();
-    }
-  </script>
-  <script>
-    if (!window.THREE || !THREE.OrbitControls) {
-      (function(){
-        if (!window.THREE) return;
-        THREE.OrbitControls = function(camera, dom) {
-          const target = new THREE.Vector3();
-          const spherical = new THREE.Spherical();
-          const tmp = new THREE.Vector3();
-          function sync(){ tmp.copy(camera.position).sub(target); spherical.setFromVector3(tmp); }
-          sync();
-          let dragging=false, panning=false, lastX=0, lastY=0;
-          dom.addEventListener('contextmenu', e=>e.preventDefault());
-          dom.addEventListener('mousedown', e=>{ if(e.button===0) dragging=true; else panning=true; lastX=e.clientX; lastY=e.clientY; });
-          window.addEventListener('mouseup', ()=>{ dragging=false; panning=false; });
-          dom.addEventListener('mousemove', e=>{
-            const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
-            if(dragging){
-              spherical.theta -= dx*0.005; spherical.phi -= dy*0.005; spherical.phi=Math.max(0.001,Math.min(Math.PI-0.001,spherical.phi));
-              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-            } else if(panning){
-              const panSpeed = spherical.radius*0.001; const forward=camera.getWorldDirection(new THREE.Vector3());
-              const right=new THREE.Vector3().crossVectors(forward,camera.up).normalize(); const up=camera.up.clone().normalize();
-              target.add(right.multiplyScalar(-dx*panSpeed)).add(up.multiplyScalar(dy*panSpeed));
-              tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-            }
-          });
-          dom.addEventListener('wheel', e=>{ e.preventDefault(); const s=Math.pow(1.1, Math.sign(e.deltaY)); spherical.radius=Math.max(0.001, spherical.radius*s);
-            tmp.setFromSpherical(spherical); camera.position.copy(target).add(tmp); camera.lookAt(target);
-          }, { passive:false });
-          this.target = target; this.update = function(){};
-        };
-      })();
-    }
-  </script>
+  __FALLBACK_CONTROLS__
   <script id=\"full-json\" type=\"application/json\">__FULL_JSON__</script>
   <script id=\"partial-method-json\" type=\"application/json\">__METHOD_JSON__</script>
   __GT_SCRIPT__
@@ -547,6 +519,7 @@ def _write_html_embedded(path: str, has_gt: bool, full_dict: dict, method_dict: 
     html = html.replace('__GT_SCRIPT__', gt_script)
     html = html.replace('__FULL_JSON__', json.dumps(full_dict))
     html = html.replace('__METHOD_JSON__', json.dumps(method_dict))
+    html = html.replace('__FALLBACK_CONTROLS__', FALLBACK_ORBITCONTROLS)
 
     with open(path, 'w', encoding='utf-8') as f:
         f.write(html)
@@ -566,14 +539,20 @@ def generate_interactive_view(full_mesh_path: str, partial_mesh_path: str, match
 
   if not isinstance(matches, np.ndarray):
     matches = np.asarray(matches, dtype=int)
-  colors_M = _hsv_colormap(verts_M.shape[0])
+  # Use coordinate-based colormap normalized on joint M+N bounds
+  colors_M = _xyz_normalized_colormap(verts_M, verts_N)
+  # Smooth base colors on the full mesh for softer gradients
+  colors_M = _smooth_vertex_colors(faces_M, colors_M, iters=3, alpha=0.45)
   colors_N_method = colors_M[matches]
+  # Smooth transferred colors on partial mesh to reduce blockiness
+  colors_N_method = _smooth_vertex_colors(faces_N, colors_N_method, iters=2, alpha=0.5)
 
   has_gt = gt_matches is not None and len(gt_matches) == verts_N.shape[0]
   colors_N_gt = None
   if has_gt:
     gt_idx = np.asarray(gt_matches, dtype=int)
     colors_N_gt = colors_M[gt_idx]
+    colors_N_gt = _smooth_vertex_colors(faces_N, colors_N_gt, iters=2, alpha=0.5)
 
   html_path = os.path.join(out_dir, 'interactive_view.html')
   if embed_assets:
