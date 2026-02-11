@@ -19,10 +19,9 @@ class TestMeshData:
     partial_mesh: str
     ground_truth: str
 
-def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, matches, gt_matches, dist_method_geo, opts, output_folder):
+def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, v, matches, gt_matches, dist_method_geo, opts, output_folder):
     """Create and save the functional map visualization showing source function, ground truth transfer, and method transfer."""
     import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     import matplotlib as mpl
 
@@ -42,29 +41,29 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
         boundary_edges = [edge for edge, count in edge_count.items() if count == 1]
         return boundary_edges
 
-    # Center shapes for visualization
-    v_N_vis = vert_N - vert_N.mean(0)
-    v_M_vis = vert_M - vert_M.mean(0)
-    
+    # Center and downscale meshes using a shared centroid and common scale
+    all_verts = np.vstack([vert_M, vert_N])
+    shared_center = all_verts.mean(0)
+    ranges = all_verts.max(0) - all_verts.min(0)
+    max_range = float(ranges.max())
+    scale = (1.0 / max_range) if max_range > 1e-12 else 1.0
+    v_N_vis = (vert_N - shared_center) * scale
+    v_M_vis = (vert_M - shared_center) * scale
+
     # Find boundary edges
     boundary_edges_N = find_boundary_edges(triv_N)
     boundary_edges_M = find_boundary_edges(triv_M)
 
-    bbox_min = v_N_vis.min(0)
-    bbox_max = v_N_vis.max(0)
-    bbox_range = (bbox_max - bbox_min).max()
-    bbox_center = (bbox_max + bbox_min) / 2
-    margin = 0.1 * bbox_range
-    lim = bbox_range / 2 + margin
-
-    def set_axes_equal(ax):
-        ax.set_xlim([bbox_center[0] - lim, bbox_center[0] + lim])
-        ax.set_ylim([bbox_center[1] - lim, bbox_center[1] + lim])
-        ax.set_zlim([bbox_center[2] - lim, bbox_center[2] + lim])
+    def set_axes_clean(ax):
+        # Fit perfectly into a fixed cube without coordinate systems
+        ax.set_xlim([-0.5, 0.5])
+        ax.set_ylim([-0.5, 0.5])
+        ax.set_zlim([-0.5, 0.5])
         try:
             ax.set_box_aspect([1, 1, 1])
         except Exception:
             pass
+        ax.set_axis_off()
 
     # Compute source function on N
     v_N_norm = (vert_N - vert_N.min(0)) / (vert_N.max(0) - vert_N.min(0))
@@ -81,8 +80,6 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     colors_method = N.evecs.T.numpy(force=True) @ (N.S.numpy(force=True) * source_fun)
     colors_method = C @ colors_method
     colors_method = M.evecs.numpy(force=True) @ colors_method
-
-    dist_gt_geo = np.zeros_like(dist_method_geo) if dist_method_geo is not None else None
     
     # Prepare mesh polygons and face colors
     poly_N = [v_N_vis[f] for f in triv_N]
@@ -91,6 +88,7 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     # Map vertex colors to face colors (average of vertex colors)
     cmap_viridis = plt.get_cmap("viridis")
     cmap_coolwarm = plt.get_cmap("coolwarm")
+    cmap_gray = plt.get_cmap("gray")
     
     source_fun_colors = cmap_viridis((source_fun - source_fun.min()) / (source_fun.max() - source_fun.min()))[:, :3]
     facecols_source = source_fun_colors[triv_N].mean(axis=1)
@@ -105,99 +103,75 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     colors_method_rgb = cmap_viridis(colors_method_norm)[:, :3]
     facecols_method = colors_method_rgb[triv_M].mean(axis=1)
     
-    facecols_gt_error = None
-    if dist_gt_geo is not None:
-        dist_gt_geo_colors = cmap_coolwarm(dist_gt_geo / 0.1)[:, :3]
-        facecols_gt_error = dist_gt_geo_colors[triv_N].mean(axis=1)
-    
     facecols_method_error = None
-    vmax_error = None
+    error_cb_cfg = None
     if dist_method_geo is not None and dist_method_geo.size > 0:
         vmax_error = np.percentile(dist_method_geo, 95)
         dist_method_geo_norm = np.clip(dist_method_geo / vmax_error, 0, 1)
         dist_method_geo_colors = cmap_coolwarm(dist_method_geo_norm)[:, :3]
         facecols_method_error = dist_method_geo_colors[triv_N].mean(axis=1)
+        error_cb_cfg = (cmap_coolwarm, plt.Normalize(vmin=0, vmax=vmax_error))
 
-    # --- Make figure (2 rows) ---
+    # Soft membership function v visualization (grayscale, bright=1 dark=0)
+    v_cb_cfg = None
+    facecols_v = None
+    if v is not None:
+        try:
+            v_arr = np.asarray(v, dtype=float).reshape(-1)
+            if v_arr.size == vert_N.shape[0]:
+                vnorm = (v_arr - v_arr.min()) / (v_arr.max() - v_arr.min() + 1e-12)
+                vcols = cmap_gray(vnorm)[:, :3]
+                facecols_v = vcols[triv_N].mean(axis=1)
+                v_cb_cfg = (cmap_gray, plt.Normalize(vmin=0, vmax=1))
+            elif v_arr.size == vert_M.shape[0]:
+                vnorm = (v_arr - v_arr.min()) / (v_arr.max() - v_arr.min() + 1e-12)
+                vcols = cmap_gray(vnorm)[:, :3]
+                facecols_v = vcols[triv_M].mean(axis=1)
+                v_cb_cfg = (cmap_gray, plt.Normalize(vmin=0, vmax=1))
+        except Exception:
+            facecols_v = None
+            v_cb_cfg = None
 
-    fig = plt.figure(figsize=(14, 10))
+    # --- Build dynamic panel list ---
+    panels = []
+    panels.append(("N: Source Function", poly_N, facecols_source, boundary_edges_N, v_N_vis, None))
+    if has_gt and facecols_gt is not None:
+        panels.append(("GROUND TRUTH Transfer", poly_M, facecols_gt, boundary_edges_M, v_M_vis, None))
+    panels.append(("METHOD Transfer", poly_M, facecols_method, boundary_edges_M, v_M_vis, None))
+    if facecols_method_error is not None and error_cb_cfg is not None:
+        panels.append((f"Method Error (mean = {dist_method_geo.mean():.4f})", poly_N, facecols_method_error, boundary_edges_N, v_N_vis, error_cb_cfg))
+    if facecols_v is not None and v_cb_cfg is not None:
+        # Decide which geometry to show for v based on its size
+        if v_cb_cfg and v_arr.size == vert_N.shape[0]:
+            panels.append(("Soft Membership v (N)", poly_N, facecols_v, boundary_edges_N, v_N_vis, v_cb_cfg))
+        elif v_cb_cfg and v_arr.size == vert_M.shape[0]:
+            panels.append(("Soft Membership v (M)", poly_M, facecols_v, boundary_edges_M, v_M_vis, v_cb_cfg))
+
+    # Layout: up to 3 columns per row
+    n_panels = len(panels)
+    ncols = min(3, n_panels)
+    nrows = int(np.ceil(n_panels / ncols))
+    fig = plt.figure(figsize=(6 * ncols, 5 * nrows))
     boundary_line_width = 2
     opacity = 1.0
-
-    # ============== ROW 1: Source + GT Transfer ==============
-
-    # Source function on N
-    ax1 = fig.add_subplot(2, 3, 1, projection='3d')
-    pc1 = Poly3DCollection(poly_N, facecolors=facecols_source, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-    ax1.add_collection3d(pc1)
-    for edge in boundary_edges_N:
-        pts = v_N_vis[list(edge)]
-        ax1.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax1.set_title("N: Source Function")
-    set_axes_equal(ax1)
-    ax1.view_init(elev=20, azim=45)
-    ax1.grid(False)
-
-    # GT transfer onto M
-    if has_gt and facecols_gt is not None:
-        ax2 = fig.add_subplot(2, 3, 2, projection='3d')
-        pc2 = Poly3DCollection(poly_M, facecolors=facecols_gt, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-        ax2.add_collection3d(pc2)
-        for edge in boundary_edges_M:
-            pts = v_M_vis[list(edge)]
-            ax2.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-        ax2.set_title("GROUND TRUTH Transfer")
-        set_axes_equal(ax2)
-        ax2.view_init(elev=20, azim=45)
-        ax2.grid(False)
-
-    # GT error (always 0)
-    if facecols_gt_error is not None:
-        ax3 = fig.add_subplot(2, 3, 3, projection='3d')
-        pc3 = Poly3DCollection(poly_N, facecolors=facecols_gt_error, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-        ax3.add_collection3d(pc3)
-        for edge in boundary_edges_N:
-            pts = v_N_vis[list(edge)]
-            ax3.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-        ax3.set_title(f"GT Error (mean = {dist_gt_geo.mean():.4f})")
-        set_axes_equal(ax3)
-        ax3.view_init(elev=20, azim=45)
-        ax3.grid(False)
-        # Add colorbar
-        sm3 = plt.cm.ScalarMappable(cmap=cmap_coolwarm, norm=plt.Normalize(vmin=0, vmax=0.1))
-        sm3.set_array([])
-        plt.colorbar(sm3, ax=ax3, shrink=0.6)
-
-    # ============== ROW 2: Method Transfer + Errors ==============
-
-    # Method transfer to M
-    ax4 = fig.add_subplot(2, 3, 4, projection='3d')
-    pc4 = Poly3DCollection(poly_M, facecolors=facecols_method, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-    ax4.add_collection3d(pc4)
-    for edge in boundary_edges_M:
-        pts = v_M_vis[list(edge)]
-        ax4.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax4.set_title("METHOD Transfer")
-    set_axes_equal(ax4)
-    ax4.view_init(elev=20, azim=45)
-    ax4.grid(False)
-
-    # Error heatmap on N
-    if facecols_method_error is not None and vmax_error is not None:
-        ax5 = fig.add_subplot(2, 3, 5, projection='3d')
-        pc5 = Poly3DCollection(poly_N, facecolors=facecols_method_error, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
-        ax5.add_collection3d(pc5)
-        for edge in boundary_edges_N:
-            pts = v_N_vis[list(edge)]
-            ax5.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-        ax5.set_title(f"Method Error (mean = {dist_method_geo.mean():.4f})")
-        set_axes_equal(ax5)
-        ax5.view_init(elev=20, azim=45)
-        ax5.grid(False)
-        # Add colorbar
-        sm5 = plt.cm.ScalarMappable(cmap=cmap_coolwarm, norm=plt.Normalize(vmin=0, vmax=vmax_error))
-        sm5.set_array([])
-        plt.colorbar(sm5, ax=ax5, shrink=0.6)
+    # Render panels
+    for idx, (title, polys, facecols, boundary_edges, verts_vis, cb_cfg) in enumerate(panels, start=1):
+        ax = fig.add_subplot(nrows, ncols, idx, projection='3d')
+        pc = Poly3DCollection(polys, facecolors=facecols, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+        ax.add_collection3d(pc)
+        for edge in boundary_edges:
+            pts = verts_vis[list(edge)]
+            ax.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
+        ax.set_title(title)
+        set_axes_clean(ax)
+        ax.view_init(elev=20, azim=45)
+        ax.grid(False)
+        # Add colorbar when configuration is provided (error or membership)
+        if cb_cfg is not None:
+            cmap_cb, norm_cb = cb_cfg
+            sm = plt.cm.ScalarMappable(cmap=cmap_cb, norm=norm_cb)
+            sm.set_array([])
+            plt.colorbar(sm, ax=ax, shrink=0.6)
 
     plt.tight_layout()
     functional_map_fname = f"functional_map_visualization_{opts.descriptor_type}.png"
@@ -214,13 +188,8 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     import matplotlib as mpl
 
-    def create_full_colormap(n):
-        cmap = plt.get_cmap("hsv")
-        colors = cmap(np.linspace(0, 1, n))[:, :3]
-        return colors
-    
     def find_boundary_edges(triangles):
-        """Find boundary edges (edges that appear only once in the mesh)."""
+        """Find boundary edges (edges that appear only once in the mesh). Kept for optional outlines (not used)."""
         from collections import defaultdict
         edge_count = defaultdict(int)
         for tri in triangles:
@@ -230,95 +199,182 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
         boundary_edges = [edge for edge, count in edge_count.items() if count == 1]
         return boundary_edges
 
-    # create vertex colormap on M and transfer to N by indexing (pullback)
-    colors_M = create_full_colormap(vert_M.shape[0])   # (n_M,3)
-    colors_N_method = colors_M[matches]                # (n_N,3) method pullback
+    def subdivide_mesh_for_colors(verts, triangles, vcolors, levels=1):
+        """Uniformly subdivide triangles by splitting edges at midpoints, interpolating vertex colors.
+        Returns (new_verts, new_tris, new_vcolors)."""
+        verts = np.asarray(verts)
+        triangles = np.asarray(triangles, dtype=int)
+        vcolors = np.asarray(vcolors)
+        for _ in range(max(0, int(levels))):
+            edge_mid = {}
+            new_verts = verts.tolist()
+            new_cols = vcolors.tolist()
+            new_tris = []
+
+            def mid_idx(i, j):
+                a, b = (i, j) if i < j else (j, i)
+                key = (a, b)
+                if key in edge_mid:
+                    return edge_mid[key]
+                vm = 0.5 * (verts[a] + verts[b])
+                cm = 0.5 * (vcolors[a] + vcolors[b])
+                idx = len(new_verts)
+                new_verts.append(vm)
+                new_cols.append(cm)
+                edge_mid[key] = idx
+                return idx
+
+            for f in triangles:
+                i, j, k = int(f[0]), int(f[1]), int(f[2])
+                ij = mid_idx(i, j)
+                jk = mid_idx(j, k)
+                ki = mid_idx(k, i)
+                new_tris.extend([
+                    [i, ij, ki],
+                    [ij, j, jk],
+                    [ki, jk, k],
+                    [ij, jk, ki],
+                ])
+
+            verts = np.asarray(new_verts)
+            vcolors = np.asarray(new_cols)
+            triangles = np.asarray(new_tris, dtype=int)
+        return verts, triangles, vcolors
+
+    # Shared centering and uniform scaling so both meshes fit neatly
+    all_verts = np.vstack([vert_M, vert_N])
+    shared_center = all_verts.mean(0)
+    ranges = all_verts.max(0) - all_verts.min(0)
+    max_range = float(ranges.max())
+    scale = (1.0 / max_range) if max_range > 1e-12 else 1.0
+    v_M_vis = (vert_M - shared_center) * scale
+    v_N_vis = (vert_N - shared_center) * scale
+
+    # Paper colormap: per-vertex RGB = normalized XYZ of M using joint min/max over M and N
+    def create_paper_colormap(vert_M_arr, vert_N_arr):
+        mins = np.minimum(vert_M_arr.min(axis=0), vert_N_arr.min(axis=0))
+        maxs = np.maximum(vert_M_arr.max(axis=0), vert_N_arr.max(axis=0))
+        denom = maxs - mins
+        denom = np.where(denom > 1e-12, denom, 1.0)
+        return (vert_M_arr - mins) / denom
+    colors_M = create_paper_colormap(vert_M, vert_N)
+    # Slightly dim base colors to improve specular visibility
+    colors_M = np.clip(colors_M * 0.90, 0.0, 1.0)
+    # Transfer to N via matches (method pullback)
+    colors_N_method = colors_M[matches]
     has_gt = gt_matches is not None and len(gt_matches) == vert_N.shape[0]
     colors_N_gt = None
     if has_gt:
-        colors_N_gt = colors_M[gt_matches]                 # (n_N,3) ground truth pullback
+        colors_N_gt = colors_M[gt_matches]
 
-    # prepare centered geometry (use same centering as first block)
-    v_M_vis = vert_M - vert_N.mean(0)   # center both shapes on partial-shape center (keeps views consistent)
-    v_N_vis = vert_N - vert_N.mean(0)
-    
-    # Find boundary edges
-    boundary_edges_M = find_boundary_edges(triv_M)
-    boundary_edges_N = find_boundary_edges(triv_N)
+    # Subdivide meshes once to approximate per-vertex color interpolation on faces
+    subdiv_levels = 1
+    v_M_sub, t_M_sub, c_M_sub = subdivide_mesh_for_colors(v_M_vis, triv_M, colors_M, levels=subdiv_levels)
+    v_Nm_sub, t_Nm_sub, c_Nm_sub = subdivide_mesh_for_colors(v_N_vis, triv_N, colors_N_method, levels=subdiv_levels)
 
-    # compute face polygons and per-face colors (average vertex colors per face)
-    poly_M = [v_M_vis[f] for f in triv_M]
-    facecols_M = colors_M[triv_M].mean(axis=1)
+    # compute face polygons and per-face colors (average vertex colors per face) on subdivided meshes
+    poly_M = [v_M_sub[f] for f in t_M_sub]
+    facecols_M = c_M_sub[t_M_sub].mean(axis=1)
 
-    poly_N = [v_N_vis[f] for f in triv_N]
-    facecols_N_method = colors_N_method[triv_N].mean(axis=1)
+    poly_N_method = [v_Nm_sub[f] for f in t_Nm_sub]
+    facecols_N_method = c_Nm_sub[t_Nm_sub].mean(axis=1)
     facecols_N_gt = None
     if has_gt and colors_N_gt is not None:
-        facecols_N_gt = colors_N_gt[triv_N].mean(axis=1)
+        v_Ng_sub, t_Ng_sub, c_Ng_sub = subdivide_mesh_for_colors(v_N_vis, triv_N, colors_N_gt, levels=subdiv_levels)
+        poly_N_gt = [v_Ng_sub[f] for f in t_Ng_sub]
+        facecols_N_gt = c_Ng_sub[t_Ng_sub].mean(axis=1)
 
-    # ensure bounding box and aspect come from the same bbox used in first block (recompute if needed)
-    bbox_min = v_N_vis.min(0)
-    bbox_max = v_N_vis.max(0)
-    bbox_range = (bbox_max - bbox_min).max()
-    bbox_center = (bbox_max + bbox_min) / 2
-    margin = 0.1 * bbox_range
-    lim = bbox_range / 2 + margin
+    # Specular + diffuse shading per face (Blinn-Phong approximation)
+    def compute_face_normals(verts_vis, triangles):
+        normals = []
+        for f in triangles:
+            a, b, c = verts_vis[f]
+            n = np.cross(b - a, c - a)
+            norm = np.linalg.norm(n)
+            if norm > 1e-12:
+                n = n / norm
+            else:
+                n = np.array([0.0, 0.0, 1.0])
+            normals.append(n)
+        return np.array(normals)
 
-    def set_axes_equal_local(ax):
-        ax.set_xlim([bbox_center[0] - lim, bbox_center[0] + lim])
-        ax.set_ylim([bbox_center[1] - lim, bbox_center[1] + lim])
-        ax.set_zlim([bbox_center[2] - lim, bbox_center[2] + lim])
+    light_dir = np.array([0.577, 0.577, 0.577])  # normalized diagonal light
+    light_dir = light_dir / np.linalg.norm(light_dir)
+    view_dir = np.array([0.0, 0.0, 1.0])
+    view_dir = view_dir / np.linalg.norm(view_dir)
+    half_vec = light_dir + view_dir
+    half_vec = half_vec / np.linalg.norm(half_vec)
+    shininess = 128.0
+    ambient = 0.25
+    kd = 0.85
+    ks = 0.80
+
+    normals_M = compute_face_normals(v_M_sub, t_M_sub)
+    normals_Nm = compute_face_normals(v_Nm_sub, t_Nm_sub)
+    normals_Ng = None
+    if has_gt and colors_N_gt is not None:
+        normals_Ng = compute_face_normals(v_Ng_sub, t_Ng_sub)
+
+    diffuse_M = np.maximum(normals_M @ light_dir, 0.0)
+    spec_M = np.maximum(normals_M @ half_vec, 0.0) ** shininess
+    shading_M = ambient + kd * diffuse_M[:, None]
+    facecols_M_shaded = np.clip(facecols_M * shading_M + ks * spec_M[:, None], 0.0, 1.0)
+
+    diffuse_Nm = np.maximum(normals_Nm @ light_dir, 0.0)
+    spec_Nm = np.maximum(normals_Nm @ half_vec, 0.0) ** shininess
+    shading_Nm = ambient + kd * diffuse_Nm[:, None]
+    facecols_N_method_shaded = np.clip(facecols_N_method * shading_Nm + ks * spec_Nm[:, None], 0.0, 1.0)
+    facecols_N_gt_shaded = None
+    if facecols_N_gt is not None and normals_Ng is not None:
+        diffuse_Ng = np.maximum(normals_Ng @ light_dir, 0.0)
+        spec_Ng = np.maximum(normals_Ng @ half_vec, 0.0) ** shininess
+        shading_Ng = ambient + kd * diffuse_Ng[:, None]
+        facecols_N_gt_shaded = np.clip(facecols_N_gt * shading_Ng + ks * spec_Ng[:, None], 0.0, 1.0)
+
+    def set_axes_clean(ax):
+        ax.set_xlim([-0.5, 0.5])
+        ax.set_ylim([-0.5, 0.5])
+        ax.set_zlim([-0.5, 0.5])
         try:
             ax.set_box_aspect([1, 1, 1])
         except Exception:
             pass
+        ax.set_axis_off()
 
     # create figure: left = full mesh, middle = GT pullback, right = method pullback
-    fig = plt.figure(figsize=(18, 7))
-    boundary_line_width = 2
-    opacity = 1.0
+    fig = plt.figure(figsize=(24, 9))
+    boundary_line_width = 0
+    opacity = 0.85
 
     # Full mesh (continuous)
     ax1 = fig.add_subplot(1, 3, 1, projection='3d')
-    pc1 = Poly3DCollection(poly_M, facecolors=facecols_M, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+    pc1 = Poly3DCollection(poly_M, facecolors=facecols_M_shaded, linewidths=0, edgecolor=None, alpha=opacity, shade=False)
     ax1.add_collection3d(pc1)
-    # Plot boundary edges in black
-    for edge in boundary_edges_M:
-        pts = v_M_vis[list(edge)]
-        ax1.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
-    ax1.set_title("Full Mesh (M)\ncontinuous colors", pad=20)
-    set_axes_equal_local(ax1)
+    # No boundary edges to keep surfaces clean
+    ax1.set_title("Full Mesh (M)\nsmooth colors", pad=20)
+    set_axes_clean(ax1)
     ax1.view_init(elev=20, azim=45)
-    ax1.set_xlabel("X"); ax1.set_ylabel("Y"); ax1.set_zlabel("Z")
     ax1.grid(False)
 
     # Partial mesh with ground truth pullback
     if facecols_N_gt is not None:
         ax2 = fig.add_subplot(1, 3, 2, projection='3d')
-        pc2 = Poly3DCollection(poly_N, facecolors=facecols_N_gt, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+        pc2 = Poly3DCollection(poly_N_gt, facecolors=facecols_N_gt_shaded, linewidths=0, edgecolor=None, alpha=opacity, shade=False)
         ax2.add_collection3d(pc2)
-        # Plot boundary edges in black
-        for edge in boundary_edges_N:
-            pts = v_N_vis[list(edge)]
-            ax2.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
+        # No boundary edges to keep surfaces clean
         ax2.set_title("Partial Mesh (N)\nGround Truth Pullback", pad=20)
-        set_axes_equal_local(ax2)
+        set_axes_clean(ax2)
         ax2.view_init(elev=20, azim=45)
-        ax2.set_xlabel("X"); ax2.set_ylabel("Y"); ax2.set_zlabel("Z")
         ax2.grid(False)
 
     # Partial mesh with method pullback
     ax3 = fig.add_subplot(1, 3, 3, projection='3d')
-    pc3 = Poly3DCollection(poly_N, facecolors=facecols_N_method, linewidths=0, edgecolor=None, alpha=opacity, shade=True, lightsource=mpl.colors.LightSource(azdeg=315, altdeg=45))
+    pc3 = Poly3DCollection(poly_N_method, facecolors=facecols_N_method_shaded, linewidths=0, edgecolor=None, alpha=opacity, shade=False)
     ax3.add_collection3d(pc3)
-    # Plot boundary edges in black
-    for edge in boundary_edges_N:
-        pts = v_N_vis[list(edge)]
-        ax3.plot3D(pts[:,0], pts[:,1], pts[:,2], 'k-', linewidth=boundary_line_width)
+    # No boundary edges to keep surfaces clean
     ax3.set_title("Partial Mesh (N)\nMethod Pullback", pad=20)
-    set_axes_equal_local(ax3)
+    set_axes_clean(ax3)
     ax3.view_init(elev=20, azim=45)
-    ax3.set_xlabel("X"); ax3.set_ylabel("Y"); ax3.set_zlabel("Z")
     ax3.grid(False)
 
     plt.tight_layout(pad=2.0)
@@ -330,7 +386,7 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     return color_pullback_path
 
 
-def run(mesh_data, output_folder, opts: Options):
+def run(mesh_data, output_folder, opts: Options, target_path):
     print('#'*60)
     print(f"Running `{mesh_data.name}` ...")
     print('#'*60)
@@ -370,7 +426,7 @@ def run(mesh_data, output_folder, opts: Options):
     os.makedirs(output_folder, exist_ok=True)
     # Create visualizations using helper functions
     functional_map_path = create_functional_map_visualization(
-        vert_M, vert_N, triv_M, triv_N, M, N, C, matches, gt_matches, dist_method_geo, opts, output_folder
+        vert_M, vert_N, triv_M, triv_N, M, N, C, v, matches, gt_matches, dist_method_geo, opts, output_folder
     )
     
     color_pullback_path = create_color_pullback_visualization(
@@ -736,7 +792,7 @@ def main():
             _results = {}
             for _dt in _types_to_run:
                 opts.descriptor_type = _dt
-                _results[_dt] = run(mesh_data, result_path, opts)
+                _results[_dt] = run(mesh_data, result_path, opts, target_path)
 
             entry = {
                 'name': single_name,
@@ -831,7 +887,7 @@ def main():
                 _results = {}
                 for _dt in _types_to_run:
                     opts.descriptor_type = _dt
-                    _results[_dt] = run(mesh_data, result_path, opts)
+                    _results[_dt] = run(mesh_data, result_path, opts, target_path)
 
                 # aggregate into one summary entry (only fill those run)
                 entry = {

@@ -23,7 +23,7 @@ class Options:
     icp_batch_size : int = 1000 # batch size used in ICP refinement
     fps_n_sample_points : int = 50 # number of farthest point samples for geodesic refinement
     refine_iters : int = 7 # number of refinement iterations
-    geo_desc_variance : float = 0.7 * 4e-4 # used for geodesic distance descriptors, see geo_refinement.py
+    geo_descriptor_variance : float = 0.7 * 4e-4 # used for geodesic distance descriptors, see geo_refinement.py
     C_patience_iters : int = 100 # patience iterations for early stopping in C optimization
     v_patience_iters : int = 2000 # patience iterations for early stopping in v optimization
     early_stopping : bool = False # enable early stopping?

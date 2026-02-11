@@ -218,7 +218,7 @@ python3 -m pfm_py.main \
    --partial-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/cuts/off/cuts_horse_shape_14.off \
    --shot --web-view \
    --target-path results/webview \
-   --v-max-iter 1 --C-max-iter 1 --max-outer-iter 1
+   --v-max-iter 2000 --C-max-iter 2000 --max-outer-iter 7
 ```
 
 Outputs in the sample folder:
