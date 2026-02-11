@@ -65,43 +65,50 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
             pass
         ax.set_axis_off()
 
-    # Compute source function on N
-    v_N_norm = (vert_N - vert_N.min(0)) / (vert_N.max(0) - vert_N.min(0))
-    source_fun = v_N_norm[:, 0]
+    # --- Paper colormap on N and push-forward RGB via the functional map ---
+    def create_paper_colormap(verts_A: np.ndarray, verts_B: np.ndarray) -> np.ndarray:
+        """RGB = normalized XYZ of A using min/max computed on B (create_colormap(B,B))."""
+        mins = verts_B.min(axis=0)
+        maxs = verts_B.max(axis=0)
+        denom = np.where((maxs - mins) > 1e-12, (maxs - mins), 1.0)
+        return (verts_A - mins) / denom
 
-    # Colors transferred via ground truth + method
+    # Source colors on N (create_colormap(N,N))
+    colors_N = np.clip(create_paper_colormap(vert_N, vert_N), 0.0, 1.0)
+
+    # Ground truth RGB transfer to M (vertex-wise assignment)
     has_gt = gt_matches is not None and len(gt_matches) == vert_N.shape[0]
-    colors_gt = None
+    facecols_gt = None
     if has_gt:
-        colors_gt = np.zeros(vert_M.shape[0])
-        colors_gt[gt_matches] = source_fun
+        colors_M_gt = np.zeros((vert_M.shape[0], 3), dtype=float)
+        colors_M_gt[gt_matches] = colors_N
+        facecols_gt = colors_M_gt[triv_M].mean(axis=1)
 
-    colors_method = np.zeros(vert_M.shape[0])
-    colors_method = N.evecs.T.numpy(force=True) @ (N.S.numpy(force=True) * source_fun)
-    colors_method = C @ colors_method
-    colors_method = M.evecs.numpy(force=True) @ colors_method
-    
+    # Push-forward each RGB component via C: a_M = C (E_N^T S_N f_N), then f_M = E_M a_M
+    evecs_N_T = N.evecs.T.numpy(force=True)
+    mass_N = N.S.numpy(force=True)
+    evecs_M = M.evecs.numpy(force=True)
+    colors_M_method = np.zeros((vert_M.shape[0], 3), dtype=float)
+    for ch in range(3):
+        fN = colors_N[:, ch]
+        aN = evecs_N_T @ (mass_N * fN)
+        aM = C @ aN
+        fM = evecs_M @ aM
+        # normalize per-channel for visualization stability
+        fM = (fM - fM.min()) / (fM.max() - fM.min() + 1e-10)
+        colors_M_method[:, ch] = fM
+
     # Prepare mesh polygons and face colors
     poly_N = [v_N_vis[f] for f in triv_N]
     poly_M = [v_M_vis[f] for f in triv_M]
-    
+
     # Map vertex colors to face colors (average of vertex colors)
     cmap_viridis = plt.get_cmap("viridis")
     cmap_coolwarm = plt.get_cmap("coolwarm")
     cmap_gray = plt.get_cmap("gray")
-    
-    source_fun_colors = cmap_viridis((source_fun - source_fun.min()) / (source_fun.max() - source_fun.min()))[:, :3]
-    facecols_source = source_fun_colors[triv_N].mean(axis=1)
-    
-    facecols_gt = None
-    if has_gt and colors_gt is not None:
-        colors_gt_norm = (colors_gt - colors_gt.min()) / (colors_gt.max() - colors_gt.min() + 1e-10)
-        colors_gt_rgb = cmap_viridis(colors_gt_norm)[:, :3]
-        facecols_gt = colors_gt_rgb[triv_M].mean(axis=1)
-    
-    colors_method_norm = (colors_method - colors_method.min()) / (colors_method.max() - colors_method.min() + 1e-10)
-    colors_method_rgb = cmap_viridis(colors_method_norm)[:, :3]
-    facecols_method = colors_method_rgb[triv_M].mean(axis=1)
+
+    facecols_source = colors_N[triv_N].mean(axis=1)
+    facecols_method = colors_M_method[triv_M].mean(axis=1)
     
     facecols_method_error = None
     error_cb_cfg = None
@@ -134,10 +141,10 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
 
     # --- Build dynamic panel list ---
     panels = []
-    panels.append(("N: Source Function", poly_N, facecols_source, boundary_edges_N, v_N_vis, None))
+    panels.append(("N: Paper Colormap (RGB)", poly_N, facecols_source, boundary_edges_N, v_N_vis, None))
     if has_gt and facecols_gt is not None:
         panels.append(("GROUND TRUTH Transfer", poly_M, facecols_gt, boundary_edges_M, v_M_vis, None))
-    panels.append(("METHOD Transfer", poly_M, facecols_method, boundary_edges_M, v_M_vis, None))
+    panels.append(("METHOD Push-forward (RGB)", poly_M, facecols_method, boundary_edges_M, v_M_vis, None))
     if facecols_method_error is not None and error_cb_cfg is not None:
         panels.append((f"Method Error (mean = {dist_method_geo.mean():.4f})", poly_N, facecols_method_error, boundary_edges_N, v_N_vis, error_cb_cfg))
     if facecols_v is not None and v_cb_cfg is not None:
@@ -152,7 +159,7 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     ncols = min(3, n_panels)
     nrows = int(np.ceil(n_panels / ncols))
     fig = plt.figure(figsize=(6 * ncols, 5 * nrows))
-    boundary_line_width = 2
+    boundary_line_width = 0
     opacity = 1.0
     # Render panels
     for idx, (title, polys, facecols, boundary_edges, verts_vis, cb_cfg) in enumerate(panels, start=1):
@@ -199,47 +206,36 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
         boundary_edges = [edge for edge, count in edge_count.items() if count == 1]
         return boundary_edges
 
-    def subdivide_mesh_for_colors(verts, triangles, vcolors, levels=1):
-        """Uniformly subdivide triangles by splitting edges at midpoints, interpolating vertex colors.
-        Returns (new_verts, new_tris, new_vcolors)."""
-        verts = np.asarray(verts)
-        triangles = np.asarray(triangles, dtype=int)
-        vcolors = np.asarray(vcolors)
-        for _ in range(max(0, int(levels))):
-            edge_mid = {}
-            new_verts = verts.tolist()
-            new_cols = vcolors.tolist()
-            new_tris = []
+    def _build_vertex_adjacency(num_verts: int, faces: np.ndarray):
+        """Build vertex adjacency list from triangle faces."""
+        neighbors = [set() for _ in range(num_verts)]
+        f_int = faces.astype(int)
+        for f in f_int:
+            a, b, c = int(f[0]), int(f[1]), int(f[2])
+            neighbors[a].update((b, c))
+            neighbors[b].update((a, c))
+            neighbors[c].update((a, b))
+        return [list(s) for s in neighbors]
 
-            def mid_idx(i, j):
-                a, b = (i, j) if i < j else (j, i)
-                key = (a, b)
-                if key in edge_mid:
-                    return edge_mid[key]
-                vm = 0.5 * (verts[a] + verts[b])
-                cm = 0.5 * (vcolors[a] + vcolors[b])
-                idx = len(new_verts)
-                new_verts.append(vm)
-                new_cols.append(cm)
-                edge_mid[key] = idx
-                return idx
-
-            for f in triangles:
-                i, j, k = int(f[0]), int(f[1]), int(f[2])
-                ij = mid_idx(i, j)
-                jk = mid_idx(j, k)
-                ki = mid_idx(k, i)
-                new_tris.extend([
-                    [i, ij, ki],
-                    [ij, j, jk],
-                    [ki, jk, k],
-                    [ij, jk, ki],
-                ])
-
-            verts = np.asarray(new_verts)
-            vcolors = np.asarray(new_cols)
-            triangles = np.asarray(new_tris, dtype=int)
-        return verts, triangles, vcolors
+    def _smooth_vertex_colors(faces: np.ndarray, colors: np.ndarray, iters: int = 2, alpha: float = 0.5) -> np.ndarray:
+        """Laplacian-like smoothing for vertex colors using neighbor averaging.
+        - faces: (m,3) triangle indices
+        - colors: (n,3) RGB in [0,1]
+        - iters: number of smoothing iterations
+        - alpha: blend factor toward neighbor mean (0=no change, 1=replace)
+        """
+        n = int(colors.shape[0])
+        adj = _build_vertex_adjacency(n, faces)
+        cur = colors.astype(float).copy()
+        for _ in range(max(0, int(iters))):
+            nxt = cur.copy()
+            for i, nbrs in enumerate(adj):
+                if not nbrs:
+                    continue
+                avg = cur[nbrs].mean(axis=0)
+                nxt[i] = (1.0 - alpha) * cur[i] + alpha * avg
+            cur = np.clip(nxt, 0.0, 1.0)
+        return cur
 
     # Shared centering and uniform scaling so both meshes fit neatly
     all_verts = np.vstack([vert_M, vert_N])
@@ -267,22 +263,21 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     if has_gt:
         colors_N_gt = colors_M[gt_matches]
 
-    # Subdivide meshes once to approximate per-vertex color interpolation on faces
-    subdiv_levels = 1
-    v_M_sub, t_M_sub, c_M_sub = subdivide_mesh_for_colors(v_M_vis, triv_M, colors_M, levels=subdiv_levels)
-    v_Nm_sub, t_Nm_sub, c_Nm_sub = subdivide_mesh_for_colors(v_N_vis, triv_N, colors_N_method, levels=subdiv_levels)
+    # Smooth vertex colors (no triangle subdivision) for M and N
+    colors_M_s = _smooth_vertex_colors(triv_M, colors_M, iters=2, alpha=0.5)
+    colors_N_method_s = _smooth_vertex_colors(triv_N, colors_N_method, iters=2, alpha=0.5)
 
-    # compute face polygons and per-face colors (average vertex colors per face) on subdivided meshes
-    poly_M = [v_M_sub[f] for f in t_M_sub]
-    facecols_M = c_M_sub[t_M_sub].mean(axis=1)
+    # compute face polygons and per-face colors (average vertex colors per face) on original meshes
+    poly_M = [v_M_vis[f] for f in triv_M]
+    facecols_M = colors_M_s[triv_M].mean(axis=1)
 
-    poly_N_method = [v_Nm_sub[f] for f in t_Nm_sub]
-    facecols_N_method = c_Nm_sub[t_Nm_sub].mean(axis=1)
+    poly_N_method = [v_N_vis[f] for f in triv_N]
+    facecols_N_method = colors_N_method_s[triv_N].mean(axis=1)
     facecols_N_gt = None
     if has_gt and colors_N_gt is not None:
-        v_Ng_sub, t_Ng_sub, c_Ng_sub = subdivide_mesh_for_colors(v_N_vis, triv_N, colors_N_gt, levels=subdiv_levels)
-        poly_N_gt = [v_Ng_sub[f] for f in t_Ng_sub]
-        facecols_N_gt = c_Ng_sub[t_Ng_sub].mean(axis=1)
+        colors_N_gt_s = _smooth_vertex_colors(triv_N, colors_N_gt, iters=2, alpha=0.5)
+        poly_N_gt = [v_N_vis[f] for f in triv_N]
+        facecols_N_gt = colors_N_gt_s[triv_N].mean(axis=1)
 
     # Specular + diffuse shading per face (Blinn-Phong approximation)
     def compute_face_normals(verts_vis, triangles):
@@ -309,11 +304,11 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     kd = 0.85
     ks = 0.80
 
-    normals_M = compute_face_normals(v_M_sub, t_M_sub)
-    normals_Nm = compute_face_normals(v_Nm_sub, t_Nm_sub)
+    normals_M = compute_face_normals(v_M_vis, triv_M)
+    normals_Nm = compute_face_normals(v_N_vis, triv_N)
     normals_Ng = None
     if has_gt and colors_N_gt is not None:
-        normals_Ng = compute_face_normals(v_Ng_sub, t_Ng_sub)
+        normals_Ng = compute_face_normals(v_N_vis, triv_N)
 
     diffuse_M = np.maximum(normals_M @ light_dir, 0.0)
     spec_M = np.maximum(normals_M @ half_vec, 0.0) ** shininess
