@@ -1,10 +1,4 @@
 results/*
 venv/*
-__pycache__/
-*.pyc
-miniforge.sh
-
-.venv/
-miniforge/
-micromamba/
-
+evecs
+pfm_py/__pycache__/*
