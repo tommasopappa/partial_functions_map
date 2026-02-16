@@ -20,7 +20,14 @@ class TestMeshData:
     ground_truth: str
 
 def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, v, matches, gt_matches, dist_method_geo, opts, output_folder):
-    """Create and save the functional map visualization showing source function, ground truth transfer, and method transfer."""
+    """Create and save the functional map visualization showing:
+    - Source function on N
+    - Ground truth color transfer to M (if available)
+    - Method push-forward RGB to M
+    - Method error heatmap (if available)
+    - Soft membership function v (on N or M)
+    - Ground truth membership (binary on M) if ground truth is available
+    """
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     import matplotlib as mpl
@@ -119,22 +126,25 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
         facecols_method_error = dist_method_geo_colors[triv_N].mean(axis=1)
         error_cb_cfg = (cmap_coolwarm, plt.Normalize(vmin=0, vmax=vmax_error))
 
-    # Soft membership function v visualization (grayscale, bright=1 dark=0)
+    # Soft membership function v visualization (on full mesh M; grayscale 0→1)
     v_cb_cfg = None
     facecols_v = None
+    v_arr = None
     if v is not None:
         try:
             v_arr = np.asarray(v, dtype=float).reshape(-1)
-            if v_arr.size == vert_N.shape[0]:
-                vnorm = (v_arr - v_arr.min()) / (v_arr.max() - v_arr.min() + 1e-12)
-                vcols = cmap_gray(vnorm)[:, :3]
-                facecols_v = vcols[triv_N].mean(axis=1)
-                v_cb_cfg = (cmap_gray, plt.Normalize(vmin=0, vmax=1))
-            elif v_arr.size == vert_M.shape[0]:
+            if v_arr.size == vert_M.shape[0]:
                 vnorm = (v_arr - v_arr.min()) / (v_arr.max() - v_arr.min() + 1e-12)
                 vcols = cmap_gray(vnorm)[:, :3]
                 facecols_v = vcols[triv_M].mean(axis=1)
                 v_cb_cfg = (cmap_gray, plt.Normalize(vmin=0, vmax=1))
+            else:
+                try:
+                    print(f"Warning: membership v has size {v_arr.size}, expected {vert_M.shape[0]} (full mesh M); skipping membership visualization.")
+                except Exception:
+                    pass
+                facecols_v = None
+                v_cb_cfg = None
         except Exception:
             facecols_v = None
             v_cb_cfg = None
@@ -148,11 +158,18 @@ def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C,
     if facecols_method_error is not None and error_cb_cfg is not None:
         panels.append((f"Method Error (mean = {dist_method_geo.mean():.4f})", poly_N, facecols_method_error, boundary_edges_N, v_N_vis, error_cb_cfg))
     if facecols_v is not None and v_cb_cfg is not None:
-        # Decide which geometry to show for v based on its size
-        if v_cb_cfg and v_arr.size == vert_N.shape[0]:
-            panels.append(("Soft Membership v (N)", poly_N, facecols_v, boundary_edges_N, v_N_vis, v_cb_cfg))
-        elif v_cb_cfg and v_arr.size == vert_M.shape[0]:
-            panels.append(("Soft Membership v (M)", poly_M, facecols_v, boundary_edges_M, v_M_vis, v_cb_cfg))
+        # Membership is defined on M; visualize and add GT adjacent when available
+        panels.append(("Soft Membership v (M)", poly_M, facecols_v, boundary_edges_M, v_M_vis, v_cb_cfg))
+        if has_gt:
+            try:
+                v_gt_M = np.zeros(vert_M.shape[0], dtype=float)
+                v_gt_M[gt_matches] = 1.0
+                v_gt_cols_M = cmap_gray(v_gt_M)[:, :3]
+                facecols_v_gt_M = v_gt_cols_M[triv_M].mean(axis=1)
+                v_gt_cb_cfg = (cmap_gray, plt.Normalize(vmin=0, vmax=1))
+                panels.append(("Ground Truth Membership (M)", poly_M, facecols_v_gt_M, boundary_edges_M, v_M_vis, v_gt_cb_cfg))
+            except Exception:
+                pass
 
     # Layout: up to 3 columns per row
     n_panels = len(panels)

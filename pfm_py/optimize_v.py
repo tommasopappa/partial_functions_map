@@ -46,11 +46,8 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
     v0 = M.evecs @ C @ N.evecs.T @ (N.S * constant_one)
     perturb = torch.ones_like(v0)
 
-    # Dynamic tv_sigma scaling based on mesh area (as in PFM paper)
     scale_factor = np.sqrt(M.area / 17500)
     tv_sigma = 0.2 * scale_factor
-    fps_variance = 0.7 * scale_factor
-    print(f"  Scale factor: {scale_factor:.6f}, tv_sigma: {tv_sigma:.6f}")
 
     v = torch.nn.Parameter(v0)
     optimizer = torch.optim.Adam([v], lr=opts.v_lr)
@@ -64,7 +61,7 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
     
     for i in range(opts.v_max_iter):
         optimizer.zero_grad()
-        loss = v_loss(M, N, func_N_pushforward, M_spectral_projector, func_M, v, perturb, tv_sigma, opts)
+        loss = v_loss(i, M, N, func_N_pushforward, M_spectral_projector, func_M, v, perturb, tv_sigma, opts)
         loss.backward()
         optimizer.step()
 
@@ -87,7 +84,7 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
     v_opt = best_v if best_v is not None else v.detach().clone()
     return eta(v_opt)
 
-def v_loss(M : ManifoldMesh, N : ManifoldMesh, func_N_pushforward, M_spectral_projector, func_M, v, perturb, tv_sigma, opts : Options):
+def v_loss(i, M : ManifoldMesh, N : ManifoldMesh, func_N_pushforward, M_spectral_projector, func_M, v, perturb, tv_sigma, opts : Options):
     r"""
     Compute the total loss function for soft membership function optimization.
     
@@ -127,9 +124,15 @@ def v_loss(M : ManifoldMesh, N : ManifoldMesh, func_N_pushforward, M_spectral_pr
     # Area term: penalize mismatch between N's area and the weighted area on M
     area_term = (N.area - M.partial_area(bounded_v))**2
 
-    tv_mean = N.area / M.area
+    # tv_mean = N.area / M.area
+    tv_mean = 0.5
     reg_term = mumford_shah_cost(M, v, perturb, opts, tv_mean, tv_sigma)
+    scale_factor = np.sqrt(M.area / 17500)
 
+    if i == 0 or (i + 1) % 100 == 0:
+        print(f"Data term: {data_term.item():.6f}")
+        print(f"Area term: {opts.mu1 * area_term.item():.6f}")
+        print(f"Mumford-Shah reg term: {opts.mu2 * reg_term.item():.6f}")
     return data_term + opts.mu1 * area_term + opts.mu2 * reg_term
 
 def l21_norm(matrix):
