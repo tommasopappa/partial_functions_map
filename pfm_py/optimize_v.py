@@ -44,10 +44,7 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
     # Initialize v as constant one function on N, pushed forward through functional map C
     constant_one = torch.ones(N.n_vert, dtype=torch.float32, device=opts.device)
     v0 = M.evecs @ C @ N.evecs.T @ (N.S * constant_one)
-    perturb = torch.ones_like(v0)
-
-    scale_factor = np.sqrt(M.area / 17500)
-    tv_sigma = 0.2 * scale_factor
+    perturb = torch.ones_like(v0) # currently unused (all ones)
 
     v = torch.nn.Parameter(v0)
     optimizer = torch.optim.Adam([v], lr=opts.v_lr)
@@ -61,7 +58,7 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
     
     for i in range(opts.v_max_iter):
         optimizer.zero_grad()
-        loss = v_loss(i, M, N, func_N_pushforward, M_spectral_projector, func_M, v, perturb, tv_sigma, opts)
+        loss = v_loss(i, M, N, func_N_pushforward, M_spectral_projector, func_M, v, perturb, opts)
         loss.backward()
         optimizer.step()
 
@@ -84,7 +81,7 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
     v_opt = best_v if best_v is not None else v.detach().clone()
     return eta(v_opt)
 
-def v_loss(i, M : ManifoldMesh, N : ManifoldMesh, func_N_pushforward, M_spectral_projector, func_M, v, perturb, tv_sigma, opts : Options):
+def v_loss(i, M : ManifoldMesh, N : ManifoldMesh, func_N_pushforward, M_spectral_projector, func_M, v, perturb, opts : Options):
     r"""
     Compute the total loss function for soft membership function optimization.
     
@@ -107,7 +104,6 @@ def v_loss(i, M : ManifoldMesh, N : ManifoldMesh, func_N_pushforward, M_spectral
         func_M (torch.Tensor): Descriptor functions on M, shape (n_M, feat_dim)
         v (torch.nn.Parameter): Unbounded membership function, shape (n_M,)
         perturb (torch.Tensor): Perturbation weights, shape (n_M,)
-        tv_sigma (float): Standard deviation for Mumford-Shah Gaussian localization
         opts (Options): Hyperparameters and options
     
     Returns:
@@ -124,9 +120,7 @@ def v_loss(i, M : ManifoldMesh, N : ManifoldMesh, func_N_pushforward, M_spectral
     # Area term: penalize mismatch between N's area and the weighted area on M
     area_term = (N.area - M.partial_area(bounded_v))**2
 
-    # tv_mean = N.area / M.area
-    tv_mean = 0.5
-    reg_term = mumford_shah_cost(M, v, perturb, opts, tv_mean, tv_sigma)
+    reg_term = mumford_shah_cost(M, v, perturb, opts)
     scale_factor = np.sqrt(M.area / 17500)
 
     if i == 0 or (i + 1) % 100 == 0:
@@ -171,7 +165,7 @@ def eta(t):
     """
     return 0.5 * torch.tanh(6*(t - 0.5)) + 0.5
 
-def mumford_shah_cost(M : ManifoldMesh, v, perturb, opts: Options, tv_mean, tv_sigma):
+def mumford_shah_cost(M : ManifoldMesh, v, perturb, opts: Options):
     """Compute edge-preserving Mumford-Shah regularization for membership function.
     
     Implements a smooth approximation of the Mumford-Shah functional:
@@ -186,14 +180,16 @@ def mumford_shah_cost(M : ManifoldMesh, v, perturb, opts: Options, tv_mean, tv_s
         M: Mesh with geometry (E, F, G, det) and triangulation (triv)
         v: Unbounded membership function, shape (M.n_vert,)
         perturb: Vertex weights (vertex-wise scaling), shape (M.n_vert,). Currently all ones.
-        opts: Options containing:
-            - mumford_shah_area_weighted: If True, divide by metric determinant (area-normalize)
-        tv_mean: Target membership density (typically |N|/|M|)
-        tv_sigma: Gaussian standard deviation (controls transition width)
+        opts: Options and hyperparameters
     
     Returns:
         Scalar regularization cost ≥ 0. Penalizes gradients near the membership transition.
     """
+    # Note that η(0.5) = 0.5, so the default value tv_mean = 0.5 makes sense despite this function
+    # being passed the unbounded v instead of the bounded η(v). 
+    tv_mean = opts.tv_mean
+    tv_sigma = opts.tv_sigma * np.sqrt(M.area) # tv_sigma is scale-dependent, see doc in options.py
+
     # Gaussian approximation to Dirac delta: ξ(v) = exp(-(v-v_mean)²/(2*σ²))
     # This is localized around v ≈ v_mean (the target membership density)
     xi = torch.exp(-(v - tv_mean)**2 / (2 * tv_sigma**2))
@@ -219,7 +215,7 @@ def mumford_shah_cost(M : ManifoldMesh, v, perturb, opts: Options, tv_mean, tv_s
     
     # Optional area weighting: normalize by metric determinant
     if opts.mumford_shah_area_weighted:
-        norm_grad_v /= M.det
+        norm_grad_v = norm_grad_v / M.det
 
     # Barycentric quadrature: sum ξ over the three vertices of each triangle
     xi_sum = xi[i] + xi[j] + xi[k]  # Sum of ξ at triangle vertices

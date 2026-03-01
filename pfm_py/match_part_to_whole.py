@@ -55,6 +55,7 @@ def match_and_refine(M : ManifoldMesh, N : ManifoldMesh, opts: Options):
         N_descriptors = N.compute_descriptors(opts)
 
     # Only for the FIRST stage: per-feature mass normalization for SHOT and DINO descriptors
+    # This means that all descriptor functions are normalized w.r.t the L2 scalar product on the function space
     if opts.descriptor_type.lower() in ["shot", "dino", "dinov3"]:
         eps = 1e-10
         M_norm = torch.sqrt(M.S @ (M_descriptors ** 2) + eps)   # (feat_dim,)

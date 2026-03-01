@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import math
 
 @dataclass
 class Options:
@@ -13,7 +14,6 @@ class Options:
     mu3 : float = 1.0 # weight for slanted-diagonal prior term in C optimization
     mu4 : float = 1e3 # weight for orthogonality off-diagonal term in C optimization
     mu5 : float = 1e3 # weight for orthogonality diagonal term in C optimization
-    tv_sigma : float = 0.2 * 4e-4
     C_lr : float = 1e-2 # learning rate for C optimization
     C_max_iter : int = 2000 # maximum iterations for C optimization
     max_outer_iter : int = 7 # maximum outer iterations (alternating C and v)
@@ -23,7 +23,17 @@ class Options:
     icp_batch_size : int = 1000 # batch size used in ICP refinement
     fps_n_sample_points : int = 50 # number of farthest point samples for geodesic refinement
     refine_iters : int = 7 # number of refinement iterations
-    geo_descriptor_variance : float = 0.7 * 4e-4 # used for geodesic distance descriptors, see geo_refinement.py
     C_patience_iters : int = 100 # patience iterations for early stopping in C optimization
     v_patience_iters : int = 2000 # patience iterations for early stopping in v optimization
     early_stopping : bool = False # enable early stopping?
+
+    tv_mean : float = 0.5 # target membership density for Mumford-Shah regularization, see optimize_v.py
+    # standard deviation for Mumford-Shah Gaussian localization, see optimize_v.py
+    # This value is scale-dependent. The value of 0.2 in the PFM code was optimized for meshes with surface
+    # area 1.5 - 2.0 * 10^4. The value below downscales this to meshes of area 1.
+    # In the code, this is furhter scaled by sqrt(M.area) to adapt to the actual mesh area.
+    # This might not be the optimal way to scale this parameter, but seems to be good enough.
+    tv_sigma : float = 0.2 / math.sqrt(1.75 * 10**4) 
+    # variance for Gaussian weighting of geodesic distance in geodesic descriptor computation, see geo_refinement.py
+    # scale_dependent just like tv_sigma
+    geo_descriptor_variance : float = 0.7 / math.sqrt(1.75 * 10**4) 
