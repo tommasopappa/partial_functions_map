@@ -3,10 +3,15 @@ from pfm_py.match_part_to_whole import match_and_refine
 from pfm_py.options import Options
 from pfm_py.web_viewer import generate_interactive_view
 
+import os
+# Prefer software rasterization when no GPU drivers/EGL are available (helps avoid Open3D segfaults)
+os.environ.setdefault("LIBGL_ALWAYS_SOFTWARE", "1")
+os.environ.setdefault("MESA_LOADER_DRIVER_OVERRIDE", "llvmpipe")
+os.environ.setdefault("EGL_PLATFORM", "surfaceless")
+
 import torch
 import open3d as o3d
 import numpy as np
-import os
 import argparse
 import json
 

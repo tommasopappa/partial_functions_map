@@ -121,12 +121,11 @@ def v_loss(i, M : ManifoldMesh, N : ManifoldMesh, func_N_pushforward, M_spectral
     area_term = (N.area - M.partial_area(bounded_v))**2
 
     reg_term = mumford_shah_cost(M, v, perturb, opts)
-    scale_factor = np.sqrt(M.area / 17500)
 
-    if i == 0 or (i + 1) % 100 == 0:
-        print(f"Data term: {data_term.item():.6f}")
-        print(f"Area term: {opts.mu1 * area_term.item():.6f}")
-        print(f"Mumford-Shah reg term: {opts.mu2 * reg_term.item():.6f}")
+    # if i == 0 or (i + 1) % 100 == 0:
+        # print(f"Data term: {data_term.item():.6f}")
+        # print(f"Area term: {opts.mu1 * area_term.item():.6f}")
+        # print(f"Mumford-Shah reg term: {opts.mu2 * reg_term.item():.6f}")
     return data_term + opts.mu1 * area_term + opts.mu2 * reg_term
 
 def l21_norm(matrix):

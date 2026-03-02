@@ -239,9 +239,11 @@ def _write_html(path: str, has_gt: bool):
       dom.appendChild(renderer.domElement);
       const camera = new THREE.PerspectiveCamera(60, 1, 0.01, 1000);
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
-      const light = new THREE.DirectionalLight(0xffffff, 0.9);
-      light.position.set(1,1,1);
-      scene.add(light);
+      // Headlight attached to the camera so the viewed side is always lit
+      const headlight = new THREE.DirectionalLight(0xffffff, 0.9);
+      headlight.position.set(0, 0, 1);
+      camera.add(headlight);
+      scene.add(camera);
       const amb = new THREE.AmbientLight(0xffffff, 0.3);
       scene.add(amb);
       function onResize() {{
@@ -412,9 +414,11 @@ def _write_html_embedded(path: str, has_gt: bool, full_dict: dict, method_dict: 
       dom.appendChild(renderer.domElement);
       const camera = new THREE.PerspectiveCamera(60, 1, 0.01, 1000);
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
-      const light = new THREE.DirectionalLight(0xffffff, 0.9);
-      light.position.set(1,1,1);
-      scene.add(light);
+      // Headlight attached to the camera so the viewed side is always lit
+      const headlight = new THREE.DirectionalLight(0xffffff, 0.9);
+      headlight.position.set(0, 0, 1);
+      camera.add(headlight);
+      scene.add(camera);
       const amb = new THREE.AmbientLight(0xffffff, 0.3);
       scene.add(amb);
       function onResize() {
