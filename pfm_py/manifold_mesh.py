@@ -145,24 +145,36 @@ class ManifoldMesh:
         Raises:
             ValueError: If opts.descriptor_type is not one of the supported types.
         """
-        if opts.descriptor_type.lower() == "shot":
+        # allow multiple descriptors separated by '+' or ',' (e.g. "shot+dino")
+        key = opts.descriptor_type.lower()
+        if '+' in key or ',' in key:
+            toks = [t.strip() for t in key.replace(',', '+').split('+') if t.strip()]
+            feats_list = []
+            for t in toks:
+                sub = Options(opts.device)
+                sub.descriptor_type = t
+                feats_list.append(self.compute_descriptors(sub))
+            return torch.cat(feats_list, dim=1)
+
+        # handle single descriptor cases
+        if key == "shot":
             return self.compute_shot_descriptors(opts)
-        elif opts.descriptor_type.lower() == "fpfh":
+        elif key == "fpfh":
             return self.compute_fpfh_descriptors(opts)
-        elif opts.descriptor_type.lower() == "dino":
+        elif key == "dino":
             verts = self.vert.clone().detach()
             faces = self.triv.clone().detach()
             feats, n_missing = dino_module.compute_dino_features(verts, faces)
             self.dino_n_missing = n_missing
             return torch.tensor(feats, dtype=torch.float32, device=opts.device)
-        elif opts.descriptor_type.lower() == "dinov3":
+        elif key == "dinov3":
             verts = self.vert.clone().detach()
             faces = self.triv.clone().detach()
             feats, n_missing = dinov3_module.get_shape_dinov3_features(verts, faces)
             self.dino_n_missing = n_missing
             return torch.tensor(feats, dtype=torch.float32, device=opts.device)
         else:
-            raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'shot_fpfh', 'dino' or 'dinov3'.")
+            raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'dino', 'dinov3' or combinations like 'shot+dino'.")
         
     def compute_shot_descriptors(self, opts: Options, radius=0.05, n_bins=10,
                                  min_neighbors=10, local_rf_radius=None, query_idx=None):

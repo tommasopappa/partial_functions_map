@@ -54,15 +54,16 @@ def match_and_refine(M : ManifoldMesh, N : ManifoldMesh, opts: Options):
     else:
         N_descriptors = N.compute_descriptors(opts)
 
-    # Only for the FIRST stage: per-feature mass normalization for SHOT and DINO descriptors
-    # This means that all descriptor functions are normalized w.r.t the L2 scalar product on the function space
-    if opts.descriptor_type.lower() in ["shot", "dino", "dinov3"]:
+    # Only for the FIRST stage: per-feature mass normalization for any learned or
+    # histogram-based descriptors.  When multiple descriptor types are concatenated,
+    # we normalize across the full feature vector.
+    if any(tok in opts.descriptor_type.lower() for tok in ["shot", "dino", "dinov3"]):
         eps = 1e-10
         M_norm = torch.sqrt(M.S @ (M_descriptors ** 2) + eps)   # (feat_dim,)
         N_norm = torch.sqrt(N.S @ (N_descriptors ** 2) + eps)
         M_descriptors = M_descriptors / M_norm.unsqueeze(0)
         N_descriptors = N_descriptors / N_norm.unsqueeze(0)
-        print(f"[{opts.descriptor_type.upper()}-NORM] Applied per-feature mass normalization (feat_dim={M_norm.numel()})")
+        print(f"[NORM:{opts.descriptor_type.upper()}] Applied per-feature mass normalization (feat_dim={M_norm.numel()})")
 
     # Run alternating optimization with descriptor functions
     C, v, matches = match_part_to_whole(M, N, M_descriptors, N_descriptors, None, W, est_rank, opts.max_outer_iter, opts)
