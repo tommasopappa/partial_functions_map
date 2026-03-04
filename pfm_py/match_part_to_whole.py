@@ -67,6 +67,8 @@ def match_and_refine(M : ManifoldMesh, N : ManifoldMesh, opts: Options):
 
     # Run alternating optimization with descriptor functions
     C, v, matches = match_part_to_whole(M, N, M_descriptors, N_descriptors, None, W, est_rank, opts.max_outer_iter, opts)
+    if opts.refine_iters == 0:
+        return C, v, matches
     
     print("="*60)
     print("REFINEMENT STAGE")

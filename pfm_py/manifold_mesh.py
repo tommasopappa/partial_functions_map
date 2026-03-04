@@ -92,10 +92,11 @@ class ManifoldMesh:
         
         # Enforce sign consistency: for each eigenvector, ensure the highest-absolute-value
         # component is positive. This resolves arbitrary sign flips from eigendecomposition.
-        for i in range(opts.n_eigen):
-            max_abs_idx = np.argmax(np.abs(evecs[:, i]))
-            if evecs[max_abs_idx, i] < 0:
-                evecs[:, i] = -evecs[:, i]
+        if opts.enforce_determinism:
+            for i in range(opts.n_eigen):
+                max_abs_idx = np.argmax(np.abs(evecs[:, i]))
+                if evecs[max_abs_idx, i] < 0:
+                    evecs[:, i] = -evecs[:, i]
 
         self.evals = torch.tensor(evals, dtype=torch.float32, device=opts.device)
         self.evecs = torch.tensor(evecs, dtype=torch.float32, device=opts.device)
@@ -166,13 +167,13 @@ class ManifoldMesh:
             faces = self.triv.clone().detach()
             feats, n_missing = dino_module.compute_dino_features(verts, faces)
             self.dino_n_missing = n_missing
-            return torch.tensor(feats, dtype=torch.float32, device=opts.device)
+            return feats.to(torch.float32).to(opts.device)
         elif key == "dinov3":
             verts = self.vert.clone().detach()
             faces = self.triv.clone().detach()
             feats, n_missing = dinov3_module.get_shape_dinov3_features(verts, faces)
             self.dino_n_missing = n_missing
-            return torch.tensor(feats, dtype=torch.float32, device=opts.device)
+            return feats.to(torch.float32).to(opts.device)
         else:
             raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'dino', 'dinov3' or combinations like 'shot+dino'.")
         

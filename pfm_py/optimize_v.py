@@ -174,6 +174,7 @@ def mumford_shah_cost(M : ManifoldMesh, v, perturb, opts: Options):
     where ξ(v) is a Gaussian approximation to the Dirac delta at tv_mean.
     This regularization penalizes gradients only near the membership transition, producing
     piecewise-smooth membership functions with sharp boundaries.
+    For details/derivations, see the PFM paper.
     
     Args:
         M: Mesh with geometry (E, F, G, det) and triangulation (triv)

@@ -2,6 +2,8 @@ from pfm_py.manifold_mesh import ManifoldMesh
 from pfm_py.match_part_to_whole import match_and_refine
 from pfm_py.options import Options
 from pfm_py.web_viewer import generate_interactive_view
+from pfm_py.dataset.mesh_pair import MeshPair
+from pfm_py.dataset.shrec16 import Shrec16
 
 import os
 # Prefer software rasterization when no GPU drivers/EGL are available (helps avoid Open3D segfaults)
@@ -15,14 +17,6 @@ import numpy as np
 import argparse
 import json
 
-from dataclasses import dataclass
-
-@dataclass
-class TestMeshData:
-    name: str
-    full_mesh: str
-    partial_mesh: str
-    ground_truth: str
 
 def create_functional_map_visualization(vert_M, vert_N, triv_M, triv_N, M, N, C, v, matches, gt_matches, dist_method_geo, opts, output_folder):
     """Create and save the functional map visualization showing:
@@ -513,7 +507,7 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     return color_pullback_path
 
 
-def run(mesh_data, output_folder, opts: Options, target_path):
+def run(mesh_data, output_folder, opts: Options, target_path = None):
     print('#'*60)
     print(f"Running `{mesh_data.name}` ...")
     print('#'*60)
@@ -548,7 +542,15 @@ def run(mesh_data, output_folder, opts: Options, target_path):
         print("No ground truth provided; skipping geodesic error computation.")
 
     if output_folder is None:
-        return mean_geodesic_error
+        return {
+            'mean': float(mean_geodesic_error),
+            'functional_map': None,
+            'color_pullback': None,
+            'output_folder': None,
+            'descriptor': opts.descriptor_type,
+            'matches': matches,
+            'gt_matches': gt_matches,
+        }
 
     os.makedirs(output_folder, exist_ok=True)
     # Create visualizations using helper functions
@@ -582,7 +584,7 @@ def run(mesh_data, output_folder, opts: Options, target_path):
         'gt_matches': gt_matches,
     }
 
-def write_summary_html(summary_results, target_path):
+def write_summary_html(summary_results, target_path, descriptor_list, include_visuals: bool = True):
     """Write/overwrite the HTML meshes summary from `summary_results` into `target_path/meshes_summary.html`.
     This function is safe to call repeatedly (it overwrites the previous file).
     """
@@ -591,20 +593,18 @@ def write_summary_html(summary_results, target_path):
     rows = sorted(summary_results, key=lambda x: x['name'])
 
     # compute summary statistics for top summary table
-    dino_vals = np.array([r.get('mean_dino') for r in rows], dtype=float) if rows else np.array([], dtype=float)
-    dinov3_vals = np.array([r.get('mean_dinov3') for r in rows], dtype=float) if rows else np.array([], dtype=float)
-    shot_vals = np.array([r.get('mean_shot') for r in rows], dtype=float) if rows else np.array([], dtype=float)
-    fpfh_vals = np.array([r.get('mean_fpfh') for r in rows], dtype=float) if rows else np.array([], dtype=float)
+    def _mean_key(d: str) -> str:
+        return f"mean_{d}"
 
     def safe_mean(arr):
         if arr.size == 0:
             return float('nan')
         return float(np.mean(arr))
 
-    overall_dino = safe_mean(dino_vals)
-    overall_dinov3 = safe_mean(dinov3_vals)
-    overall_shot = safe_mean(shot_vals)
-    overall_fpfh = safe_mean(fpfh_vals)
+    overall_means = {
+        d: safe_mean(np.array([r.get(_mean_key(d)) for r in rows], dtype=float)) if rows else float('nan')
+        for d in descriptor_list
+    }
 
     cuts_rows = [r for r in rows if r.get('folder') == 'cuts']
     holes_rows = [r for r in rows if r.get('folder') == 'holes']
@@ -613,14 +613,14 @@ def write_summary_html(summary_results, target_path):
     holes_count = len(holes_rows)
     total_count = len(rows)
 
-    cuts_dino = safe_mean(np.array([r.get('mean_dino') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
-    cuts_dinov3 = safe_mean(np.array([r.get('mean_dinov3') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
-    cuts_shot = safe_mean(np.array([r.get('mean_shot') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
-    cuts_fpfh = safe_mean(np.array([r.get('mean_fpfh') for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
-    holes_dino = safe_mean(np.array([r.get('mean_dino') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
-    holes_dinov3 = safe_mean(np.array([r.get('mean_dinov3') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
-    holes_shot = safe_mean(np.array([r.get('mean_shot') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
-    holes_fpfh = safe_mean(np.array([r.get('mean_fpfh') for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
+    cuts_means = {
+        d: safe_mean(np.array([r.get(_mean_key(d)) for r in cuts_rows], dtype=float)) if cuts_count > 0 else float('nan')
+        for d in descriptor_list
+    }
+    holes_means = {
+        d: safe_mean(np.array([r.get(_mean_key(d)) for r in holes_rows], dtype=float)) if holes_count > 0 else float('nan')
+        for d in descriptor_list
+    }
 
     html_lines = [
         '<!doctype html>',
@@ -640,68 +640,48 @@ def write_summary_html(summary_results, target_path):
         '<h1>Meshes Summary</h1>',
         '<h2>Dataset Statistics</h2>',
         '<table>',
-        '<tr><th>Category</th><th>Count</th><th>Mean Geodesic Error (DINO)</th><th>Mean Geodesic Error (DINOv3)</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th></tr>',
-        f'<tr><td>Cuts</td><td>{cuts_count}</td><td>{cuts_dino:.6f}</td><td>{cuts_dinov3:.6f}</td><td>{cuts_shot:.6f}</td><td>{cuts_fpfh:.6f}</td></tr>',
-        f'<tr><td>Holes</td><td>{holes_count}</td><td>{holes_dino:.6f}</td><td>{holes_dinov3:.6f}</td><td>{holes_shot:.6f}</td><td>{holes_fpfh:.6f}</td></tr>',
-        f'<tr><td>Entire dataset</td><td>{total_count}</td><td>{overall_dino:.6f}</td><td>{overall_dinov3:.6f}</td><td>{overall_shot:.6f}</td><td>{overall_fpfh:.6f}</td></tr>',
+        '<tr><th>Category</th><th>Count</th>' + ''.join([f'<th>Mean Geodesic Error ({d.upper()})</th>' for d in descriptor_list]) + '</tr>',
+        f'<tr><td>Cuts</td><td>{cuts_count}</td>' + ''.join([f'<td>{cuts_means[d]:.6f}</td>' for d in descriptor_list]) + '</tr>',
+        f'<tr><td>Holes</td><td>{holes_count}</td>' + ''.join([f'<td>{holes_means[d]:.6f}</td>' for d in descriptor_list]) + '</tr>',
+        f'<tr><td>Entire dataset</td><td>{total_count}</td>' + ''.join([f'<td>{overall_means[d]:.6f}</td>' for d in descriptor_list]) + '</tr>',
         '</table>',
         '<hr/>',
         '<h2>Individual Mesh Results</h2>',
         '<table>',
-        '<tr><th>Name</th><th>Best</th><th>Mean Geodesic Error (DINO)</th><th>Mean Geodesic Error (DINOv3)</th><th>Mean Geodesic Error (SHOT)</th><th>Mean Geodesic Error (FPFH)</th><th>DINO Visualizations</th><th>DINOv3 Visualizations</th><th>SHOT Visualizations</th><th>FPFH Visualizations</th></tr>'
+        '<tr><th>Name</th><th>Best</th>'
+        + ''.join([f'<th>Mean Geodesic Error ({d.upper()})</th>' for d in descriptor_list])
+        + (''.join([f'<th>{d.upper()} Visualizations</th>' for d in descriptor_list]) if include_visuals else '')
+        + '</tr>'
     ]
 
     for r in rows:
-        dino_links = []
-        dinov3_links = []
-        shot_links = []
-        fpfh_links = []
-        if r.get('functional_map_dino'):
-            dino_links.append(f'<a href="{r["functional_map_dino"]}" target="_blank">functional_map_visualization_dino</a>')
-        if r.get('color_pullback_dino'):
-            dino_links.append(f'<a href="{r["color_pullback_dino"]}" target="_blank">color_pullback_dino</a>')
-        if r.get('functional_map_dinov3'):
-            dinov3_links.append(f'<a href="{r["functional_map_dinov3"]}" target="_blank">functional_map_visualization_dinov3</a>')
-        if r.get('color_pullback_dinov3'):
-            dinov3_links.append(f'<a href="{r["color_pullback_dinov3"]}" target="_blank">color_pullback_dinov3</a>')
-        if r.get('functional_map_shot'):
-            shot_links.append(f'<a href="{r["functional_map_shot"]}" target="_blank">functional_map_visualization_shot</a>')
-        if r.get('color_pullback_shot'):
-            shot_links.append(f'<a href="{r["color_pullback_shot"]}" target="_blank">color_pullback_shot</a>')
-        if r.get('interactive_view_shot'):
-            shot_links.append(f'<a href="{r["interactive_view_shot"]}" target="_blank">interactive_view_shot</a>')
-        if r.get('functional_map_fpfh'):
-            fpfh_links.append(f'<a href="{r["functional_map_fpfh"]}" target="_blank">functional_map_visualization_fpfh</a>')
-        if r.get('color_pullback_fpfh'):
-            fpfh_links.append(f'<a href="{r["color_pullback_fpfh"]}" target="_blank">color_pullback_fpfh</a>')
-        if r.get('interactive_view_fpfh'):
-            fpfh_links.append(f'<a href="{r["interactive_view_fpfh"]}" target="_blank">interactive_view_fpfh</a>')
-        if r.get('interactive_view_dino'):
-            dino_links.append(f'<a href="{r["interactive_view_dino"]}" target="_blank">interactive_view_dino</a>')
-        if r.get('interactive_view_dinov3'):
-            dinov3_links.append(f'<a href="{r["interactive_view_dinov3"]}" target="_blank">interactive_view_dinov3</a>')
-
-        dino_html = ' | '.join(dino_links) if dino_links else ''
-        dinov3_html = ' | '.join(dinov3_links) if dinov3_links else ''
-        shot_html = ' | '.join(shot_links) if shot_links else ''
-        fpfh_html = ' | '.join(fpfh_links) if fpfh_links else ''
-
-        mean_dino = r.get('mean_dino') if r.get('mean_dino') is not None else float('nan')
-        mean_dinov3 = r.get('mean_dinov3') if r.get('mean_dinov3') is not None else float('nan')
-        mean_shot = r.get('mean_shot') if r.get('mean_shot') is not None else float('nan')
-        mean_fpfh = r.get('mean_fpfh') if r.get('mean_fpfh') is not None else float('nan')
+        means = {d: r.get(_mean_key(d)) if r.get(_mean_key(d)) is not None else float('nan') for d in descriptor_list}
 
         # Determine best descriptor (lowest error)
-        descriptor_errors = {
-            'DINO': mean_dino,
-            'DINOv3': mean_dinov3,
-            'SHOT': mean_shot,
-            'FPFH': mean_fpfh
-        }
+        descriptor_errors = {d.upper(): means[d] for d in descriptor_list}
         valid_errors = {k: v for k, v in descriptor_errors.items() if not np.isnan(v)}
         best_descriptor = min(valid_errors, key=valid_errors.get) if valid_errors else 'N/A'
 
-        html_lines.append(f'<tr><td>{r["name"]}</td><td>{best_descriptor}</td><td>{mean_dino:.6f}</td><td>{mean_dinov3:.6f}</td><td>{mean_shot:.6f}</td><td>{mean_fpfh:.6f}</td><td>{dino_html}</td><td>{dinov3_html}</td><td>{shot_html}</td><td>{fpfh_html}</td></tr>')
+        row_cells = [f'<td>{r["name"]}</td>', f'<td>{best_descriptor}</td>']
+        row_cells.extend([f'<td>{means[d]:.6f}</td>' for d in descriptor_list])
+
+        if include_visuals:
+            vis_cells = []
+            for d in descriptor_list:
+                links = []
+                fm_key = f'functional_map_{d}'
+                cp_key = f'color_pullback_{d}'
+                iv_key = f'interactive_view_{d}'
+                if r.get(fm_key):
+                    links.append(f'<a href="{r[fm_key]}" target="_blank">functional_map_visualization_{d}</a>')
+                if r.get(cp_key):
+                    links.append(f'<a href="{r[cp_key]}" target="_blank">color_pullback_{d}</a>')
+                if r.get(iv_key):
+                    links.append(f'<a href="{r[iv_key]}" target="_blank">interactive_view_{d}</a>')
+                vis_cells.append(f'<td>{" | ".join(links) if links else ""}</td>')
+            row_cells.extend(vis_cells)
+
+        html_lines.append('<tr>' + ''.join(row_cells) + '</tr>')
 
     html_lines.extend(['</table>', '</body>', '</html>'])
 
@@ -773,6 +753,11 @@ def main():
         help='Use DINOv3 descriptors (requires pytorch3d, transformers and internet to download model)'
     )
     parser.add_argument(
+        '--desc',
+        action='append',
+        help='Descriptor to run (can be provided multiple times, e.g. --desc shot --desc fpfh)'
+    )
+    parser.add_argument(
         '--target-path',
         type=str,
         default='results',
@@ -786,6 +771,12 @@ def main():
         '--web-view',
         action='store_true',
         help='Generate a web-based interactive viewer (HTML + JSON) in the result folder and link it in the summary'
+    )
+
+    parser.add_argument(
+        '--no-vis',
+        action='store_true',
+        help='Skip generation of visualizations (functional map and color pullback images)'
     )
 
     # Benchmark mode: run all descriptors for comparison
@@ -810,6 +801,11 @@ def main():
         '--gt-path',
         type=str,
         help='Optional path to ground-truth correspondences (.vts). If omitted, GT-based metrics/visualizations are skipped'
+    )
+    parser.add_argument(
+        '--shrec16',
+        type=str,
+        help='Path to SHREC16 root (contains cuts/holes/null). Required for dataset mode.'
     )
 
     # Optional optimization/iteration overrides
@@ -838,29 +834,37 @@ def main():
 
     # Viewer mode will be handled after matching to show post-match colors
 
-    # Determine the descriptor type to use
-    descriptor_type = "fpfh"  # Default value
+    # Determine descriptor types to use (allow multiple)
+    selected_types = []
+    if args.fpfh:
+        selected_types.append("fpfh")
     if args.shot:
-        descriptor_type = "shot"
-    elif args.fpfh:
-        descriptor_type = "fpfh"
-    elif args.dino:
-        descriptor_type = "dino"
-    elif getattr(args, 'dinov3', False):
-        descriptor_type = "dinov3"
+        selected_types.append("shot")
+    if args.dino:
+        selected_types.append("dino")
+    if getattr(args, 'dinov3', False):
+        selected_types.append("dinov3")
+    if args.desc:
+        selected_types.extend(args.desc)
+    # De-duplicate while preserving order
+    _seen = set()
+    selected_types = [t for t in selected_types if not (t in _seen or _seen.add(t))]
+    if not selected_types and not args.benchmark:
+        selected_types = ["fpfh"]
 
     target_path = args.target_path
     state_path = os.path.join(target_path, 'state.txt')
 
-    print(f"Using descriptor: {descriptor_type.upper()}")
-    # Defaults for dataset mode (used when single-run paths are not provided)
-    FULL_MESH_DIR_DEFAULT = '/usr/prakt/w0010/SAVHA/shape_data/SHREC16/null/off'
-    PARTIAL_ROOT_DIR_DEFAULT = '/usr/prakt/w0010/SAVHA/shape_data/SHREC16'
-
+    if args.benchmark:
+        print("Using descriptors: DINO, DINOv3, SHOT, FPFH (benchmark)")
+    else:
+        print("Using descriptors: " + ", ".join([t.upper() for t in selected_types]))
     if args.full_mesh and args.partial_mesh:
         print(f"Single-run: full={args.full_mesh}, partial={args.partial_mesh}, gt={args.gt_path or 'None'}")
     else:
-        print(f"Dataset defaults in use: full_dir={FULL_MESH_DIR_DEFAULT}, partial_root={PARTIAL_ROOT_DIR_DEFAULT}")
+        if not args.shrec16:
+            parser.error("Dataset mode requires --shrec16 <path> when --full-mesh/--partial-mesh are not provided.")
+        print(f"Dataset mode: SHREC16 root={args.shrec16}")
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device}")
@@ -900,7 +904,7 @@ def main():
                 raise FileNotFoundError(f"Could not resolve full mesh file under directory {_full_path} for partial {single_name} (tried: {', '.join(candidates)})")
             _full_path = found
 
-        mesh_data = TestMeshData(
+        mesh_data = MeshPair(
             name=single_name,
             full_mesh=_full_path,
             partial_mesh=args.partial_mesh,
@@ -914,138 +918,120 @@ def main():
             if args.benchmark:
                 _types_to_run = ['dino', 'dinov3', 'shot', 'fpfh']
             else:
-                _types_to_run = [descriptor_type]
+                _types_to_run = list(selected_types)
 
             _results = {}
             for _dt in _types_to_run:
                 opts.descriptor_type = _dt
-                _results[_dt] = run(mesh_data, result_path, opts, target_path)
+                _results[_dt] = run(
+                    mesh_data,
+                    None if args.no_vis else result_path,
+                    opts,
+                    target_path
+                )
 
             entry = {
                 'name': single_name,
-                'mean_dino': (_results.get('dino') or {}).get('mean'),
-                'mean_dinov3': (_results.get('dinov3') or {}).get('mean'),
-                'mean_shot': (_results.get('shot') or {}).get('mean'),
-                'mean_fpfh': (_results.get('fpfh') or {}).get('mean'),
-                'functional_map_dino': (_results.get('dino') or {}).get('functional_map'),
-                'color_pullback_dino': (_results.get('dino') or {}).get('color_pullback'),
-                'functional_map_dinov3': (_results.get('dinov3') or {}).get('functional_map'),
-                'color_pullback_dinov3': (_results.get('dinov3') or {}).get('color_pullback'),
-                'functional_map_shot': (_results.get('shot') or {}).get('functional_map'),
-                'color_pullback_shot': (_results.get('shot') or {}).get('color_pullback'),
-                'functional_map_fpfh': (_results.get('fpfh') or {}).get('functional_map'),
-                'color_pullback_fpfh': (_results.get('fpfh') or {}).get('color_pullback'),
                 'output_folder': result_path,
                 'folder': 'single',
             }
+            for _dt in _types_to_run:
+                res = _results.get(_dt) or {}
+                entry[f'mean_{_dt}'] = res.get('mean')
+                entry[f'functional_map_{_dt}'] = res.get('functional_map')
+                entry[f'color_pullback_{_dt}'] = res.get('color_pullback')
             summary_results.append(entry)
             processed_samples[single_name] = entry
             state['processed_samples'] = processed_samples
             save_state(state, state_path)
-            write_summary_html(summary_results, target_path)
+            write_summary_html(summary_results, target_path, _types_to_run, include_visuals=(not args.no_vis))
 
             # If web viewer requested, generate HTML using the already-computed matches
             if args.web_view:
-                try:
-                    viewer_res = _results.get(descriptor_type)
-                    if viewer_res is None:
-                        raise RuntimeError(f"No results found for descriptor '{descriptor_type}' to generate web view.")
-                    matches_arr = viewer_res.get('matches')
-                    gt_matches_arr = viewer_res.get('gt_matches')
-                    if matches_arr is None:
-                        raise RuntimeError("Matches are missing from run() results; cannot generate web view.")
-                    html_path = generate_interactive_view(
-                        mesh_data.full_mesh,
-                        mesh_data.partial_mesh,
-                        matches_arr,
-                        gt_matches_arr,
-                        result_path
-                    )
+                for _dt in _types_to_run:
                     try:
-                        html_rel = os.path.relpath(html_path, start=target_path)
-                    except Exception:
-                        html_rel = html_path
-                    key_name = f'interactive_view_{descriptor_type}'
-                    entry[key_name] = html_rel
-                    processed_samples[single_name] = entry
-                    state['processed_samples'] = processed_samples
-                    save_state(state, state_path)
-                    write_summary_html(summary_results, target_path)
-                    print(f"Web viewer generated: {html_path}")
-                except Exception as e:
-                    print(f"Web viewer generation failed (no recompute): {e}")
+                        viewer_res = _results.get(_dt)
+                        if viewer_res is None:
+                            raise RuntimeError(f"No results found for descriptor '{_dt}' to generate web view.")
+                        matches_arr = viewer_res.get('matches')
+                        gt_matches_arr = viewer_res.get('gt_matches')
+                        if matches_arr is None:
+                            raise RuntimeError("Matches are missing from run() results; cannot generate web view.")
+                        html_path = generate_interactive_view(
+                            mesh_data.full_mesh,
+                            mesh_data.partial_mesh,
+                            matches_arr,
+                            gt_matches_arr,
+                            result_path
+                        )
+                        try:
+                            html_rel = os.path.relpath(html_path, start=target_path)
+                        except Exception:
+                            html_rel = html_path
+                        key_name = f'interactive_view_{_dt}'
+                        entry[key_name] = html_rel
+                        processed_samples[single_name] = entry
+                        state['processed_samples'] = processed_samples
+                        save_state(state, state_path)
+                        write_summary_html(summary_results, target_path, _types_to_run, include_visuals=(not args.no_vis))
+                        print(f"Web viewer generated: {html_path}")
+                    except Exception as e:
+                        print(f"Web viewer generation failed (no recompute): {e}")
 
             # Popup viewer deprecated; web-based viewer available via --web-view
     else:
-        partial_folders = ["cuts", "holes"]
-        for folder in partial_folders:
-            partial_off_dir = os.path.join(PARTIAL_ROOT_DIR_DEFAULT, folder, 'off')
-            partial_files = os.listdir(partial_off_dir)
-            i = 0
-            for partial_file in partial_files:
-                # remove extension safely
-                partial_mesh_name = os.path.splitext(partial_file)[0]
+        def _infer_folder(path: str) -> str:
+            parts = os.path.normpath(path).split(os.sep)
+            if 'cuts' in parts:
+                return 'cuts'
+            if 'holes' in parts:
+                return 'holes'
+            return 'unknown'
 
-                # safe extraction of the full mesh name from the partial's filename
-                parts = partial_mesh_name.split('_')
-                if len(parts) >= 2:
-                    full_mesh_name = parts[1]
-                else:
-                    full_mesh_name = partial_mesh_name
-                mesh_data = TestMeshData(
-                    name=partial_mesh_name,
-                    full_mesh=os.path.join(FULL_MESH_DIR_DEFAULT, f"{full_mesh_name}.off"),
-                    partial_mesh=os.path.join(PARTIAL_ROOT_DIR_DEFAULT, folder, 'off', partial_file),
-                    ground_truth=os.path.join(PARTIAL_ROOT_DIR_DEFAULT, folder, 'corres', f"{partial_mesh_name}.vts")
+        dataset = Shrec16(args.shrec16)
+        for mesh_data in dataset:
+            folder = _infer_folder(mesh_data.partial_mesh)
+            result_path = os.path.join(target_path, folder, mesh_data.name)
+
+            # skip if already processed (from persisted state)
+            if mesh_data.name in processed_samples:
+                continue
+
+            # Decide descriptors to run
+            if args.benchmark:
+                _types_to_run = ['dino', 'dinov3', 'shot', 'fpfh']
+            else:
+                _types_to_run = list(selected_types)
+
+            _results = {}
+            for _dt in _types_to_run:
+                opts.descriptor_type = _dt
+                _results[_dt] = run(
+                    mesh_data,
+                    None if args.no_vis else result_path,
+                    opts,
+                    target_path
                 )
-                result_path = os.path.join(target_path, folder, partial_mesh_name)
 
-                # skip if already processed (from persisted state)
-                if partial_mesh_name in processed_samples:
-                    continue
-                # Process all samples
+            # aggregate into one summary entry (only fill those run)
+            entry = {
+                'name': mesh_data.name,
+                'output_folder': result_path,
+                'folder': folder,
+            }
+            for _dt in _types_to_run:
+                res = _results.get(_dt) or {}
+                entry[f'mean_{_dt}'] = res.get('mean')
+                entry[f'functional_map_{_dt}'] = res.get('functional_map')
+                entry[f'color_pullback_{_dt}'] = res.get('color_pullback')
+            summary_results.append(entry)
+            processed_samples[mesh_data.name] = entry
+            state['processed_samples'] = processed_samples
+            # write incremental HTML summary after each processed mesh
+            save_state(state, state_path)
+            write_summary_html(summary_results, target_path, _types_to_run, include_visuals=(not args.no_vis))
 
-                # Decide descriptors to run
-                if args.benchmark:
-                    _types_to_run = ['dino', 'dinov3', 'shot', 'fpfh']
-                else:
-                    _types_to_run = [descriptor_type]
-
-                _results = {}
-                for _dt in _types_to_run:
-                    opts.descriptor_type = _dt
-                    _results[_dt] = run(mesh_data, result_path, opts, target_path)
-
-                # aggregate into one summary entry (only fill those run)
-                entry = {
-                    'name': partial_mesh_name,
-                    'mean_dino': (_results.get('dino') or {}).get('mean'),
-                    'mean_dinov3': (_results.get('dinov3') or {}).get('mean'),
-                    'mean_shot': (_results.get('shot') or {}).get('mean'),
-                    'mean_fpfh': (_results.get('fpfh') or {}).get('mean'),
-                    'functional_map_dino': (_results.get('dino') or {}).get('functional_map'),
-                    'color_pullback_dino': (_results.get('dino') or {}).get('color_pullback'),
-                    'functional_map_dinov3': (_results.get('dinov3') or {}).get('functional_map'),
-                    'color_pullback_dinov3': (_results.get('dinov3') or {}).get('color_pullback'),
-                    'functional_map_shot': (_results.get('shot') or {}).get('functional_map'),
-                    'color_pullback_shot': (_results.get('shot') or {}).get('color_pullback'),
-                    'functional_map_fpfh': (_results.get('fpfh') or {}).get('functional_map'),
-                    'color_pullback_fpfh': (_results.get('fpfh') or {}).get('color_pullback'),
-                    'output_folder': result_path,
-                    'folder': folder,
-                }
-                summary_results.append(entry)
-                processed_samples[partial_mesh_name] = entry
-                state['processed_samples'] = processed_samples
-                # write incremental HTML summary after each processed mesh
-                save_state(state, state_path)
-                write_summary_html(summary_results, target_path)
-                
-                i += 1
-                if i == 50:
-                    break
-
-            # In dataset mode, viewer is less defined; skipping popup to avoid repeated openings
+        # In dataset mode, viewer is less defined; skipping popup to avoid repeated openings
 
 if __name__ == "__main__":
     main()

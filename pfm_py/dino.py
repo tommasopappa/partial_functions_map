@@ -149,7 +149,7 @@ def compute_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0
         nearest = dists.argmin(dim=1)
         ft_per_vertex[missing] = ft_per_vertex[has_feats][nearest]
 
-    return ft_per_vertex.cpu(), n_missing
+    return ft_per_vertex.detach(), n_missing
 
 
 # convenience aliases for backward compatibility

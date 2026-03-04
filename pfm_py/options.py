@@ -26,10 +26,11 @@ class Options:
     C_patience_iters : int = 100 # patience iterations for early stopping in C optimization
     v_patience_iters : int = 2000 # patience iterations for early stopping in v optimization
     early_stopping : bool = False # enable early stopping?
+    enforce_determinism: bool = True # whether to enforce consistency in the eigendecomposition, leading to deterministic results
 
     tv_mean : float = 0.5 # target membership density for Mumford-Shah regularization, see optimize_v.py
     # standard deviation for Mumford-Shah Gaussian localization, see optimize_v.py
-    # This value is scale-dependent. The value of 0.2 in the PFM code was optimized for meshes with surface
+    # This value is scale-dependent. The value of 0.2 in the PFM code was optimized, for meshes with surface
     # area 1.5 - 2.0 * 10^4. The value below downscales this to meshes of area 1.
     # In the code, this is furhter scaled by sqrt(M.area) to adapt to the actual mesh area.
     # This might not be the optimal way to scale this parameter, but seems to be good enough.

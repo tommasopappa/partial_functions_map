@@ -10,7 +10,8 @@ def run_icp_partial(M : ManifoldMesh, N : ManifoldMesh, C_init, est_rank, opts: 
     spectral domain and Procrustes updates (via SVD). 
     For every vertex of N, we find
     a corresponding vertex of M via nearest-neighbor matching in the spectral coordinate space
-    of M. Points on N receive spectral coordinates of M via pushing forward with C.
+    of M. The spectral coordinates of a point p is the spectral representation of the indicator function at p.
+    Points on N receive spectral coordinates of M via pushing forward with C.
     Using these matches, we refine C via a Procrustes update that finds the best orthogonal map 
     aligning push-forward coordinates of N to those of the matched vertices on M.
 
