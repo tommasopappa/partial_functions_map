@@ -189,6 +189,14 @@ def _write_html(path: str, has_gt: bool):
         const showGT = !pgMesh.visible;
         pgMesh.visible = showGT;
         pmMesh.visible = !showGT;
+        const labelEl = document.getElementById('partialLabelSpan');
+        if (labelEl) {
+          labelEl.textContent = 'Right: Partial ' + (showGT ? '(GT)' : '(Method)');
+        }
+        const panelLabel = document.getElementById('partialPanelLabel');
+        if (panelLabel) {
+          panelLabel.textContent = 'Partial Mesh ' + (showGT ? '(GT)' : '(Method)');
+        }
       });
         """
     ) if has_gt else ''
@@ -219,12 +227,12 @@ def _write_html(path: str, has_gt: bool):
   <div id="toolbar">
     <strong>Interactive Viewer:</strong>
     <span style="margin-left:12px;">Left: Full (continuous)</span>
-    <span style="margin-left:12px;">Right: Partial (__PARTIAL_LABEL__)</span>
+    <span id="partialLabelSpan" style="margin-left:12px;">Right: Partial (__PARTIAL_LABEL__)</span>
     __TOGGLE_BTN__
   </div>
   <div id="container">
     <div class="panel"><div class="label">Full Mesh (continuous)</div><div id="left"></div></div>
-    <div class="panel"><div class="label">Partial Mesh (__PARTIAL_LABEL__)</div><div id="right"></div></div>
+    <div class="panel"><div class="label" id="partialPanelLabel">Partial Mesh (__PARTIAL_LABEL__)</div><div id="right"></div></div>
   </div>
   <script>
     async function loadJSON(url) {{
@@ -362,6 +370,14 @@ def _write_html_embedded(path: str, has_gt: bool, full_dict: dict, method_dict: 
         const showGT = !pgMesh.visible;
         pgMesh.visible = showGT;
         pmMesh.visible = !showGT;
+        const labelEl = document.getElementById('partialLabelSpan');
+        if (labelEl) {
+          labelEl.textContent = 'Right: Partial ' + (showGT ? '(GT)' : '(Method)');
+        }
+        const panelLabel = document.getElementById('partialPanelLabel');
+        if (panelLabel) {
+          panelLabel.textContent = 'Partial Mesh ' + (showGT ? '(GT)' : '(Method)');
+        }
       });
         """
     ) if has_gt else ''
@@ -393,12 +409,12 @@ def _write_html_embedded(path: str, has_gt: bool, full_dict: dict, method_dict: 
   <div id=\"toolbar\">
     <strong>Interactive Viewer:</strong>
     <span style=\"margin-left:12px;\">Left: Full (continuous)</span>
-    <span style=\"margin-left:12px;\">Right: Partial (__PARTIAL_LABEL__)</span>
+    <span id="partialLabelSpan" style="margin-left:12px;">Right: Partial (__PARTIAL_LABEL__)</span>
     __TOGGLE_BTN__
   </div>
   <div id=\"container\">
     <div class=\"panel\"><div class=\"label\">Full Mesh (continuous)</div><div id=\"left\"></div></div>
-    <div class=\"panel\"><div class=\"label\">Partial Mesh (__PARTIAL_LABEL__)</div><div id=\"right\"></div></div>
+    <div class=\"panel\"><div class=\"label\" id=\"partialPanelLabel\">Partial Mesh (__PARTIAL_LABEL__)</div><div id=\"right\"></div></div>
   </div>
   <script>
     function getJSON(id) {
@@ -508,6 +524,14 @@ def _write_html_embedded(path: str, has_gt: bool, full_dict: dict, method_dict: 
           const showGT = !pgMesh.visible;
           pgMesh.visible = showGT;
           pmMesh.visible = !showGT;
+          const labelEl = document.getElementById('partialLabelSpan');
+          if (labelEl) {
+            labelEl.textContent = 'Right: Partial ' + (showGT ? '(GT)' : '(Method)');
+          }
+          const panelLabel = document.getElementById('partialPanelLabel');
+          if (panelLabel) {
+            panelLabel.textContent = 'Partial Mesh ' + (showGT ? '(GT)' : '(Method)');
+          }
         });
       }
     }
