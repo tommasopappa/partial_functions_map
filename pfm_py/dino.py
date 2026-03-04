@@ -1,3 +1,13 @@
+################################################################################
+## Reference: Code adapted from echo-match repository
+## Original source: https://github.com/vikiehm/echo-match/blob/main/utils/dino_util.py
+## 
+## This module provides DINO feature extraction and mesh rendering utilities
+## for computing shape features from 3D meshes. Implementation is based on the
+## echo-match project by vikiehm, with modifications and simplifications for
+## the partial functions map use case.
+################################################################################
+
 import math
 import torch
 import numpy as np
