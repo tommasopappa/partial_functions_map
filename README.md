@@ -4,7 +4,16 @@ Comprehensive Python implementation of partial functional maps and related metho
 
 ## Overview
 
-This repository implements the partial functional maps framework for establishing correspondences between 3D shapes with partial geometry. It combines spectral geometric methods with modern deep learning features and classical descriptors to achieve robust shape matching.
+This repository is a **Python reimplementation** of the [original MATLAB Partial Functional Maps (PFM) repository](https://github.com/pitbullil/PFM/tree/master/pfm), based on the foundational paper:
+
+**[Partial Functional Correspondence](https://arxiv.org/pdf/1506.05274)** by Rodolà et al.
+
+The implementation reproduces the core PFM framework for establishing correspondences between 3D shapes with partial geometry. Beyond the original MATLAB implementation (which uses SHOT descriptors), this Python version extends the framework with:
+- **Deep learning-based descriptors**: DINOv2 and DINOv3 (self-supervised vision transformers)
+- **Additional classical descriptors**: FPFH (Fast Point Feature Histograms)
+- **Flexible descriptor combinations**: Different types of descriptors can be freely combined.
+
+This enables robust and accurate shape matching across various deformation patterns and topological changes.
 
 ## Implemented Methods
 
@@ -56,19 +65,6 @@ All feature extractors can be combined with both FM and PFM refinement:
 - ICP (baseline)
 
 ## Benchmark Results
-
-### Visual Comparison
-
-Example showing correspondence quality across different methods on a challenging partial matching case:
-
-![Method Comparison](method_comparison.png)
-
-The visualization shows source shape (left), transferred/matched shape (center), and error visualization (right) for each method. Note how:
-- **Ground Truth (GT)**: Perfect correspondence (0.000 error)
-- **DINO+PFM**: Achieves excellent results (0.014 error) with proper part matching
-- **DINO+FM**: Moderate performance (0.478 error) - struggles with partial geometry
-- **DINO alone**: Poor performance (0.443 error) without refinement
-- **ICP**: Worst performer (0.310 error) - fails on partial/cut shapes
 
 ### Performance by Shape Type
 
@@ -145,17 +141,6 @@ pip install einops==0.7.0 meshio==5.3.4 opencv-python==4.8.1.78 plyfile==1.0.1
 
 **See [INSTALLATION.md](INSTALLATION.md) for complete conda installation instructions and verification steps.**
 
-### Alternative: Python venv
-
-If you cannot use conda (e.g., restricted environments), use the automated setup script. **Note**: PyTorch3D compilation may take 30+ minutes:
-
-```bash
-python3 setup_environment.py
-source .venv/bin/activate
-```
-
-**See [SETUP_ALTERNATIVE.md](SETUP_ALTERNATIVE.md) for venv installation options.**
-
 ## CLI Usage
 
 PFM provides a simple CLI for single runs and dataset processing. The entry point is [pfm_py/main.py](pfm_py/main.py).
@@ -191,6 +176,16 @@ python3 -m pfm_py.main \
    --dinov3 \
    --target-path results/dinov3
 
+# SHREC16 dataset
+python3 -m pfm_py.main \
+   --shrec16 <path to SHREC16> \
+   --shot --fpfh --desc shot+dino \
+   --target-path results \
+   --web-view \
+   --max-outer-iter 5 \
+   --C-max-iter 1500 \
+   --v-max-iter 1000
+
 # Override iteration parameters (keep other defaults)
 python3 -m pfm_py.main \
    --full-mesh /path/to/full.off \
@@ -202,7 +197,6 @@ python3 -m pfm_py.main \
 
 Notes:
 - When `--full-mesh` is a directory, the CLI tries candidates derived from the partial name, e.g., `horse_shape_14.off → horse.off → partial_basename.off`.
-- If single-run paths are omitted, the CLI uses internal SHREC16 defaults and iterates `cuts/holes`; with `--benchmark` it produces a summary page.
 - To override the DINO model id, set env `PFM_DINO_MODEL`; for gated repos, set `HF_TOKEN`.
 
 ## Key Features

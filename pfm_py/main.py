@@ -363,7 +363,7 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
             img_N_gt = _render_image_o3d(v_N_vis, triv_N, colors_N_gt, size=(1200, 900)) if (has_gt and colors_N_gt is not None) else None
 
             # Compose with matplotlib to add titles consistently
-            fig, axes = plt.subplots(1, 3 if img_N_gt is not None else 2, figsize=(24, 9))
+            fig, axes = plt.subplots(1, 3 if img_N_gt is not None else 2, figsize=(36, 14))
             ax_idx = 0
             axes[ax_idx].imshow(img_M)
             axes[ax_idx].set_title("Full Mesh (M)\nsmooth colors", pad=20)
@@ -381,7 +381,7 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
             plt.tight_layout(pad=2.0)
             color_pullback_fname = f"color_pullback_{opts.descriptor_type}.png"
             color_pullback_path = os.path.join(output_folder, color_pullback_fname)
-            plt.savefig(color_pullback_path, dpi=300)
+            plt.savefig(color_pullback_path, dpi=150)
             print(f"Saved: {color_pullback_path} (Open3D renderer)")
             return color_pullback_path
         except Exception as e:
@@ -463,7 +463,7 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
         facecols_N_gt_shaded = np.clip(facecols_N_gt * shading_Ng + ks * spec_Ng[:, None], 0.0, 1.0)
 
     # create figure: left = full mesh, middle = GT pullback, right = method pullback
-    fig = plt.figure(figsize=(24, 9))
+    fig = plt.figure(figsize=(36, 14))
     boundary_line_width = 0
     opacity = 0.85
 
@@ -501,7 +501,7 @@ def create_color_pullback_visualization(vert_M, vert_N, triv_M, triv_N, matches,
     plt.tight_layout(pad=2.0)
     color_pullback_fname = f"color_pullback_{opts.descriptor_type}.png"
     color_pullback_path = os.path.join(output_folder, color_pullback_fname)
-    plt.savefig(color_pullback_path, dpi=300)
+    plt.savefig(color_pullback_path, dpi=150)
     print(f"Saved: {color_pullback_path}")
     
     return color_pullback_path
@@ -763,8 +763,6 @@ def main():
         default='results',
         help='Path to the output results directory (default: results)'
     )
-
-    # (Removed) Popup viewer flag was deprecated in favor of web-based viewer
 
     # Web viewer: generate HTML + JSON assets and link in summary
     parser.add_argument(
