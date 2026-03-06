@@ -43,7 +43,7 @@ def generate_html(sample_records, aggregate_records, refine_values, target_path)
         '</head>',
         '<body>',
         '<h1>Refinement Iteration Study - SHOT Descriptors</h1>',
-        '<p>Full scale experiment: 100 cuts + 100 holes samples</p>',
+        '<p>Full dataset experiment: All cuts + All holes samples from SHREC16</p>',
         '<p>Refinement iterations tested: ' + ', '.join(map(str, refine_values)) + '</p>',
     ]
     
@@ -163,7 +163,7 @@ parser.add_argument(
     '--seed',
     type=int,
     default=None,
-    help='Random seed for sample selection (optional)'
+    help='Random seed (not used when loading existing results)'
 )
 
 args = parser.parse_args()
@@ -189,26 +189,38 @@ def _collect_all(data_path: str, folder: str) -> List[MeshPair]:
     iterator = Shrec16(data_path, [folder]).__iter__()
     return list(iterator)
 
-def _shuffle_and_take(samples: List[MeshPair], limit: int, rng: np.random.Generator) -> List[MeshPair]:
-    if len(samples) <= limit:
-        return samples
-    shuffled = list(samples)
-    rng.shuffle(shuffled)
-    return shuffled[:limit]
-
-rng = np.random.default_rng(seed)
-
 cuts_all = _collect_all(data_path, "cuts")
 holes_all = _collect_all(data_path, "holes")
 
-# Full scale: 100 cuts, 100 holes
-cuts_samples = _shuffle_and_take(cuts_all, 100, rng)
-holes_samples = _shuffle_and_take(holes_all, 100, rng)
-samples: List[Tuple[MeshPair, str]] = [(s, "cuts") for s in cuts_samples] + [(s, "holes") for s in holes_samples]
+# Use all samples (no shuffling or limiting)
+samples: List[Tuple[MeshPair, str]] = [(s, "cuts") for s in cuts_all] + [(s, "holes") for s in holes_all]
 
 print(f"\nCollected {len(samples)} samples:")
-print(f"  Cuts: {len(cuts_samples)}")
-print(f"  Holes: {len(holes_samples)}")
+print(f"  Cuts: {len(cuts_all)}")
+print(f"  Holes: {len(holes_all)}")
+
+results_json = os.path.join(target_path, "refinement_statistics.json")
+
+# Load existing results to skip already-processed samples
+already_processed = set()
+existing_sample_records = []
+if os.path.exists(results_json):
+    try:
+        with open(results_json, "r", encoding="utf-8") as f:
+            existing_data = json.load(f)
+        existing_sample_records = existing_data.get("samples", [])
+        already_processed = {record["name"] for record in existing_sample_records}
+        print(f"\nFound existing results: {len(already_processed)} samples already processed")
+        print(f"Will skip these and continue with remaining samples")
+    except Exception as e:
+        print(f"\nWarning: Could not load existing results: {e}")
+        print("Starting fresh...")
+
+# Filter out already-processed samples
+samples_to_process = [(s, cat) for s, cat in samples if s.name not in already_processed]
+print(f"\nSamples to process: {len(samples_to_process)}")
+print(f"Already completed: {len(already_processed)}")
+print(f"Total: {len(samples)}\n")
 
 results_json = os.path.join(target_path, "refinement_statistics.json")
 os.makedirs(target_path, exist_ok=True)
@@ -216,15 +228,22 @@ os.makedirs(target_path, exist_ok=True)
 print("\n" + "="*80)
 print("TESTING EFFECT OF refine_iters")
 print("="*80)
-print(f"Testing {len(samples)} samples with refine_iters values {refine_values}\n")
+print(f"Testing {len(samples_to_process)} samples with refine_iters values {refine_values}\n")
 
+# Initialize with existing data
 all_mge = []
 per_sample_best = []
-sample_records = []
+sample_records = list(existing_sample_records)
 
-for sample_idx, (sample, category) in enumerate(samples):
+# Build existing aggregate data
+for record in existing_sample_records:
+    mge_by_refine = {int(k): v for k, v in record["mge_by_refine"].items()}
+    all_mge.append(mge_by_refine)
+    per_sample_best.append((record["best_refine_iters"], record["best_mge"], record["improvement_pct_vs_0"]))
+
+for sample_idx, (sample, category) in enumerate(samples_to_process):
     print(f"\n{'='*80}")
-    print(f"SAMPLE {sample_idx+1}/{len(samples)}: {sample.name} ({category})")
+    print(f"SAMPLE {len(existing_sample_records) + sample_idx+1}/{len(samples)}: {sample.name} ({category})")
     print(f"{'='*80}")
 
     mge_by_refine = {}
@@ -265,11 +284,16 @@ for sample_idx, (sample, category) in enumerate(samples):
     print(f"Relative improvement vs refine_iters=0: {improvement_pct:.2f}%")
 
     # Update JSON after each sample
+    # Build full list including both existing and new samples for aggregate calculations
+    all_samples = samples  # original full list
+    processed_count = len(existing_sample_records) + sample_idx + 1
+    
     baseline_vals = np.array([m[0] for m in all_mge], dtype=float)
     baseline_mask = np.isfinite(baseline_vals) & (baseline_vals > 0)
     baseline_mean = float(np.mean(baseline_vals[baseline_mask])) if np.any(baseline_mask) else float('nan')
 
-    categories = [cat for _, cat in samples[:sample_idx+1]]
+    # Categories from all processed samples so far
+    categories = [rec["category"] for rec in sample_records]
     cuts_mask = np.array([cat == "cuts" for cat in categories], dtype=bool)
     holes_mask = np.array([cat == "holes" for cat in categories], dtype=bool)
 
@@ -322,8 +346,8 @@ for sample_idx, (sample, category) in enumerate(samples):
 
     summary_payload = {
         "refine_iters_values": [int(r) for r in refine_values],
-        "num_samples_processed": sample_idx + 1,
-        "num_samples_total": len(samples),
+        "num_samples_processed": processed_count,
+        "num_samples_total": len(all_samples),
         "baseline_refine_iters": 0,
         "seed": seed,
         "samples": sample_records,

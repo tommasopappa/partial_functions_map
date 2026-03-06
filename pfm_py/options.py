@@ -23,10 +23,9 @@ class Options:
     icp_batch_size : int = 1000 # batch size used in ICP refinement
     fps_n_sample_points : int = 50 # number of farthest point samples for geodesic refinement
     refine_iters : int = 7 # number of refinement iterations
-    C_patience_iters : int = 100 # patience iterations for early stopping in C optimization
-    v_patience_iters : int = 2000 # patience iterations for early stopping in v optimization
-    early_stopping : bool = False # enable early stopping?
-    enforce_determinism: bool = True # whether to enforce consistency in the eigendecomposition, leading to deterministic results
+    
+    early_stopping : bool = False # enable early stopping in C step and v step
+    patience_iters : int = 500 # number of iterations to wait for improvement before early stopping
 
     tv_mean : float = 0.5 # target membership density for Mumford-Shah regularization, see optimize_v.py
     # standard deviation for Mumford-Shah Gaussian localization, see optimize_v.py

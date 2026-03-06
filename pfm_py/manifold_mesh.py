@@ -81,22 +81,21 @@ class ManifoldMesh:
         # Compute Laplace-Beltrami operator L and mass matrix S
         L, S = robust_laplacian.mesh_laplacian(vertices, triangles, mollify_factor=1e-5)
         L, S = L.tocsr(), S.tocsr() # CSR for efficiency
-        
-        # np.random.seed(42)
-        # v0 = np.random.randn(L.shape[0])
 
+        # Compute first (i.e. smallest eigenvalue) n_eigen eigenvalues/eigenvectors of L
         evals, evecs = sla.eigsh(L, k=opts.n_eigen, M=S, sigma=0.0, which='LM', maxiter=1e9, tol=1.e-15) # type: ignore
         
-        for i in range(opts.n_eigen): # Normalize eigenvectors w.r.t mass matrix
+        # Normalize eigenfunctions w.r.t to the L2 norm
+        # Afterwards, the eigenfuctions form an orthonormal system in the L2 function space. 
+        for i in range(opts.n_eigen):
             evecs[:, i] = evecs[:, i] / np.sqrt(evecs[:, i].T @ S @ evecs[:, i])
         
         # Enforce sign consistency: for each eigenvector, ensure the highest-absolute-value
         # component is positive. This resolves arbitrary sign flips from eigendecomposition.
-        if opts.enforce_determinism:
-            for i in range(opts.n_eigen):
-                max_abs_idx = np.argmax(np.abs(evecs[:, i]))
-                if evecs[max_abs_idx, i] < 0:
-                    evecs[:, i] = -evecs[:, i]
+        for i in range(opts.n_eigen):
+            max_abs_idx = np.argmax(np.abs(evecs[:, i]))
+            if evecs[max_abs_idx, i] < 0:
+                evecs[:, i] = -evecs[:, i]
 
         self.evals = torch.tensor(evals, dtype=torch.float32, device=opts.device)
         self.evecs = torch.tensor(evecs, dtype=torch.float32, device=opts.device)

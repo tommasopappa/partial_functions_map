@@ -1,17 +1,14 @@
 ################################################################################
+## DINOv3 descriptor computation
 ## References:
 ## 1. DINOv3 Model Repository (Facebook Research)
 ##    https://github.com/facebookresearch/dinov3
 ##    Provides the DINOv3 vision transformer model and utilities
 ##
 ## 2. Echo-Match Repository (Application built on DINOv3) 
-#     code taken and modified for DinoV3 features in this module.
-##    https://github.com/vikiehm/echo-match/blob/main/utils/dino_util.py
-##    Shape feature extraction application using DINOv3
+##    Code taken from this repository and slightly adapted.
+##    Source: https://github.com/vikiehm/echo-match/blob/main/utils/dino_util.py
 ##
-## This module adapts code from both repositories, combining the DINOv3-vitb16 
-## model with mesh rendering and feature aggregation techniques from echo-match.
-## Implementation includes modifications for the partial functions map use case.
 ################################################################################
 
 import os
