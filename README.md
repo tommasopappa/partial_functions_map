@@ -13,57 +13,6 @@ The implementation reproduces the core PFM framework for establishing correspond
 - **Additional classical descriptors**: FPFH (Fast Point Feature Histograms)
 - **Flexible descriptor combinations**: Different types of descriptors can be freely combined.
 
-This enables robust and accurate shape matching across various deformation patterns and topological changes.
-
-## Implemented Methods
-
-### Core Methods
-
-1. **Partial Functional Maps (PFM)** - Rodolà et al.
-   - Spectral framework for partial shape matching
-   - Handles missing geometry and topological changes
-   - Laplace-Beltrami eigenbasis computation
-
-2. **Functional Maps (FM)** - Ovsjanikov et al.
-   - Complete shape correspondence framework
-   - Spectral representation of correspondences
-   - Foundation for partial methods
-
-3. **Iterative Closest Point (ICP)**
-   - Classical point-to-point registration
-   - Baseline comparison method
-
-### Feature Extractors
-
-1. **DINOv2** - Meta AI
-   - Self-supervised vision transformer features
-   - Projection of 2D features onto 3D meshes
-   - Multiple views rendering and aggregation
-
-2. **SHOT** (Signature of Histograms of OrienTations)
-   - Local geometric descriptor
-   - Histogram-based feature encoding
-   - Robust to noise and partial data
-
-3. **FPFH** (Fast Point Feature Histograms)
-   - Fast local geometric descriptor
-   - Multi-scale neighborhood encoding
-   - Efficient computation
-
-### Method Combinations
-
-All feature extractors can be combined with both FM and PFM refinement:
-- DINO only
-- DINO + FM
-- DINO + PFM
-- SHOT only
-- SHOT + FM
-- SHOT + PFM
-- FPFH only
-- FPFH + FM
-- FPFH + PFM
-- ICP (baseline)
-
 ## Benchmark Results
 
 ### Performance by Shape Type
@@ -145,111 +94,118 @@ pip install einops==0.7.0 meshio==5.3.4 opencv-python==4.8.1.78 plyfile==1.0.1
 
 PFM provides a simple CLI for single runs and dataset processing. The entry point is [pfm_py/main.py](pfm_py/main.py).
 
-- Descriptors: `--fpfh` (default), `--shot`, `--dino`, `--dinov3`
-- Inputs: `--full-mesh` (.off file or directory), `--partial-mesh` (.off file), `--gt-path` (optional .vts)
-- Output: `--target-path` (results directory; default: `results`)
-- Benchmark: `--benchmark` runs DINO, DINOv3, SHOT, FPFH and writes a comparative summary
-- Iteration overrides: `--v-max-iter`, `--C-max-iter`, `--max-outer-iter`
+### Available CLI Options
 
-Examples:
+#### Descriptor Selection (choose one or combine with `--desc`)
+- `--fpfh` - Use FPFH descriptors (Fast Point Feature Histograms)
+- `--shot` - Use SHOT descriptors (Signature of Histograms of Orientations)
+- `--dino` - Use DINO (DINOv2) descriptors (requires pytorch3d and internet)
+- `--dinov3` or `--dino3` - Use DINOv3 descriptors (requires pytorch3d, transformers and internet)
+- `--desc <TYPE>` - Specify custom descriptor type (can be used multiple times, e.g., `--desc shot --desc fpfh`)
+  - Supports combinations like `shot+dino` or `fpfh+dinov3`
+  - Default: `fpfh` (if no descriptors specified)
+
+#### Input/Output Paths
+- `--full-mesh <PATH>` - Path to full mesh (.off file) or directory containing full meshes
+  - If directory, auto-resolves full mesh from partial name
+  - E.g., `horse_shape_14.off` tries candidates: `horse_shape_14.off` → `horse.off` → fallback to same basename
+- `--partial-mesh <PATH>` - Path to partial mesh (.off file) to match
+- `--gt-path <PATH>` - Optional path to ground truth correspondences (.vts file)
+  - If omitted, GT-based metrics/visualizations are skipped
+- `--target-path <PATH>` - Output results directory (default: `results`)
+- `--shrec16 <PATH>` - Path to SHREC16 root directory (contains cuts/holes/null subdirectories)
+  - Required for dataset mode (when `--full-mesh`/`--partial-mesh` not provided)
+
+#### Visualization Options
+- `--web-view` - Generate interactive HTML+JSON 3D viewer in result folder
+  - Left panel: full mesh with continuous colors
+  - Right panel: partial mesh with method/GT colors
+  - Features: rotate, zoom, pan, method/GT toggle
+- `--no-vis` - Skip generation of visualizations (functional map and color pullback images)
+
+#### Optimization Overrides
+- `--v-max-iter <INT>` - Override max iterations for v optimization (default: 2000)
+- `--C-max-iter <INT>` - Override max iterations for functional map C optimization (default: 2000)
+- `--max-outer-iter <INT>` - Override max outer loop iterations (default: 7)
+
+### CLI Examples
 
 ```bash
-# Single run (SHOT)
+# Single run with SHOT descriptors
 python3 -m pfm_py.main \
    --full-mesh /path/to/full.off \
    --partial-mesh /path/to/partial.off \
    --shot \
    --target-path results/shot_single
 
-# Single run (DINOv3) + GT + benchmark
+# Single run with DINOv3 + ground truth
 python3 -m pfm_py.main \
    --full-mesh /path/to/full.off \
    --partial-mesh /path/to/partial.off \
    --gt-path /path/to/corres.vts \
-   --dinov3 --benchmark \
-   --target-path results/dinov3_benchmark
+   --dinov3 \
+   --target-path results/dinov3_with_gt
 
-# Provide a full directory; auto-resolve the full mesh from the partial name
+# Combine multiple descriptors
+python3 -m pfm_py.main \
+   --full-mesh /path/to/full.off \
+   --partial-mesh /path/to/partial.off \
+   --desc shot+fpfh \
+   --target-path results/shot_fpfh_combined
+
+# Auto-resolve full mesh from directory
 python3 -m pfm_py.main \
    --full-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/null/off \
    --partial-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/cuts/off/cuts_horse_shape_14.off \
    --dinov3 \
    --target-path results/dinov3
 
-# SHREC16 dataset
+# SHREC16 dataset with multiple descriptors and web viewer
 python3 -m pfm_py.main \
-   --shrec16 <path to SHREC16> \
-   --shot --fpfh --desc shot+dino \
+   --shrec16 /usr/prakt/w0010/SAVHA/shape_data/SHREC16 \
+   --shot --fpfh \
    --target-path results \
    --web-view \
    --max-outer-iter 5 \
    --C-max-iter 1500 \
    --v-max-iter 1000
 
-# Override iteration parameters (keep other defaults)
+# Custom iteration parameters
 python3 -m pfm_py.main \
    --full-mesh /path/to/full.off \
    --partial-mesh /path/to/partial.off \
    --dino \
-   --v-max-iter 3000 --C-max-iter 2500 --max-outer-iter 10 \
+   --v-max-iter 3000 \
+   --C-max-iter 2500 \
+   --max-outer-iter 10 \
    --target-path results/dino_custom_iters
 ```
 
-Notes:
-- When `--full-mesh` is a directory, the CLI tries candidates derived from the partial name, e.g., `horse_shape_14.off → horse.off → partial_basename.off`.
-- To override the DINO model id, set env `PFM_DINO_MODEL`; for gated repos, set `HF_TOKEN`.
+### Output Files
+
+When `--target-path` is specified, the following files are generated per mesh pair:
+- `correspondence.vts` - Computed pointwise correspondences (vertices of N → vertices of M), 1-indexed, one per line
+- `functional_map_visualization.png` - Visualization of the functional map and color transfers
+- `color_pullback_visualization.png` - Color pullback and error heatmap visualizations
+- `interactive_view.html` - Interactive 3D web viewer (if `--web-view` enabled)
+
+### Environment Variables
+
+- `PFM_DINO_MODEL` - Override default DINO/DINOv3 model ID
+- `HF_TOKEN` - Hugging Face token for accessing gated models (required for some model versions)
+
+### Notes
+
+- When `--full-mesh` is a directory, the CLI auto-resolves candidates from the partial mesh name
+- Default descriptor is `fpfh` if none specified
+- Multiple descriptors can be combined using `+` or `--desc` repeated multiple times
+- Ground truth comparisons require GT file; omit `--gt-path` to skip GT-based metrics
+- To run all available descriptors individually, use `--fpfh --shot --dino --dinov3` flags together
 
 ## Web Viewer (Interactive HTML)
 
-- Purpose: Generate an interactive 3D page. Left panel shows the full mesh (continuous colors), right panel shows the partial mesh (method/GT colors), with rotate, zoom, pan and optional Method/GT toggle.
+- Purpose: Generate an interactive 3D page. Left panel shows the full mesh (continuous colors), right panel shows the partial mesh (method/GT colors), with rotate, zoom, pan and Method/GT toggle.
 - Enable: Add `--web-view` to the CLI; an `interactive_view.html` is created per sample inside the result folder.
-
-### Quick Example
-
-```bash
-python3 -m pfm_py.main \
-   --full-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/null/off \
-   --partial-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/cuts/off/cuts_horse_shape_14.off \
-   --shot --web-view \
-   --target-path results/webview \
-   --v-max-iter 2000 --C-max-iter 2000 --max-outer-iter 7
-```
-
-Outputs in the sample folder:
-- `interactive_view.html`
-- `three.min.js` (bundled automatically by the generator)
-- Optional: `full.json`, `partial_method.json`, `partial_gt.json` (non-embedded mode)
-
-### Open in VS Code (recommended)
-
-- Simple Browser:
-   - Ctrl+Shift+P (Cmd+Shift+P on macOS) → “Simple Browser: Show”
-   - Paste: `http://127.0.0.1:8001/interactive_view.html`
-- Local server:
-   ```bash
-   cd <sample_dir>
-   python3 -m http.server 8001 --bind 127.0.0.1
-   # Then open http://127.0.0.1:8001/interactive_view.html in a browser or Simple Browser
-   ```
-   - If the port is busy (EADDRINUSE), pick another port (e.g., 8010) or kill the old process:
-   ```bash
-   pkill -f "http.server 8001" || true
-   python3 -m http.server 8010 --bind 127.0.0.1
-   ```
-
-### Offline and Compatibility
-
-- The generator bundles a local `three.min.js` into the output folder and the HTML references local scripts, so the page works without internet.
-- A lightweight inline OrbitControls fallback is embedded; rotation (left mouse), zoom (wheel), and pan (right/middle mouse) work even without `OrbitControls.js`.
-- Embedded mode (default) writes JSON data directly into the HTML so `file://` or local server both work; non-embedded mode fetches `.json` files next to the page.
-
-### Troubleshooting
-
-- Blank page: Hard refresh (Ctrl/Cmd+Shift+R) or check DevTools that the `<canvas>` has a non-zero size; prefer VS Code Simple Browser or a local server over `file://` if scripts aren’t running.
-- Port in use: Change port or terminate the old server (see above).
-- No interaction: Ensure `three.min.js` exists in the output folder; the inline fallback still enables basic controls if external `OrbitControls.js` is missing.
-
-See the generator for details: [pfm_py/web_viewer.py](pfm_py/web_viewer.py).
 
 ## Key Features
 
@@ -270,11 +226,13 @@ Test shapes include: cat, centaur, david, dog, horse, michael, victoria, wolf
 
 ## References
 
-- Rodolà et al. - Partial Functional Correspondence
-- Ovsjanikov et al. - Functional Maps Framework
-- Meta AI - DINOv2: Learning Robust Visual Features
-- Tombari et al. - SHOT Descriptor
-- Rusu et al. - FPFH Descriptor
+- [Partial Functional Correspondence](https://arxiv.org/pdf/1506.05274) - Rodolà et al.
+- [Functional Maps Framework](https://arxiv.org/abs/1202.3673) - Ovsjanikov et al.
+- [DINOv2: Learning Robust Visual Features](https://arxiv.org/abs/2304.07193) - Meta AI Research
+- [DINOv3 Repository](https://github.com/facebookresearch/dinov3) - Meta AI Research
+- SHOT Descriptor - Tombari et al.
+- FPFH Descriptor - Rusu et al.
+- [Original MATLAB PFM Repository](https://github.com/pitbullil/PFM/tree/master/pfm) - Reference implementation
 
 ## License
 

@@ -1,4 +1,4 @@
-from pfm_py.dataset import MeshPair
+from pfm_py.dataset.mesh_pair import MeshPair
 from pfm_py.dataset.shrec16 import Shrec16
 from pfm_py.options import Options
 import pfm_py.main as main
@@ -9,6 +9,136 @@ import os
 import argparse
 import json
 from typing import List, Tuple
+
+
+def format_num(val, decimals=3):
+    """Format a number to fixed decimal places, handling NaN/Inf."""
+    if not np.isfinite(val):
+        return "N/A"
+    return f"{val:.{decimals}f}"
+
+
+def generate_html(sample_records, aggregate_records, refine_values, target_path):
+    """Generate HTML report with two tables: by sample and by refinement iteration."""
+    html_lines = [
+        '<!DOCTYPE html>',
+        '<html>',
+        '<head>',
+        '<meta charset="utf-8" />',
+        '<title>Refinement Iteration Study</title>',
+        '<style>',
+        'body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }',
+        'h1, h2 { color: #333; }',
+        'table { border-collapse: collapse; width: 100%; margin-bottom: 30px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }',
+        'th, td { border: 1px solid #ddd; padding: 10px; text-align: right; }',
+        'th { background: #4CAF50; color: white; font-weight: bold; }',
+        'tr:nth-child(even) { background: #f9f9f9; }',
+        'tr:hover { background: #f0f0f0; }',
+        '.sample-name { text-align: left; }',
+        '.category { font-size: 0.9em; color: #666; }',
+        '.best { background: #c8e6c9; font-weight: bold; }',
+        '.improvement-positive { color: green; }',
+        '.improvement-negative { color: red; }',
+        '</style>',
+        '</head>',
+        '<body>',
+        '<h1>Refinement Iteration Study - SHOT Descriptors</h1>',
+        '<p>Full scale experiment: 100 cuts + 100 holes samples</p>',
+        '<p>Refinement iterations tested: ' + ', '.join(map(str, refine_values)) + '</p>',
+    ]
+    
+    # TABLE 1: Samples as rows, refinement iterations as columns
+    html_lines.extend([
+        '<h2>Table 1: Results by Sample</h2>',
+        '<p>Mean Geodesic Error (MGE) for each sample across refinement iterations. Best value per sample highlighted.</p>',
+        '<table>',
+        '<tr><th class="sample-name">Sample</th><th class="sample-name">Category</th>',
+    ])
+    
+    for r in refine_values:
+        html_lines.append(f'<th>refine={r}</th>')
+    
+    html_lines.extend([
+        '<th>Best</th>',
+        '<th>Improvement %</th>',
+        '</tr>',
+    ])
+    
+    for record in sample_records:
+        name = record['name']
+        category = record['category']
+        mge_by_refine = record['mge_by_refine']
+        best_r = record['best_refine_iters']
+        improvement = record['improvement_pct_vs_0']
+        
+        html_lines.append(f'<tr><td class="sample-name">{name}</td><td class="category">{category}</td>')
+        
+        for r in refine_values:
+            mge_val = mge_by_refine.get(str(r), float('nan'))
+            is_best = (r == best_r)
+            css_class = 'best' if is_best else ''
+            html_lines.append(f'<td class="{css_class}">{format_num(mge_val)}</td>')
+        
+        html_lines.append(f'<td>{best_r}</td>')
+        improvement_class = 'improvement-positive' if improvement > 0 else 'improvement-negative'
+        html_lines.append(f'<td class="{improvement_class}">{format_num(improvement, 2)}%</td>')
+        html_lines.append('</tr>')
+    
+    html_lines.extend([
+        '</table>',
+        '',
+    ])
+    
+    # TABLE 2: Refinement iterations as rows, aggregate statistics as columns
+    html_lines.extend([
+        '<h2>Table 2: Aggregate Results by Refinement Iteration</h2>',
+        '<p>Summary statistics across all samples for each refinement iteration value.</p>',
+        '<table>',
+        '<tr>',
+        '<th>refine_iters</th>',
+        '<th>Optimal For (%)</th>',
+        '<th>Avg MGE</th>',
+        '<th>Avg Improvement %</th>',
+        '<th>Avg MGE (Cuts)</th>',
+        '<th>Avg Improvement % (Cuts)</th>',
+        '<th>Avg MGE (Holes)</th>',
+        '<th>Avg Improvement % (Holes)</th>',
+        '</tr>',
+    ])
+    
+    for record in aggregate_records:
+        r = record['refine_iters']
+        optimal_pct = record['optimal_pct']
+        avg_mge = record['avg_mge']
+        avg_improve = record['avg_improvement_pct_vs_0']
+        avg_mge_cuts = record['avg_mge_cuts']
+        avg_improve_cuts = record['avg_improvement_pct_vs_0_cuts']
+        avg_mge_holes = record['avg_mge_holes']
+        avg_improve_holes = record['avg_improvement_pct_vs_0_holes']
+        
+        html_lines.append('<tr>')
+        html_lines.append(f'<td>{r}</td>')
+        html_lines.append(f'<td>{format_num(optimal_pct, 1)}%</td>')
+        html_lines.append(f'<td>{format_num(avg_mge)}</td>')
+        html_lines.append(f'<td>{format_num(avg_improve, 2)}%</td>')
+        html_lines.append(f'<td>{format_num(avg_mge_cuts)}</td>')
+        html_lines.append(f'<td>{format_num(avg_improve_cuts, 2)}%</td>')
+        html_lines.append(f'<td>{format_num(avg_mge_holes)}</td>')
+        html_lines.append(f'<td>{format_num(avg_improve_holes, 2)}%</td>')
+        html_lines.append('</tr>')
+    
+    html_lines.extend([
+        '</table>',
+        '</body>',
+        '</html>',
+    ])
+    
+    html_path = os.path.join(target_path, 'refinement_study.html')
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(html_lines))
+    
+    return html_path
+
 
 # Command-line argument parsing
 parser = argparse.ArgumentParser(
@@ -26,7 +156,7 @@ parser.add_argument(
 parser.add_argument(
     '--target-path',
     type=str,
-    default='results',
+    default='results/refinement_experiment',
     help='Path to the output results directory'
 )
 parser.add_argument(
@@ -71,25 +201,17 @@ rng = np.random.default_rng(seed)
 cuts_all = _collect_all(data_path, "cuts")
 holes_all = _collect_all(data_path, "holes")
 
-cuts_samples = _shuffle_and_take(cuts_all, 15, rng)
-holes_samples = _shuffle_and_take(holes_all, 15, rng)
+# Full scale: 100 cuts, 100 holes
+cuts_samples = _shuffle_and_take(cuts_all, 100, rng)
+holes_samples = _shuffle_and_take(holes_all, 100, rng)
 samples: List[Tuple[MeshPair, str]] = [(s, "cuts") for s in cuts_samples] + [(s, "holes") for s in holes_samples]
 
 print(f"\nCollected {len(samples)} samples:")
-for i, (s, cat) in enumerate(samples):
-    print(f"  {i+1}. {s.name} ({cat})")
+print(f"  Cuts: {len(cuts_samples)}")
+print(f"  Holes: {len(holes_samples)}")
 
-results_file = os.path.join(target_path, "refinement_statistics.txt")
 results_json = os.path.join(target_path, "refinement_statistics.json")
 os.makedirs(target_path, exist_ok=True)
-
-with open(results_file, "w") as f:
-    f.write("="*100 + "\n")
-    f.write("REFINEMENT ITERATION STUDY: Effect of opts.refine_iters\n")
-    f.write("="*100 + "\n")
-    f.write("30 samples (15 cuts, 15 holes) × 5 refine_iters values per sample\n")
-    f.write(f"refine_iters values: {refine_values}\n")
-    f.write("="*100 + "\n\n")
 
 print("\n" + "="*80)
 print("TESTING EFFECT OF refine_iters")
@@ -142,98 +264,81 @@ for sample_idx, (sample, category) in enumerate(samples):
     print(f"Best refine_iters={best_r} with MGE={best_mge:.6f}")
     print(f"Relative improvement vs refine_iters=0: {improvement_pct:.2f}%")
 
-    with open(results_file, "a") as f:
-        f.write(f"\nSample {sample_idx+1}: {sample.name} ({category})\n")
-        f.write(f"{'-'*100}\n")
-        for r in refine_values:
-            f.write(f"  refine_iters={r}: MGE={mge_by_refine[r]:.6f}\n")
-        f.write(f"  Best refine_iters: {best_r}\n")
-        f.write(f"  Best MGE: {best_mge:.6f}\n")
-        f.write(f"  Relative improvement vs refine_iters=0: {improvement_pct:.2f}%\n")
-        f.flush()
+    # Update JSON after each sample
+    baseline_vals = np.array([m[0] for m in all_mge], dtype=float)
+    baseline_mask = np.isfinite(baseline_vals) & (baseline_vals > 0)
+    baseline_mean = float(np.mean(baseline_vals[baseline_mask])) if np.any(baseline_mask) else float('nan')
+
+    categories = [cat for _, cat in samples[:sample_idx+1]]
+    cuts_mask = np.array([cat == "cuts" for cat in categories], dtype=bool)
+    holes_mask = np.array([cat == "holes" for cat in categories], dtype=bool)
+
+    baseline_mean_cuts = float(np.mean(baseline_vals[baseline_mask & cuts_mask])) if np.any(baseline_mask & cuts_mask) else float('nan')
+    baseline_mean_holes = float(np.mean(baseline_vals[baseline_mask & holes_mask])) if np.any(baseline_mask & holes_mask) else float('nan')
+
+    aggregate_records = []
+    for r in refine_values:
+        best_count = sum(1 for (best_r, _, _) in per_sample_best if best_r == r)
+        best_pct = 100.0 * best_count / len(per_sample_best) if per_sample_best else 0.0
+        vals = np.array([m[r] for m in all_mge], dtype=float)
+        mask = np.isfinite(vals) & baseline_mask
+        if np.any(mask):
+            avg_mge = float(np.mean(vals[mask]))
+            if np.isfinite(baseline_mean) and baseline_mean > 0:
+                avg_improve = 100.0 * (baseline_mean - avg_mge) / baseline_mean
+            else:
+                avg_improve = float('nan')
+        else:
+            avg_mge = float('nan')
+            avg_improve = float('nan')
+
+        # Category-specific averages
+        mask_cuts = mask & cuts_mask
+        mask_holes = mask & holes_mask
+        if np.any(mask_cuts) and np.isfinite(baseline_mean_cuts) and baseline_mean_cuts > 0:
+            avg_mge_cuts = float(np.mean(vals[mask_cuts]))
+            avg_improve_cuts = 100.0 * (baseline_mean_cuts - avg_mge_cuts) / baseline_mean_cuts
+        else:
+            avg_mge_cuts = float('nan')
+            avg_improve_cuts = float('nan')
+
+        if np.any(mask_holes) and np.isfinite(baseline_mean_holes) and baseline_mean_holes > 0:
+            avg_mge_holes = float(np.mean(vals[mask_holes]))
+            avg_improve_holes = 100.0 * (baseline_mean_holes - avg_mge_holes) / baseline_mean_holes
+        else:
+            avg_mge_holes = float('nan')
+            avg_improve_holes = float('nan')
+
+        aggregate_records.append({
+            "refine_iters": int(r),
+            "optimal_pct": float(best_pct),
+            "avg_improvement_pct_vs_0": float(avg_improve),
+            "avg_improvement_pct_vs_0_cuts": float(avg_improve_cuts),
+            "avg_improvement_pct_vs_0_holes": float(avg_improve_holes),
+            "avg_mge": float(avg_mge),
+            "avg_mge_cuts": float(avg_mge_cuts),
+            "avg_mge_holes": float(avg_mge_holes),
+        })
+
+    summary_payload = {
+        "refine_iters_values": [int(r) for r in refine_values],
+        "num_samples_processed": sample_idx + 1,
+        "num_samples_total": len(samples),
+        "baseline_refine_iters": 0,
+        "seed": seed,
+        "samples": sample_records,
+        "aggregate": aggregate_records,
+    }
+
+    with open(results_json, "w", encoding="utf-8") as f:
+        json.dump(summary_payload, f, indent=2)
+
+    # Generate HTML report
+    generate_html(sample_records, aggregate_records, refine_values, target_path)
 
 print("\n" + "="*80)
-print("AGGREGATE SUMMARY")
+print("STUDY COMPLETE")
 print("="*80)
 
-baseline_vals = np.array([m[0] for m in all_mge], dtype=float)
-baseline_mask = np.isfinite(baseline_vals) & (baseline_vals > 0)
-baseline_mean = float(np.mean(baseline_vals[baseline_mask])) if np.any(baseline_mask) else float('nan')
-
-categories = [cat for _, cat in samples]
-cuts_mask = np.array([cat == "cuts" for cat in categories], dtype=bool)
-holes_mask = np.array([cat == "holes" for cat in categories], dtype=bool)
-
-baseline_mean_cuts = float(np.mean(baseline_vals[baseline_mask & cuts_mask])) if np.any(baseline_mask & cuts_mask) else float('nan')
-baseline_mean_holes = float(np.mean(baseline_vals[baseline_mask & holes_mask])) if np.any(baseline_mask & holes_mask) else float('nan')
-
-aggregate_records = []
-for r in refine_values:
-    best_count = sum(1 for (best_r, _, _) in per_sample_best if best_r == r)
-    best_pct = 100.0 * best_count / len(samples) if samples else 0.0
-    vals = np.array([m[r] for m in all_mge], dtype=float)
-    mask = np.isfinite(vals) & baseline_mask
-    if np.any(mask):
-        avg_mge = float(np.mean(vals[mask]))
-        if np.isfinite(baseline_mean) and baseline_mean > 0:
-            avg_improve = 100.0 * (baseline_mean - avg_mge) / baseline_mean
-        else:
-            avg_improve = float('nan')
-    else:
-        avg_mge = float('nan')
-        avg_improve = float('nan')
-
-    # Category-specific averages
-    mask_cuts = mask & cuts_mask
-    mask_holes = mask & holes_mask
-    if np.any(mask_cuts) and np.isfinite(baseline_mean_cuts) and baseline_mean_cuts > 0:
-        avg_mge_cuts = float(np.mean(vals[mask_cuts]))
-        avg_improve_cuts = 100.0 * (baseline_mean_cuts - avg_mge_cuts) / baseline_mean_cuts
-    else:
-        avg_mge_cuts = float('nan')
-        avg_improve_cuts = float('nan')
-
-    if np.any(mask_holes) and np.isfinite(baseline_mean_holes) and baseline_mean_holes > 0:
-        avg_mge_holes = float(np.mean(vals[mask_holes]))
-        avg_improve_holes = 100.0 * (baseline_mean_holes - avg_mge_holes) / baseline_mean_holes
-    else:
-        avg_mge_holes = float('nan')
-        avg_improve_holes = float('nan')
-
-    print(
-        f"refine_iters={r}: optimal for {best_pct:.1f}% of samples; "
-        f"avg improvement vs 0: {avg_improve:.2f}% "
-        f"(cuts {avg_improve_cuts:.2f}%, holes {avg_improve_holes:.2f}%)"
-    )
-
-    with open(results_file, "a") as f:
-        f.write(f"\nrefine_iters={r}: optimal for {best_pct:.1f}% of samples\n")
-        f.write(f"  Avg improvement vs refine_iters=0: {avg_improve:.2f}%\n")
-        f.write(f"  Avg improvement vs 0 (cuts): {avg_improve_cuts:.2f}%\n")
-        f.write(f"  Avg improvement vs 0 (holes): {avg_improve_holes:.2f}%\n")
-
-    aggregate_records.append({
-        "refine_iters": int(r),
-        "optimal_pct": float(best_pct),
-        "avg_improvement_pct_vs_0": float(avg_improve),
-        "avg_improvement_pct_vs_0_cuts": float(avg_improve_cuts),
-        "avg_improvement_pct_vs_0_holes": float(avg_improve_holes),
-        "avg_mge": float(avg_mge),
-        "avg_mge_cuts": float(avg_mge_cuts),
-        "avg_mge_holes": float(avg_mge_holes),
-    })
-
-summary_payload = {
-    "refine_iters_values": [int(r) for r in refine_values],
-    "num_samples": int(len(samples)),
-    "baseline_refine_iters": 0,
-    "seed": seed,
-    "samples": sample_records,
-    "aggregate": aggregate_records,
-}
-
-with open(results_json, "w", encoding="utf-8") as f:
-    json.dump(summary_payload, f, indent=2)
-
-print(f"\nComplete results saved to: {results_file}")
-print(f"JSON summary saved to: {results_json}")
+print(f"\nJSON results saved to: {results_json}")
+print(f"HTML report saved to: {os.path.join(target_path, 'refinement_study.html')}")

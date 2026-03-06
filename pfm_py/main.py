@@ -553,6 +553,12 @@ def run(mesh_data, output_folder, opts: Options, target_path = None):
         }
 
     os.makedirs(output_folder, exist_ok=True)
+    
+    # Save pointwise correspondences to correspondence.vts
+    correspondence_path = os.path.join(output_folder, 'correspondence.vts')
+    np.savetxt(correspondence_path, matches.astype(int) + 1, fmt='%d')
+    print(f"Wrote correspondences to {correspondence_path}")
+    
     # Create visualizations using helper functions
     functional_map_path = create_functional_map_visualization(
         vert_M, vert_N, triv_M, triv_N, M, N, C, v, matches, gt_matches, dist_method_geo, opts, output_folder
@@ -724,8 +730,8 @@ def main():
     # Single-run with user-provided meshes
     python main.py --full-mesh /path/to/full.off --partial-mesh /path/to/partial.off --shot --target-path results
 
-    # Single-run with GT and benchmark all descriptors
-    python main.py --full-mesh /path/to/full.off --partial-mesh /path/to/partial.off --gt-path /path/to/corres.vts --benchmark --target-path results
+    # Single-run with GT
+    python main.py --full-mesh /path/to/full.off --partial-mesh /path/to/partial.off --gt-path /path/to/corres.vts --target-path results
 
     # Dataset mode (uses defaults for SHREC16 directory layout)
     python main.py --fpfh --target-path results
@@ -775,13 +781,6 @@ def main():
         '--no-vis',
         action='store_true',
         help='Skip generation of visualizations (functional map and color pullback images)'
-    )
-
-    # Benchmark mode: run all descriptors for comparison
-    parser.add_argument(
-        '--benchmark',
-        action='store_true',
-        help='Run all descriptors (DINO, DINOv3, SHOT, FPFH) and write comparative summary'
     )
 
     # Single-run paths: user-provided full/partial mesh (optional GT)
@@ -847,16 +846,13 @@ def main():
     # De-duplicate while preserving order
     _seen = set()
     selected_types = [t for t in selected_types if not (t in _seen or _seen.add(t))]
-    if not selected_types and not args.benchmark:
+    if not selected_types:
         selected_types = ["fpfh"]
 
     target_path = args.target_path
     state_path = os.path.join(target_path, 'state.txt')
 
-    if args.benchmark:
-        print("Using descriptors: DINO, DINOv3, SHOT, FPFH (benchmark)")
-    else:
-        print("Using descriptors: " + ", ".join([t.upper() for t in selected_types]))
+    print("Using descriptors: " + ", ".join([t.upper() for t in selected_types]))
     if args.full_mesh and args.partial_mesh:
         print(f"Single-run: full={args.full_mesh}, partial={args.partial_mesh}, gt={args.gt_path or 'None'}")
     else:
@@ -913,10 +909,7 @@ def main():
         if single_name in processed_samples:
             print(f"Skipping {single_name}: already processed (state)")
         else:
-            if args.benchmark:
-                _types_to_run = ['dino', 'dinov3', 'shot', 'fpfh']
-            else:
-                _types_to_run = list(selected_types)
+            _types_to_run = list(selected_types)
 
             _results = {}
             for _dt in _types_to_run:

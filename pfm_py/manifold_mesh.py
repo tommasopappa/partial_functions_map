@@ -106,7 +106,7 @@ class ManifoldMesh:
         if compute_geo:
             self.compute_geometry()
 
-    def compute_fpfh_descriptors(self, opts: Options):
+    def compute_fpfh_descriptors(self, scale_factor: float, opts: Options):
         """Compute FPFH (Fast Point Feature Histogram) descriptors for all vertices.
         
         FPFH descriptors are local geometric features computed in a two-step process:
@@ -114,6 +114,7 @@ class ManifoldMesh:
         then computing FPFH by combining PFH values.
         
         Args:
+            scale_factor: Scaling factor for neighborhood radius (should be of order sqrt(area)).
             opts: Options object containing device specification.
         
         Returns:
@@ -122,14 +123,14 @@ class ManifoldMesh:
             distributions of angles and distances between vertex normals and positions
             in a local neighborhood.
         """
-        radius = 0.04 * self.area
+        radius = 0.04 * scale_factor
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(self.vert.numpy(force=True))
         pcd.estimate_normals(o3d.geometry.KDTreeSearchParamRadius(radius=radius*2))
         fpfh = o3d.pipelines.registration.compute_fpfh_feature(pcd, o3d.geometry.KDTreeSearchParamRadius(radius=radius))
         return torch.tensor(fpfh.data.T, dtype=torch.float32, device=opts.device)
 
-    def compute_descriptors(self, opts: Options):
+    def compute_descriptors(self, scale_factor : float, opts: Options):
         """Compute local geometric descriptors for all vertices based on descriptor_type option.
         
         Supports multiple descriptor types: SHOT (Signature of Histograms of Orientations),
@@ -137,6 +138,8 @@ class ManifoldMesh:
         Functions are represented as descriptor values at each vertex.
         
         Args:
+            scale_factor: Scaling factor for descriptor computation (e.g., neighborhood radius).
+                Should be of order sqrt(area).
             opts: Options object with descriptor_type field specifying which descriptor to use.
         
         Returns:
@@ -154,14 +157,14 @@ class ManifoldMesh:
             for t in toks:
                 sub = Options(opts.device)
                 sub.descriptor_type = t
-                feats_list.append(self.compute_descriptors(sub))
+                feats_list.append(self.compute_descriptors(scale_factor, sub))
             return torch.cat(feats_list, dim=1)
 
         # handle single descriptor cases
         if key == "shot":
-            return self.compute_shot_descriptors(opts)
+            return self.compute_shot_descriptors(scale_factor, opts)
         elif key == "fpfh":
-            return self.compute_fpfh_descriptors(opts)
+            return self.compute_fpfh_descriptors(scale_factor,opts)
         elif key == "dino":
             verts = self.vert.clone().detach()
             faces = self.triv.clone().detach()
@@ -177,7 +180,7 @@ class ManifoldMesh:
         else:
             raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'dino', 'dinov3' or combinations like 'shot+dino'.")
         
-    def compute_shot_descriptors(self, opts: Options, radius=0.05, n_bins=10,
+    def compute_shot_descriptors(self, scale_factor: float, opts: Options, radius=0.05, n_bins=10,
                                  min_neighbors=10, local_rf_radius=None, query_idx=None):
         """Compute SHOT (Signature of Histograms of Orientations) descriptors for vertices.
         
@@ -186,13 +189,15 @@ class ManifoldMesh:
         is computed in a local reference frame aligned with the surface normal.
         
         Args:
+            scale_factor: Scale factor for neighborhood radius (should be of order sqrt(area)).
             opts: Options object containing device specification.
             radius: Search radius for neighborhood in world coordinates. Default 0.05.
+                Should be independent of mesh scale, as it will be multiplied by scale_factor.
             n_bins: Number of bins for histogram quantization. Default 10.
             min_neighbors: Minimum number of neighbors required for a valid descriptor.
                           Default 10.
             local_rf_radius: Radius for local reference frame computation. If None,
-                           defaults to 1.5 * radius.
+                           defaults to 1.5 * scale_factor * radius.
             query_idx: If provided, only compute descriptors for these vertex indices.
                       If None, compute for all vertices. Shape (n_query,) or None.
         
@@ -203,6 +208,7 @@ class ManifoldMesh:
         """
         from pfm_py.shot import SHOTParams, SHOTDescriptor
         
+        radius = scale_factor * radius
         vertices = self.vert.numpy(force=True)
         faces = self.triv.numpy(force=True)
         normals = None

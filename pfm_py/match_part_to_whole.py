@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 from pfm_py.geo_refinement import compute_geodesic_descriptors
 from pfm_py.icp_partial import run_icp_partial
@@ -41,18 +42,21 @@ def match_and_refine(M : ManifoldMesh, N : ManifoldMesh, opts: Options):
     print(f"N: vertices: {N.n_vert}, area: {N.area:.6f}")
     est_rank = estimate_rank(M, N)
     print(f"Estimate rank of functional map: {est_rank} / {opts.n_eigen}")
+    print(f"Descriptor type: {opts.descriptor_type.upper()}")
 
     W = create_slanted_diagonal_mask(est_rank, opts)
     
+    # Use same scale factor for both meshes to ensure descriptors are comparable.
+    scale_factor = np.sqrt(M.area)
     # Use cached descriptors if available (avoid re-rendering)
     if hasattr(M, '_cached_descriptors') and M._cached_descriptors is not None:
         M_descriptors = M._cached_descriptors
     else:
-        M_descriptors = M.compute_descriptors(opts)
+        M_descriptors = M.compute_descriptors(scale_factor, opts)
     if hasattr(N, '_cached_descriptors') and N._cached_descriptors is not None:
         N_descriptors = N._cached_descriptors
     else:
-        N_descriptors = N.compute_descriptors(opts)
+        N_descriptors = N.compute_descriptors(scale_factor, opts)
 
     # Only for the FIRST stage: per-feature mass normalization for any learned or
     # histogram-based descriptors.  When multiple descriptor types are concatenated,
