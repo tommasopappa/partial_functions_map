@@ -6,11 +6,12 @@
 ##    Provides the DINOv3 vision transformer model and utilities
 ##
 ## 2. Echo-Match Repository (Application built on DINOv3) 
-##    Code taken from this repository and slightly adapted.
+##    Code taken from this repository and slightly modified.
 ##    Source: https://github.com/vikiehm/echo-match/blob/main/utils/dino_util.py
 ##
 ################################################################################
 
+from dataclasses import dataclass
 import os
 import math
 import torch
@@ -79,18 +80,13 @@ def arange_pixels(resolution, invert_y_axis=False, device="cuda"):
     return pixels
 
 
-def batch_render(device, mesh, num_views, H, W):
-    bbox = mesh.get_bounding_boxes()
-    bbox_min, bbox_max = bbox.min(dim=-1).values[0], bbox.max(dim=-1).values[0]
-    bbox_center = (bbox_min + bbox_max) / 2.0
-    distance = torch.sqrt(((bbox_max - bbox_min) ** 2).sum()) * 0.65
-
+def batch_render(compute_opts, device, mesh, num_views, H, W):
     steps = int(math.ceil(math.sqrt(num_views)))
     end = 360 - 360 / steps
     elevation = torch.linspace(0, end, steps).repeat(steps)[:num_views]
     azimuth = torch.linspace(0, end, steps).repeat_interleave(steps)[:num_views]
 
-    R, T = look_at_view_transform(dist=distance, azim=azimuth, elev=elevation, device=device, at=bbox_center.unsqueeze(0))
+    R, T = look_at_view_transform(dist=compute_opts.cam_distance, azim=azimuth, elev=elevation, device=device, at=compute_opts.cam_target.unsqueeze(0))
     camera = PerspectiveCameras(R=R, T=T, device=device)
     raster_settings = RasterizationSettings(image_size=(H, W), blur_radius=0.0, faces_per_pixel=1, bin_size=0)
     rasterizer = MeshRasterizer(cameras=camera, raster_settings=raster_settings)
@@ -103,10 +99,26 @@ def batch_render(device, mesh, num_views, H, W):
     depth = rasterizer(batch_mesh).zbuf
     return images, camera, depth
 
+@dataclass
+class DinoV3ComputeOpts:
+    cam_distance: float
+    cam_target: torch.Tensor
+    global_scale: float
 
-def compute_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
+def get_compute_opts(verts) -> DinoV3ComputeOpts:
+    bbox_min = verts.min(dim=0).values
+    bbox_max = verts.max(dim=0).values
+    bbox_center = (bbox_min + bbox_max) / 2
+    bbox_diag = torch.norm(bbox_max - bbox_min)
+    cam_distance = bbox_diag * 0.65
+
+    return DinoV3ComputeOpts(cam_distance=cam_distance, cam_target=bbox_center, global_scale=bbox_diag)
+
+def compute_dinov3_features(compute_opts: DinoV3ComputeOpts, verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
     if not PYTORCH3D_AVAILABLE:
         raise RuntimeError('pytorch3d not available')
+    if compute_opts is None:
+        compute_opts = get_compute_opts(verts)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dino_model = get_dino_model(device)
@@ -117,14 +129,9 @@ def compute_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0
     mesh = Meshes(verts=[verts], faces=[faces], textures=textures).to(device)
     mesh_vertices = mesh.verts_list()[0]
 
-    if len(mesh_vertices) > VERTEX_GPU_LIMIT:
-        samples = torch.randperm(len(mesh_vertices))[:10000]
-        max_dist = torch.cdist(mesh_vertices[samples], mesh_vertices[samples]).max()
-    else:
-        max_dist = torch.cdist(mesh_vertices, mesh_vertices).max()
-    ball_radius = max_dist * tolerance
+    ball_radius = compute_opts.global_scale * tolerance
 
-    images, camera, depth = batch_render(device, mesh, num_views, H, W)
+    images, camera, depth = batch_render(compute_opts, device, mesh, num_views, H, W)
     pixel_coords = arange_pixels((H, W), invert_y_axis=True, device=device)[0]
     pixel_coords[:, 0] = torch.flip(pixel_coords[:, 0], dims=[0])
     grid = arange_pixels((H, W), invert_y_axis=False, device=device)[0].reshape(1, H, W, 2).half()
@@ -168,13 +175,3 @@ def compute_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0
         ft_per_vertex[missing] = ft_per_vertex[has_feats][nearest]
 
     return ft_per_vertex.cpu(), n_missing
-
-
-def get_shape_dino_features(verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
-    feats, _ = compute_dino_features(verts, faces, num_views, H, W, tolerance)
-    return feats
-
-compute_shape_dino_features = get_shape_dino_features
-def get_shape_dinov3_features(verts, faces, num_views=100, H=512, W=512, tolerance=0.004):
-    return compute_dino_features(verts, faces, num_views, H, W, tolerance)
-get_dinov3_model = get_dino_model

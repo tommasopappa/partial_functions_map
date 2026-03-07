@@ -4,7 +4,7 @@ import os
 from pfm_py.dataset.mesh_pair import MeshPair
 
 class Shrec16:
-    """Iterator that yields MeshPair objects for all partial meshes"""
+    """Iterator that yields MeshPair objects for all full-partial pairs in the SHREC'16 dataset."""
     
     def __init__(self, data_path: str, partial_folders: list = ["cuts", "holes"]):
         self.data_path = data_path

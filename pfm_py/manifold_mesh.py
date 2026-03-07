@@ -105,31 +105,7 @@ class ManifoldMesh:
         if compute_geo:
             self.compute_geometry()
 
-    def compute_fpfh_descriptors(self, scale_factor: float, opts: Options):
-        """Compute FPFH (Fast Point Feature Histogram) descriptors for all vertices.
-        
-        FPFH descriptors are local geometric features computed in a two-step process:
-        first computing PFH (Point Feature Histogram) for each point and its neighbors,
-        then computing FPFH by combining PFH values.
-        
-        Args:
-            scale_factor: Scaling factor for neighborhood radius (should be of order sqrt(area)).
-            opts: Options object containing device specification.
-        
-        Returns:
-            Descriptor matrix of shape (n_vert, feat_dim), where each row contains
-            the FPFH feature vector for the corresponding vertex. Values represent
-            distributions of angles and distances between vertex normals and positions
-            in a local neighborhood.
-        """
-        radius = 0.04 * scale_factor
-        pcd = o3d.geometry.PointCloud()
-        pcd.points = o3d.utility.Vector3dVector(self.vert.numpy(force=True))
-        pcd.estimate_normals(o3d.geometry.KDTreeSearchParamRadius(radius=radius*2))
-        fpfh = o3d.pipelines.registration.compute_fpfh_feature(pcd, o3d.geometry.KDTreeSearchParamRadius(radius=radius))
-        return torch.tensor(fpfh.data.T, dtype=torch.float32, device=opts.device)
-
-    def compute_descriptors(self, scale_factor : float, opts: Options):
+    def compute_descriptors(self, opts: Options):
         """Compute local geometric descriptors for all vertices based on descriptor_type option.
         
         Supports multiple descriptor types: SHOT (Signature of Histograms of Orientations),
@@ -156,29 +132,123 @@ class ManifoldMesh:
             for t in toks:
                 sub = Options(opts.device)
                 sub.descriptor_type = t
-                feats_list.append(self.compute_descriptors(scale_factor, sub))
+                feats_list.append(self.compute_descriptors(sub))
             return torch.cat(feats_list, dim=1)
 
         # handle single descriptor cases
         if key == "shot":
-            return self.compute_shot_descriptors(scale_factor, opts)
+            return self.compute_shot_descriptors(None, opts)
         elif key == "fpfh":
-            return self.compute_fpfh_descriptors(scale_factor,opts)
+            return self.compute_fpfh_descriptors(None, opts)
         elif key == "dino":
             verts = self.vert.clone().detach()
             faces = self.triv.clone().detach()
-            feats, n_missing = dino_module.compute_dino_features(verts, faces)
-            self.dino_n_missing = n_missing
+            feats, _n_missing = dino_module.compute_dino_features(None, verts, faces)
             return feats.to(torch.float32).to(opts.device)
         elif key == "dinov3":
             verts = self.vert.clone().detach()
             faces = self.triv.clone().detach()
-            feats, n_missing = dinov3_module.get_shape_dinov3_features(verts, faces)
-            self.dino_n_missing = n_missing
+            feats, _n_missing = dinov3_module.get_shape_dinov3_features(None, verts, faces)
             return feats.to(torch.float32).to(opts.device)
         else:
             raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'dino', 'dinov3' or combinations like 'shot+dino'.")
         
+    @classmethod
+    def compute_compatible_descriptors(cls, full: "ManifoldMesh", partial: "ManifoldMesh", opts: Options):
+        """Like compute_descriptors, but computes descriptors on the full mesh that are approximately compatible 
+        with those on the partial mesh (e.g. using the same scaling).
+        Therefore, the descriptors computed by this function are suitable for partial shape matching.
+
+        Compute local geometric descriptors for all vertices based on descriptor_type option.
+        
+        Supports multiple descriptor types: SHOT (Signature of Histograms of Orientations),
+        FPFH (Fast Point Feature Histogram), DINO and DINOv3 (learned deep features).
+        Functions are represented as descriptor values at each vertex.
+        
+        Args:
+            scale_factor: Scaling factor for descriptor computation (e.g., neighborhood radius).
+                Should be of order sqrt(area).
+            opts: Options object with descriptor_type field specifying which descriptor to use.
+        
+        Returns:
+            Descriptor matrix of shape (n_vert, feat_dim), where each row represents
+            functions (descriptors) at one vertex. feat_dim depends on descriptor type.
+        
+        Raises:
+            ValueError: If opts.descriptor_type is not one of the supported types.
+        """
+        # allow multiple descriptors separated by '+' or ',' (e.g. "shot+dino")
+        key = opts.descriptor_type.lower()
+        if '+' in key or ',' in key:
+            toks = [t.strip() for t in key.replace(',', '+').split('+') if t.strip()]
+            full_feats_list = []
+            partial_feats_list = []
+            for t in toks:
+                sub = Options(opts.device)
+                sub.descriptor_type = t
+                desc_full_t, desc_partial_t = ManifoldMesh.compute_compatible_descriptors(full, partial, sub)
+                full_feats_list.append(desc_full_t)
+                partial_feats_list.append(desc_partial_t)
+            return torch.cat(full_feats_list, dim=1), torch.cat(partial_feats_list, dim=1)
+
+        # handle single descriptor cases
+        if key == "shot":
+            scale_factor = np.sqrt(full.area)
+            desc_full = full.compute_shot_descriptors(scale_factor, opts)
+            desc_partial = partial.compute_shot_descriptors(scale_factor, opts)
+            return desc_full, desc_partial
+        elif key == "fpfh":
+            scale_factor = np.sqrt(full.area)
+            desc_full = full.compute_fpfh_descriptors(scale_factor, opts)
+            desc_partial = partial.compute_fpfh_descriptors(scale_factor, opts)
+            return desc_full, desc_partial
+        elif key == "dino":
+            verts_full = full.vert.clone().detach()
+            faces_full = full.triv.clone().detach()
+            compute_opts = dino_module.get_compute_opts(verts_full)
+            verts_partial = partial.vert.clone().detach()
+            faces_partial = partial.triv.clone().detach()
+            desc_full, _n_missing_full = dino_module.compute_dino_features(compute_opts, verts_full, faces_full)
+            desc_partial, _n_missing_partial = dino_module.compute_dino_features(compute_opts, verts_partial, faces_partial)
+            return desc_full.to(torch.float32).to(opts.device), desc_partial.to(torch.float32).to(opts.device)
+        elif key == "dinov3":
+            verts_full = full.vert.clone().detach()
+            faces_full = full.triv.clone().detach()
+            compute_opts = dinov3_module.get_compute_opts(verts_full)
+            verts_partial = partial.vert.clone().detach()
+            faces_partial = partial.triv.clone().detach()
+            desc_full, _n_missing_full = dinov3_module.compute_dinov3_features(compute_opts, verts_full, faces_full)
+            desc_partial, _n_missing_partial = dinov3_module.compute_dinov3_features(compute_opts,verts_partial, faces_partial)
+            return desc_full.to(torch.float32).to(opts.device), desc_partial.to(torch.float32).to(opts.device)
+        else:
+            raise ValueError(f"Unknown descriptor type: {opts.descriptor_type}. Choose 'shot', 'fpfh', 'dino', 'dinov3' or combinations like 'shot+dino'.")
+
+    def compute_fpfh_descriptors(self, scale_factor: float, opts: Options):
+        """Compute FPFH (Fast Point Feature Histogram) descriptors for all vertices.
+        
+        FPFH descriptors are local geometric features computed in a two-step process:
+        first computing PFH (Point Feature Histogram) for each point and its neighbors,
+        then computing FPFH by combining PFH values.
+        
+        Args:
+            scale_factor: Scaling factor for neighborhood radius (should be of order sqrt(area)).
+            opts: Options object containing device specification.
+        
+        Returns:
+            Descriptor matrix of shape (n_vert, feat_dim), where each row contains
+            the FPFH feature vector for the corresponding vertex. Values represent
+            distributions of angles and distances between vertex normals and positions
+            in a local neighborhood.
+        """
+        if scale_factor is None:
+            scale_factor = np.sqrt(self.area)
+        radius = 0.04 * scale_factor
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(self.vert.numpy(force=True))
+        pcd.estimate_normals(o3d.geometry.KDTreeSearchParamRadius(radius=radius*2))
+        fpfh = o3d.pipelines.registration.compute_fpfh_feature(pcd, o3d.geometry.KDTreeSearchParamRadius(radius=radius))
+        return torch.tensor(fpfh.data.T, dtype=torch.float32, device=opts.device)
+    
     def compute_shot_descriptors(self, scale_factor: float, opts: Options, radius=0.05, n_bins=10,
                                  min_neighbors=10, local_rf_radius=None, query_idx=None):
         """Compute SHOT (Signature of Histograms of Orientations) descriptors for vertices.
@@ -207,6 +277,8 @@ class ManifoldMesh:
         """
         from pfm_py.shot import SHOTParams, SHOTDescriptor
         
+        if scale_factor is None:
+            scale_factor = np.sqrt(self.area)
         radius = scale_factor * radius
         vertices = self.vert.numpy(force=True)
         faces = self.triv.numpy(force=True)
