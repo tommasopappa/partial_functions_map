@@ -127,6 +127,8 @@ PFM provides a simple CLI for single runs and dataset processing. The entry poin
 - `--v-max-iter <INT>` - Override max iterations for v optimization (default: 2000)
 - `--C-max-iter <INT>` - Override max iterations for functional map C optimization (default: 2000)
 - `--max-outer-iter <INT>` - Override max outer loop iterations (default: 7)
+- `--refine-iters <INT>` - Override refinement-stage outer iterations (default: 3)
+- `--early-stopping` - Enable early stopping in C and v optimization steps
 
 ### CLI Examples
 
@@ -178,6 +180,8 @@ python3 -m pfm_py.main \
    --v-max-iter 3000 \
    --C-max-iter 2500 \
    --max-outer-iter 10 \
+   --refine-iters 5 \
+   --early-stopping \
    --target-path results/dino_custom_iters
 ```
 

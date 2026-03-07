@@ -16,7 +16,6 @@ from pfm_py.manifold_mesh import ManifoldMesh
 from pfm_py.options import Options
 
 ALMOST_ZERO = 1e-10
-MIN_IMPROVEMENT = 1e-3
 
 def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v, est_rank, opts : Options):
     """Optimize functional map C via gradient descent.
@@ -59,7 +58,7 @@ def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v,
     optimizer = torch.optim.Adam([C], lr=opts.C_lr)
     
     # Early stopping variables
-    best_loss = float('inf')
+    best_loss = None
     best_C = None
     patience_counter = 0
     
@@ -72,17 +71,17 @@ def optimize_C(M : ManifoldMesh, N : ManifoldMesh, W, func_M, func_N, C_init, v,
         if iter == 0 or (iter + 1) % 200 == 0:
             print(f"  Iter {iter+1}/{opts.C_max_iter}, Loss: {loss.item():.6f}")
         
-        # Early stopping: terminate if loss does not improve for patience iterations
+        # Early stopping: terminate if loss doesn't improve for patience iterations
         if opts.early_stopping:
-            if loss.item() <= best_loss - MIN_IMPROVEMENT:
+            if best_loss is None or (best_loss - loss.item()) / max(abs(best_loss), ALMOST_ZERO) > opts.early_stopping_tol:
                 best_loss = loss.item()
                 best_C = C.detach().clone()
                 patience_counter = 0
             else:
                 patience_counter += 1
-            
-            if patience_counter >= opts.C_patience_iters:
-                print(f"  Early stopping at iter {iter+1}: Loss has not decreased for {opts.C_patience_iters} iterations")
+
+            if patience_counter >= opts.patience_iters:
+                print(f"  Early stopping at iter {iter+1}: Loss has not decreased for {opts.patience_iters} iterations")
                 break
 
     return best_C if best_C is not None else C.detach().clone()

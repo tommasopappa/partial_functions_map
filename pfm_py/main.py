@@ -824,6 +824,18 @@ def main():
         type=int,
         help='Override Options.max_outer_iter (default: 7)'
     )
+    parser.add_argument(
+        '--refine-iters',
+        dest='refine_iters',
+        type=int,
+        help='Override Options.refine_iters (default: 3)'
+    )
+    parser.add_argument(
+        '--early-stopping',
+        dest='early_stopping',
+        action='store_true',
+        help='Enable early stopping in C and v optimization steps'
+    )
 
     # Dataset mode uses internal defaults, no CLI args needed
 
@@ -870,6 +882,10 @@ def main():
         opts.C_max_iter = args.C_max_iter
     if getattr(args, 'max_outer_iter', None) is not None:
         opts.max_outer_iter = args.max_outer_iter
+    if getattr(args, 'refine_iters', None) is not None:
+        opts.refine_iters = args.refine_iters
+    if getattr(args, 'early_stopping', False):
+        opts.early_stopping = True
     
     # load persisted state (processed samples) and initialize summary_results from it
     state = load_state(state_path)
@@ -989,10 +1005,7 @@ def main():
                 continue
 
             # Decide descriptors to run
-            if args.benchmark:
-                _types_to_run = ['dino', 'dinov3', 'shot', 'fpfh']
-            else:
-                _types_to_run = list(selected_types)
+            _types_to_run = list(selected_types)
 
             _results = {}
             for _dt in _types_to_run:

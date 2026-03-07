@@ -25,13 +25,14 @@ class Options:
     refine_iters : int = 7 # number of refinement iterations
     
     early_stopping : bool = False # enable early stopping in C step and v step
-    patience_iters : int = 500 # number of iterations to wait for improvement before early stopping
+    patience_iters : int = 200 # number of iterations to wait for improvement before early stopping
+    early_stopping_tol : float = 1e-5 # minimum relative improvement to reset patience counter for early stopping
 
     tv_mean : float = 0.5 # target membership density for Mumford-Shah regularization, see optimize_v.py
     # standard deviation for Mumford-Shah Gaussian localization, see optimize_v.py
     # This value is scale-dependent. The value of 0.2 in the PFM code was optimized, for meshes with surface
     # area 1.5 - 2.0 * 10^4. The value below downscales this to meshes of area 1.
-    # In the code, this is furhter scaled by sqrt(M.area) to adapt to the actual mesh area.
+    # In the code, this is further scaled by sqrt(M.area) to adapt to the actual mesh area.
     # This might not be the optimal way to scale this parameter, but seems to be good enough.
     tv_sigma : float = 0.2 / math.sqrt(1.75 * 10**4) 
     # variance for Gaussian weighting of geodesic distance in geodesic descriptor computation, see geo_refinement.py

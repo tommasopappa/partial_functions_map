@@ -52,7 +52,7 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
     # Early stopping mechanism
     # Stops optimization if loss hasn't improved for v_patience_iters iterations
     # This prevents overfitting and avoids wasting computation on plateaus
-    best_loss = float('inf')
+    best_loss = None
     best_v = None
     patience_counter = 0
     
@@ -67,15 +67,15 @@ def optimize_v(M : ManifoldMesh, N : ManifoldMesh, func_M, func_N, C, opts : Opt
         
         # Early stopping: terminate if loss doesn't significantly decrease for patience iterations
         if opts.early_stopping:
-            if loss.item() < best_loss:
+            if best_loss is None or (best_loss - loss.item()) / max(abs(best_loss), ALMOST_ZERO) > opts.early_stopping_tol:
                 best_loss = loss.item()
                 best_v = v.detach().clone()
                 patience_counter = 0
             else:
                 patience_counter += 1
             
-            if patience_counter >= opts.v_patience_iters:
-                print(f"  Early stopping at iter {i+1}: Loss has not decreased for {opts.v_patience_iters} iterations")
+            if patience_counter >= opts.patience_iters:
+                print(f"  Early stopping at iter {i+1}: Loss has not decreased for {opts.patience_iters} iterations")
                 break
 
     v_opt = best_v if best_v is not None else v.detach().clone()
