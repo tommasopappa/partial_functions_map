@@ -2,6 +2,11 @@
 
 Comprehensive Python implementation of partial functional maps and related methods for non-rigid shape matching, including state-of-the-art feature extraction and refinement techniques.
 
+
+## Results
+![Results](Results.png)
+
+
 ## Overview
 
 This repository is a **Python reimplementation** of the [original MATLAB Partial Functional Maps (PFM) repository](https://github.com/pitbullil/PFM/tree/master/pfm), based on the foundational paper:
