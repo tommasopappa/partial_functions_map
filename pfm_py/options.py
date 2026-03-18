@@ -25,8 +25,8 @@ class Options:
     refine_iters : int = 7 # number of refinement iterations
     
     early_stopping : bool = False # enable early stopping in C step and v step
-    patience_iters : int = 200 # number of iterations to wait for improvement before early stopping
-    early_stopping_tol : float = 1e-5 # minimum relative improvement to reset patience counter for early stopping
+    patience_iters : int = 100 # number of iterations to wait for improvement before early stopping
+    early_stopping_tol : float = 1e-4 # minimum relative improvement to reset patience counter for early stopping
 
     tv_mean : float = 0.5 # target membership density for Mumford-Shah regularization, see optimize_v.py
     # standard deviation for Mumford-Shah Gaussian localization, see optimize_v.py

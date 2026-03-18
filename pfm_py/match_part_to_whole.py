@@ -47,9 +47,8 @@ def match_and_refine(M : ManifoldMesh, N : ManifoldMesh, opts: Options):
     W = create_slanted_diagonal_mask(est_rank, opts)
     M_descriptors, N_descriptors = ManifoldMesh.compute_compatible_descriptors(M, N, opts)
 
-    # Only for the FIRST stage: per-feature mass normalization for any learned or
-    # histogram-based descriptors.  When multiple descriptor types are concatenated,
-    # we normalize across the full feature vector.
+    # Per-feature mass normalization
+    # This means normalizing each descriptor function in the L2 norm.
     if any(tok in opts.descriptor_type.lower() for tok in ["shot", "dino", "dinov3"]):
         eps = 1e-10
         M_norm = torch.sqrt(M.S @ (M_descriptors ** 2) + eps)   # (feat_dim,)
