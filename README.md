@@ -9,7 +9,7 @@ Comprehensive Python implementation of partial functional maps and related metho
 
 ## Overview
 
-This repository is a **Python reimplementation** of the [original MATLAB Partial Functional Maps (PFM) repository](https://github.com/pitbullil/PFM/tree/master/pfm), based on the foundational paper:
+This repository is a **Python reimplementation** of the [original MATLAB Partial Functional Maps (PFM) repository](https://github.com/pitbullil/PFM), based on the foundational paper:
 
 **[Partial Functional Correspondence](https://arxiv.org/pdf/1506.05274)** by Rodolà et al.
 
@@ -20,32 +20,16 @@ The implementation reproduces the core PFM framework for establishing correspond
 
 ## Installation
 
-### Recommended: Conda (Fast & Reliable)
-
-Best for most users - installs PyTorch3D and all dependencies in ~10 minutes:
+To install using pip/conda, run the following commands:
 
 ```bash
-# Create environment
-conda create -n pfm python=3.10 -y
-conda activate pfm
-
-# Core dependencies
-conda install -c conda-forge matplotlib=3.7.1 numpy=1.25.0 scikit-learn=1.2.2 scipy=1.10.1 -y
-
-# PyTorch (adjust cuda version as needed)
-pip install torch==2.1.0 torchvision
-
-# 3D/Geometry packages
-conda install -c fvcore -c iopath -c conda-forge fvcore iopath -y
-pip install --no-index --no-cache-dir pytorch3d -f https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/py310_cu121_pyt210/download.html
-
-# Other dependencies
-pip install open3d robust_laplacian==0.2.7 trimesh==4.0.0 potpourri3d==1.0.0
-pip install transformers==4.34.1 huggingface-hub==0.17.3
-pip install einops==0.7.0 meshio==5.3.4 opencv-python==4.8.1.78 plyfile==1.0.1
+conda create -n PfmEnv python=3.11 -y
+conda activate PfmEnv
+conda config --set channel_priority strict
+conda install pytorch torchvision torchaudio pytorch-cuda=11.8 "mkl<2024.1" "intel-openmp<2024.1" pytorch3d -c pytorch -c nvidia -c pytorch3d -y
+conda install -c conda-forge matplotlib numpy scikit-learn scipy -y
+pip install open3d robust_laplacian trimesh potpourri3d transformers huggingface-hub einops meshio opencv-python plyfile
 ```
-
-**See [INSTALLATION.md](INSTALLATION.md) for complete conda installation instructions and verification steps.**
 
 ## CLI Usage
 
@@ -84,7 +68,7 @@ PFM provides a simple CLI for single runs and dataset processing. The entry poin
 - `--v-max-iter <INT>` - Override max iterations for v optimization (default: 2000)
 - `--C-max-iter <INT>` - Override max iterations for functional map C optimization (default: 2000)
 - `--max-outer-iter <INT>` - Override max outer loop iterations (default: 7)
-- `--refine-iters <INT>` - Override refinement-stage outer iterations (default: 3)
+- `--refine-iters <INT>` - Override refinement-stage outer iterations (default: same as `--max-outer-iter`; if omitted, it is set to `max_outer_iter`)
 - `--early-stopping` - Enable early stopping in C and v optimization steps
 
 ### CLI Examples
@@ -114,14 +98,14 @@ python3 -m pfm_py.main \
 
 # Auto-resolve full mesh from directory
 python3 -m pfm_py.main \
-   --full-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/null/off \
-   --partial-mesh /usr/prakt/w0010/SAVHA/shape_data/SHREC16/cuts/off/cuts_horse_shape_14.off \
+   --full-mesh /path/to/shape_data/SHREC16/null/off \
+   --partial-mesh /path/to/shape_data/SHREC16/cuts/off/cuts_horse_shape_14.off \
    --dinov3 \
    --target-path results/dinov3
 
 # SHREC16 dataset with multiple descriptors and web viewer
 python3 -m pfm_py.main \
-   --shrec16 /usr/prakt/w0010/SAVHA/shape_data/SHREC16 \
+   --shrec16 /path/to/shape_data/SHREC16 \
    --shot --fpfh \
    --target-path results \
    --web-view \
@@ -134,21 +118,22 @@ python3 -m pfm_py.main \
    --full-mesh /path/to/full.off \
    --partial-mesh /path/to/partial.off \
    --dino \
-   --v-max-iter 3000 \
-   --C-max-iter 2500 \
-   --max-outer-iter 10 \
-   --refine-iters 5 \
+   --v-max-iter 2000 \
+   --C-max-iter 2000 \
+   --max-outer-iter 7 \
+   --refine-iters 7 \
    --early-stopping \
-   --target-path results/dino_custom_iters
+   --target-path results
 ```
 
 ### Output Files
 
 When `--target-path` is specified, the following files are generated per mesh pair:
-- `correspondence.vts` - Computed pointwise correspondences (vertices of N → vertices of M), 1-indexed, one per line
-- `functional_map_visualization.png` - Visualization of the functional map and color transfers
-- `color_pullback_visualization.png` - Color pullback and error heatmap visualizations
-- `interactive_view.html` - Interactive 3D web viewer (if `--web-view` enabled)
+- `correspondences_{descriptor}.vts` - Computed pointwise correspondences (vertices of N → vertices of M), 1-indexed, one per line
+- `functional_map_visualization_{descriptor}.png` - Visualizes the functional map **C** by spectrally pushing forward a coordinate-based RGB signal from N to M. The RGB components are treated as functions on N, which are then mapped to functions on M via C. Also shows the geodesic error heatmap (if GT available), the soft membership function **v**, and GT membership (if GT available).
+- `functional_map_heatmap_{descriptor}.png` - Standalone heatmap visualization of the functional map matrix **C** with dimensions and color bar.
+- `color_pullback_{descriptor}.png` - Visualizes the pointwise correspondences by pushing forward a coordinate-based RGB signal from N to M via the estimated (and optionally GT) matches. A good correspondence means the method push-forward looks like the GT push-forward.
+- `interactive_view.html` - Interactive 3D web viewer, shows the color pullback (if `--web-view` enabled)
 
 ### Environment Variables
 

@@ -2,3 +2,5 @@ results/*
 venv/*
 evecs
 pfm_py/__pycache__/*
+pfm_py/experiments/__pycache__/*
+pfm_py/dataset/__pycache__/*
